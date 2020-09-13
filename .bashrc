@@ -143,4 +143,5 @@ function set-title() {
   TITLE="\[\e]2;$*\a\]"
   PS1=${ORIG}${TITLE}
 }
-
+# FU microsoft telemetry
+DOTNET_CLI_TELEMETRY_OPTOUT=1
