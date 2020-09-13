@@ -1,0 +1,55 @@
+# bin files in $HOME/.local/bin
+activate-global-python-argcomplete
+autopep8
+bat-modules -> /home/lab-ubuntu/Scripts/bat-extras/bat-modules
+batdiff -> /home/lab-ubuntu/Scripts/bat-extras/batdiff
+batgrep -> /home/lab-ubuntu/Scripts/bat-extras/batgrep
+batman -> /home/lab-ubuntu/Scripts/bat-extras/batman
+batwatch -> /home/lab-ubuntu/Scripts/bat-extras/batwatch
+django-admin
+django-admin.py
+dmypy
+epylint
+flake8
+isort
+mypy
+mypyc
+pipenv
+pipenv-resolver
+pipx
+pkginfo
+prettybat -> /home/lab-ubuntu/Scripts/bat-extras/prettybat
+pycodestyle
+pyflakes
+pygmentize
+pylint
+pylupdate5
+pyrcc5
+pyreverse
+python-argcomplete-check-easy-install-script
+python-argcomplete-tcsh
+pyuic5
+qtpad
+register-python-argcomplete
+rst2html.py
+rst2html4.py
+rst2html5.py
+rst2latex.py
+rst2man.py
+rst2odt.py
+rst2odt_prepstyles.py
+rst2pseudoxml.py
+rst2s5.py
+rst2xetex.py
+rst2xml.py
+rstpep2html.py
+sqlformat
+stubgen
+stubtest
+symilar
+tqdm
+trans
+twine
+userpath
+virtualenv
+virtualenv-clone
