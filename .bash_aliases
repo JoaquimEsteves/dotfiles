@@ -24,7 +24,7 @@ alias rfind="'find' "
 alias dotfiles="fd '^\.' . --maxdepth 1 --hidden --no-ignore "
 # EXA
 # exa is a pretty cool ls alternative
-alias ls="/home/joaquim/.cargo/bin/exa --icons "
+alias ls="$HOME/.cargo/bin/exa --icons "
 alias lst="ls -T --level=1 "
 alias rls="'ls' "
 alias ll='exa -alF --icons --header --git --extended'
@@ -35,13 +35,13 @@ alias l='exa -F --icons'
 # ripgrep is yet another rust re-implementation
 # this time of grep funnily enough
 # batgrep is just ripgrep but with bat as output
-alias grep="/home/joaquim/.cargo/bin/rg " 
+alias grep="$HOME/.cargo/bin/rg " 
 alias rgrep="'grep' "
 # batman is just the man pages but with bat output
-alias man="/home/joaquim/.local/bin/batman "
+alias man="$HOME/.local/bin/batman "
 alias rman="'man' "
 # dust is du + rust
-alias du="/home/joaquim/.cargo/bin/dust "
+alias du="$HOME/.cargo/bin/dust "
 alias rdu="'du' "
 # ytop => like top only pretty
 alias top="ytop "
