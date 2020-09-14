@@ -3,7 +3,7 @@
 	url = https://github.com/altercation/vim-colors-solarized.git
 [submodule ".tmux/plugins/tmux-mem-cpu-load"]
 	path = .tmux/plugins/tmux-mem-cpu-load
-	url = https://github.com/thewtex/tmux-mem-cpu-load
+	url = https://github.com/thewtex/tmux-mem-cpu-load.git
 [submodule ".tmux/plugins/tpm"]
 	path = .tmux/plugins/tpm
 	url = https://github.com/tmux-plugins/tpm.git
