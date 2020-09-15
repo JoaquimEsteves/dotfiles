@@ -127,6 +127,9 @@ export NVM_DIR="$HOME/.nvm"
 # shellcheck source=/dev/null
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion" # This loads nvm bash_completion
 
+# yarn's global bin package
+export PATH="$PATH:$(yarn global bin)"
+
 # export local .hosts to /etc/host
 export HOSTALIASES="$HOME/.hosts"
 # Allow BAT (fancy cat built with RUST) to use 'less' with wheelscrool
