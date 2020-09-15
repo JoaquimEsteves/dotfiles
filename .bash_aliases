@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 # Quickly reload bash from .bashrc
 alias reloadbash=". ~/.bashrc"
 # Make my sudo experience more wholesome
@@ -27,7 +28,7 @@ alias rfind="'find' "
 alias dotfiles="fd '^\.' . --maxdepth 1 --hidden --no-ignore "
 # EXA
 # exa is a pretty cool ls alternative
-alias ls="$HOME/.cargo/bin/exa --icons "
+alias ls='$HOME/.cargo/bin/exa --icons '
 alias lst="ls -T --level=1 "
 alias rls="'ls' "
 alias ll='exa -alF --icons --header --git --extended'
@@ -38,13 +39,13 @@ alias l='exa -F --icons'
 # ripgrep is yet another rust re-implementation
 # this time of grep funnily enough
 # batgrep is just ripgrep but with bat as output
-alias grep="$HOME/.cargo/bin/rg " 
+alias grep='$HOME/.cargo/bin/rg ' 
 alias rgrep="'grep' "
 # batman is just the man pages but with bat output
-alias man="$HOME/.local/bin/batman "
+alias man='$HOME/.local/bin/batman '
 alias rman="'man' "
 # dust is du + rust
-alias du="$HOME/.cargo/bin/dust "
+alias du='$HOME/.cargo/bin/dust '
 alias rdu="'du' "
 # ytop => like top only pretty
 alias top="ytop "
@@ -61,3 +62,7 @@ alias tat="tmux attach -t "
 alias tnt="tmux new -s "
 # See tmux sessions
 alias tls="tmux ls "
+
+if [ -f "$HOME/Scripts/html-mk-cat.sh" ]; then
+	alias cgoogler='googler --url-handler=$HOME/Scripts/html-mk-cat.sh'
+fi
