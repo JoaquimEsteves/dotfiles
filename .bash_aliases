@@ -4,7 +4,10 @@ alias reloadbash=". ~/.bashrc"
 alias please="echo -e '\a' && sudo " 
 # Ensures we can use aliases with sudo
 alias sudo='sudo '
-# Easy acces to the "file explorer"
+# Update and upgrade
+alias update-upgrade="please apt update && please apt upgrade"
+# Easy acces to the "file explorer" 
+# (it actually tries to use the sensible choice for any file you try to open)
 alias explorer="xdg-open " 
 # RUST REPLACEMENTS FOR CLI TOOLS
 # The following are a series of fancy rust replacements for standard cli tools
