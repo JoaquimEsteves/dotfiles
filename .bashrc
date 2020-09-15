@@ -4,8 +4,8 @@
 
 # If not running interactively, don't do anything
 case $- in
-	*i*) ;;
-	*) return;;
+*i*) ;;
+*) return ;;
 esac
 
 # don't put duplicate lines or lines starting with space in the history.
@@ -37,7 +37,7 @@ fi
 
 # set a fancy prompt (non-color, unless we know we "want" color)
 case "$TERM" in
-	xterm-color|*-256color) color_prompt=yes;;
+xterm-color | *-256color) color_prompt=yes ;;
 esac
 
 # uncomment for a colored prompt, if the terminal has the capability; turned
@@ -65,11 +65,11 @@ unset color_prompt force_color_prompt
 
 # If this is an xterm set the title to user@host:dir
 case "$TERM" in
-	xterm*|rxvt*)
-		PS1="\[\e]0;${debian_chroot:+($debian_chroot)}\u@\h: \w\a\]$PS1"
-		;;
-	*)
-		;;
+xterm* | rxvt*)
+	PS1="\[\e]0;${debian_chroot:+($debian_chroot)}\u@\h: \w\a\]$PS1"
+	;;
+*) ;;
+
 esac
 
 # enable color support of ls and also add handy aliases
@@ -104,6 +104,7 @@ alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo
 # See /usr/share/doc/bash-doc/examples in the bash-doc package.
 
 if [ -f ~/.bash_aliases ]; then
+	# shellcheck source=/dev/null
 	. ~/.bash_aliases
 fi
 
@@ -112,18 +113,22 @@ fi
 # sources /etc/bash.bashrc).
 if ! shopt -oq posix; then
 	if [ -f /usr/share/bash-completion/bash_completion ]; then
+		# shellcheck source=/dev/null
 		. /usr/share/bash-completion/bash_completion
 	elif [ -f /etc/bash_completion ]; then
+		# shellcheck source=/dev/null
 		. /etc/bash_completion
 	fi
 fi
 
 export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+# shellcheck source=/dev/null
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"                   # This loads nvm
+# shellcheck source=/dev/null
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion" # This loads nvm bash_completion
 
 # export local .hosts to /etc/host
-export HOSTALIASES="~/.hosts"
+export HOSTALIASES="$HOME/.hosts"
 # Allow BAT (fancy cat built with RUST) to use 'less' with wheelscrool
 export BAT_PAGER="less -RF"
 # Allows us to use zoxide, the fancy cd built with rust
@@ -135,13 +140,11 @@ PS1=${PS1%?}\n'$ '
 # https://direnv.net/
 eval "$(direnv hook bash)"
 #### CUSTOM FUNCTIONS ####
-# rename terminal window title
-function set-title() {
-if [[ -z "$ORIG" ]]; then
-	ORIG=$PS1
+
+if [ -f ~/.bash_functions ]; then
+	# shellcheck source=/dev/null
+	. ~/.bash_functions
 fi
-	TITLE="\[\e]2;$*\a\]"
-	PS1=${ORIG}${TITLE}
-}
+
 # FU microsoft telemetry
-DOTNET_CLI_TELEMETRY_OPTOUT=1
+export DOTNET_CLI_TELEMETRY_OPTOUT=1
