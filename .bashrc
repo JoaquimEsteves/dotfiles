@@ -134,7 +134,7 @@ export PATH="$PATH:$(yarn global bin)"
 # export local .hosts to /etc/host
 export HOSTALIASES="$HOME/.hosts"
 # Allow BAT (fancy cat built with RUST) to use 'less' with wheelscrool
-export BAT_PAGER="less -RF"
+export BAT_PAGER="less --tabs=4 -RF"
 # Allows us to use zoxide, the fancy cd built with rust
 eval "$(zoxide init bash)"
 # Add a carriage return to PS1
@@ -150,5 +150,28 @@ if [ -f ~/.bash_functions ]; then
 	. ~/.bash_functions
 fi
 
+# if [ -f ~/.profile ]; then
+# 	# .profile wasn't being read for some reason 
+# 	. ~/.profile
+# fi
+
 # FU microsoft telemetry
 export DOTNET_CLI_TELEMETRY_OPTOUT=1
+
+
+###### AZERTY KEYBOARD SHENANIGANS ######
+#                                       #
+# Stupid bloody azerty keyboards are    #
+# bloody unusable.                      #
+# So I'm replacing loads of of these    #
+# silly things for reasonable inputs.   #
+# Obviously don't use this if you're    #
+# not on azerty.                        #
+#                                       #  
+#########################################
+# maps è to /
+xmodmap -e "keycode 16 = KP_Divide"
+# maps § to \
+xmodmap -e "keycode 15 = backslash"
+
+[ -f ~/.fzf.bash ] && source ~/.fzf.bash

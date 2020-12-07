@@ -1,3 +1,7 @@
+" `matchit.vim` is built-in so let's enable it!
+" Hit `%` on `if` to jump to `else`.
+" runtime macros/matchit.vim
+
 " Ignore 1960's compatibility mode 
 set nocp
 " Always allow me to see the dang ruler
@@ -25,3 +29,14 @@ let g:solarized_termcolors=256
 let g:solarized_termtrans=1
 syntax enable
 colorscheme solarized
+
+
+"" PLUGINS
+call plug#begin('~/.vim/plugged')
+"" Typescript - React stuff
+Plug 'pangloss/vim-javascript'
+Plug 'leafgarland/typescript-vim'
+Plug 'peitalin/vim-jsx-typescript'
+Plug 'styled-components/vim-styled-components', { 'branch': 'main' }
+Plug 'jparise/vim-graphql'
+call plug#end()
