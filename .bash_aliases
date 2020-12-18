@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+
+# Enable alias expansion (useful for vim)
+# See: https://stackoverflow.com/a/19819036
+shopt -s expand_aliases
 # Quickly reload bash from .bashrc
 alias reloadbash=". ~/.bashrc"
 # Make my sudo experience more wholesome
@@ -97,3 +101,16 @@ alias weather="curl wttr.in "
 
 # Neat file preview with fuzzy search and bat! Wow
 alias preview="fzf --preview '/usr/bin/batcat --color \"always\" {}'"
+
+
+################################################################################
+#                                                                              #
+#                                 pretty boxes                                 #
+#                                                                              #
+################################################################################
+# Usage: pbox -d shell (This selects the shell style)
+#        pbox -l (browse the styles!)
+#        pbox -d <STYLE> -l (See the style's own "man" page)
+# You can also just invoke a diferent size to change it
+# Example: pbox -s 40x8
+alias pbox="boxes -s 80x5 -a c "
