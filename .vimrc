@@ -2,6 +2,10 @@
 " Hit `%` on `if` to jump to `else`.
 " runtime macros/matchit.vim
 
+" Enable bash aliases!
+let $BASH_ENV = "~/.bash_aliases"
+
+
 " Ignore 1960's compatibility mode 
 set nocp
 " Always allow me to see the dang ruler

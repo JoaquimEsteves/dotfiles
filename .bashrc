@@ -140,9 +140,6 @@ eval "$(zoxide init bash)"
 # Add a carriage return to PS1
 PS1=${PS1%?}
 PS1=${PS1%?}\n'$ '
-# Allow the use of direnv
-# https://direnv.net/
-eval "$(direnv hook bash)"
 #### CUSTOM FUNCTIONS ####
 
 if [ -f ~/.bash_functions ]; then
@@ -174,4 +171,16 @@ xmodmap -e "keycode 16 = KP_Divide"
 # maps § to \
 xmodmap -e "keycode 15 = backslash"
 
+########################################
+#                                      #
+#           FUZZY SEARCH FUN           #
+#                                      #
+########################################
+# Allows shells to remember the history of other shells. (Useful for fzf + tmux)
+export PROMPT_COMMAND="history -a; history -n"
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash
+
+# Allow the use of direnv
+# https://direnv.net/
+eval "$(direnv hook bash)"
+
