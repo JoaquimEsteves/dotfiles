@@ -1,3 +1,4 @@
+alacritty
 cargo
 cargo-clippy
 cargo-fmt
@@ -6,6 +7,7 @@ clippy-driver
 dust
 exa
 grex
+procs
 rg
 rls
 rust-gdb
@@ -13,7 +15,9 @@ rust-lldb
 rustc
 rustdoc
 rustfmt
+rustlings
 rustup
+sd
 tldr
 ytop
 zoxide

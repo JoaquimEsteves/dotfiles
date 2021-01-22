@@ -43,4 +43,11 @@ Plug 'leafgarland/typescript-vim'
 Plug 'peitalin/vim-jsx-typescript'
 Plug 'styled-components/vim-styled-components', { 'branch': 'main' }
 Plug 'jparise/vim-graphql'
+"" Cute little visual things on marks!
+Plug 'kshenoy/vim-signature'
 call plug#end()
+
+"" Fix the colors on ShowMarks so they don't look like a bloody disaster
+highlight SignColumn     ctermfg=239 ctermbg=235
+highlight SignatureMarkText ctermfg=Red ctermbg=235
+

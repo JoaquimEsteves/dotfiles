@@ -147,11 +147,6 @@ if [ -f ~/.bash_functions ]; then
 	. ~/.bash_functions
 fi
 
-# if [ -f ~/.profile ]; then
-# 	# .profile wasn't being read for some reason 
-# 	. ~/.profile
-# fi
-
 # FU microsoft telemetry
 export DOTNET_CLI_TELEMETRY_OPTOUT=1
 
@@ -170,7 +165,8 @@ export DOTNET_CLI_TELEMETRY_OPTOUT=1
 xmodmap -e "keycode 16 = KP_Divide"
 # maps § to \
 xmodmap -e "keycode 15 = backslash"
-
+# Set capslocks to be equal to escape
+# setxkbmap -option caps:escape
 ########################################
 #                                      #
 #           FUZZY SEARCH FUN           #
