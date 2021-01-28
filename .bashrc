@@ -150,7 +150,8 @@ fi
 # FU microsoft telemetry
 export DOTNET_CLI_TELEMETRY_OPTOUT=1
 
-
+# use vi
+export EDITOR=vim
 ###### AZERTY KEYBOARD SHENANIGANS ######
 #                                       #
 # Stupid bloody azerty keyboards are    #

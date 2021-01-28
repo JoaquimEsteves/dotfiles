@@ -5,8 +5,9 @@
 shopt -s expand_aliases
 # Quickly reload bash from .bashrc
 alias reloadbash=". ~/.bashrc"
-# Make my sudo experience more wholesome
-alias please="echo -e '\a' && sudo " 
+# Make my sudo experience more wholesome 
+# (also adds my $PATH so I can get access to .local/bin)
+alias please="echo -e '\a' && sudo -E env \"PATH=$PATH\" " 
 # Ensures we can use aliases with sudo
 alias sudo='sudo '
 # Update and upgrade
@@ -15,6 +16,13 @@ alias update-upgrade="please apt update && please apt upgrade"
 # (it actually tries to use the sensible choice for any file you try to open)
 alias explorer="xdg-open " 
 
+# Philipps funny little emoji picker with fzf
+alias emoj="emoji-fzf preview \
+	  | fzf --preview 'emoji-fzf get --name {1}' \
+	  | cut -d \" \" -f 1 \
+	  | emoji-fzf get"
+# to copy to xclip system keyboard (on mac use pbcopy) after selecting
+alias emojc="emoj | xclip -selection c"
 
 #################### RUST REPLACEMENTS FOR CLI TOOLS ############################
 #                                                                               #
@@ -30,18 +38,18 @@ alias bat="/usr/bin/batcat "
 alias cat="bat "
 # Useful for piping long ass commands
 alias catm="bat -l man "
-alias rcat="'cat' "
+alias rcat="command cat "
 # FD
 # use fd as a modern replacement for find!
 alias fd="/usr/bin/fdfind "
 alias find="fd "
-alias rfind="'find' "
+alias rfind="command find "
 
 # EXA
 # exa is a pretty cool ls alternative
 alias ls='$HOME/.cargo/bin/exa --icons '
 alias lst="ls -T --level=1 "
-alias rls="'ls' "
+alias rls="command ls "
 alias ll='exa -alF --icons --header --git --extended'
 alias la='exa -a --icons'
 alias l='exa -F --icons'
@@ -51,14 +59,14 @@ alias l='exa -F --icons'
 # this time of grep funnily enough
 # batgrep is just ripgrep but with bat as output
 alias grep='$HOME/.cargo/bin/rg ' 
-alias rgrep="'grep' "
+alias rgrep="command grep "
 # batman is just the man pages but with bat output
 alias man='$HOME/.local/bin/batman '
-alias rman="'man' "
+alias rman="command man "
 # DUST
 # dust is du + rust
 alias du='$HOME/.cargo/bin/dust '
-alias rdu="'du' "
+alias rdu="command du "
 # SD
 # SD is like sed, only rational
 alias sed="sd "
