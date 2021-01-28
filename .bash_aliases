@@ -69,7 +69,7 @@ alias top="ytop "
 alias rtop="command top "
 # PS
 # procs is a ps replacement
-alias ps="procs "
+alias ps="procs --sortd cpu "
 alias rps="command ps "
 
 

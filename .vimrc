@@ -2,6 +2,17 @@
 " Hit `%` on `if` to jump to `else`.
 " runtime macros/matchit.vim
 
+"" Mappings!
+"" REMEMBER:
+""      Download fzf!
+"" 	C-t => Open in new tab
+"" Classic Ctrl-F to search lines in opened buffers
+nnoremap <C-F> :Lines<CR>
+"" Search for files with git ls-files
+nnoremap <C-P> :GFiles<CR>
+"" Search _all_ files with fuzzy search
+nnoremap <C-G> :Files<CR>
+
 " Enable bash aliases!
 let $BASH_ENV = "~/.bash_aliases"
 
@@ -45,6 +56,12 @@ Plug 'styled-components/vim-styled-components', { 'branch': 'main' }
 Plug 'jparise/vim-graphql'
 "" Cute little visual things on marks!
 Plug 'kshenoy/vim-signature'
+"" Surround words and stuff
+Plug 'tpope/vim-surround'
+"" Use fuzzy search!
+"" https://github.com/junegunn/fzf.vim
+Plug '$HOME/.fzf'
+Plug 'junegunn/fzf.vim'
 call plug#end()
 
 "" Fix the colors on ShowMarks so they don't look like a bloody disaster
