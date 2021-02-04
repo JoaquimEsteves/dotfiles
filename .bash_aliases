@@ -69,8 +69,9 @@ alias du='$HOME/.cargo/bin/dust '
 alias rdu="command du "
 # SD
 # SD is like sed, only rational
-alias sed="sd "
-alias rsed="command sd "
+# Sadly operates poorly with FZF :(
+# alias sed="sd "
+# alias rsed="command sd "
 # YTOP
 # ytop => like top only pretty
 alias top="ytop "

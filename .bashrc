@@ -163,9 +163,9 @@ export EDITOR=vim
 #                                       #  
 #########################################
 # maps è to /
-xmodmap -e "keycode 16 = KP_Divide"
+# xmodmap -e "keycode 16 = KP_Divide"
 # maps § to \
-xmodmap -e "keycode 15 = backslash"
+# xmodmap -e "keycode 15 = backslash"
 # Set capslocks to be equal to escape
 # setxkbmap -option caps:escape
 ########################################
@@ -176,16 +176,6 @@ xmodmap -e "keycode 15 = backslash"
 # Allows shells to remember the history of other shells. (Useful for fzf + tmux)
 export PROMPT_COMMAND="history -a; history -n"
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash
-
-# Allow the use of direnv
-# https://direnv.net/
-eval "$(direnv hook bash)"
-
-################################################################################
-#                                                                              #
-#                               FUZZY SEARCH FUN                               #
-#                                                                              #
-################################################################################
 # Use fd (https://github.com/sharkdp/fd) instead of the default find
 # command for listing path candidates.
 # - The first argument to the function ($1) is the base path to start traversal
@@ -198,3 +188,8 @@ _fzf_compgen_path() {
 _fzf_compgen_dir() {
   fd --type d --hidden --follow --exclude ".git" . "$1"
 }
+
+# Allow the use of direnv
+# https://direnv.net/
+eval "$(direnv hook bash)"
+
