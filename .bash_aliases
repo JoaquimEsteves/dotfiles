@@ -79,6 +79,8 @@ alias rtop="command top "
 # PS
 # procs is a ps replacement
 alias ps="procs --sortd cpu "
+# Adds a cute little hierarchical tree :)
+alias pst="procs --tree "
 alias rps="command ps "
 
 
