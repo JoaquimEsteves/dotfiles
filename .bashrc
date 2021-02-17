@@ -174,7 +174,8 @@ export EDITOR=vim
 #                                      #
 ########################################
 # Allows shells to remember the history of other shells. (Useful for fzf + tmux)
-export PROMPT_COMMAND="history -a; history -n"
+# __REMOVED__: It was actually a pain in the ass
+# export PROMPT_COMMAND="history -a; history -n"
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash
 # Use fd (https://github.com/sharkdp/fd) instead of the default find
 # command for listing path candidates.
