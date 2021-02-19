@@ -1,3 +1,5 @@
+.vscode
+
 .tmux/plugins/
 .tmux/resurrect/
 .vim/.netrwhist
