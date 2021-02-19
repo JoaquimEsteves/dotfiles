@@ -162,6 +162,29 @@ export EDITOR=vim
 # not on azerty.                        #
 #                                       #  
 #########################################
+# Defaults fzf expansion to $$
+# fzf expands with:
+#
+#   Files under the current directory
+#   - You can select multiple items with TAB key
+#    vim **<TAB>
+#    
+#    # Files under parent directory
+#    vim ../**<TAB>
+#    
+#    # Files under parent directory that match `fzf`
+#    vim ../fzf**<TAB>
+#    
+#    # Files under your home directory
+#    vim ~/**<TAB>
+#    
+#    
+#    # Directories under current directory (single-selection)
+#    cd **<TAB>
+#    
+#    # Directories under ~/github that match `fzf`
+#    cd ~/github/fzf**<TAB>
+export FZF_COMPLETION_TRIGGER='$$'
 # maps è to /
 # xmodmap -e "keycode 16 = KP_Divide"
 # maps § to \
