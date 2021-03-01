@@ -129,7 +129,7 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion" # This loads nvm bash_completion
 
 # yarn's global bin package
-export PATH="$PATH:$(yarn global bin)"
+export PATH="$PATH:~/.yarn/bin"
 
 # export local .hosts to /etc/host
 export HOSTALIASES="$HOME/.hosts"
