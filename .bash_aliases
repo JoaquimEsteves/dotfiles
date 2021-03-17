@@ -5,18 +5,18 @@
 shopt -s expand_aliases
 # Quickly reload bash from .bashrc
 alias reloadbash=". ~/.bashrc"
-# Make my sudo experience more wholesome 
+# Make my sudo experience more wholesome
 # (also adds my $PATH so I can get access to .local/bin)
-alias please="echo -e '\a' && sudo -E env \"PATH=$PATH\" " 
+alias please="echo -e '\a' && sudo -E env \"PATH=$PATH\" "
 # Ensures we can use aliases with sudo
 alias sudo='sudo '
 # Update and upgrade
 alias update-upgrade="please apt update && please apt upgrade"
-# Easy acces to the "file explorer" 
+# Easy acces to the "file explorer"
 # (it actually tries to use the sensible choice for any file you try to open)
-alias explorer="xdg-open " 
+alias explorer="xdg-open "
 
-# Philipps funny little emoji picker with fzf
+# Philipp's funny little emoji picker with fzf
 alias emoj="emoji-fzf preview \
 	  | fzf --preview 'emoji-fzf get --name {1}' \
 	  | cut -d \" \" -f 1 \
@@ -27,10 +27,10 @@ alias emojc="emoj | xclip -selection c"
 #################### RUST REPLACEMENTS FOR CLI TOOLS ############################
 #                                                                               #
 # The following are a series of fancy rust replacements for standard cli tools  #
-# They're aliased so I always use the real one, although there's always         #
-# a r<command> option to summon the _real_ version                              # 
-#                                                                               # 
-################################################################################# 
+# They're aliased so I don't use the real one, although there's always          #
+# a r<command> option to summon the _real_ version                              #
+#                                                                               #
+#################################################################################
 
 # BATCAT
 # Neat little alternative to cat.
@@ -58,7 +58,7 @@ alias l='exa -F --icons'
 # ripgrep is yet another rust re-implementation
 # this time of grep funnily enough
 # batgrep is just ripgrep but with bat as output
-alias grep='$HOME/.cargo/bin/rg ' 
+alias grep='$HOME/.cargo/bin/rg '
 alias rgrep="command grep "
 # batman is just the man pages but with bat output
 alias man='$HOME/.local/bin/batman '
@@ -101,6 +101,8 @@ alias tnt="tmux new -s "
 alias tls="tmux ls "
 
 if [ -f "$HOME/Scripts/html-mk-cat.sh" ]; then
+	# use googler but with a custom html -> markdown -> batcat converter!
+	# __Very__ dank, but doesn't work half the time
 	alias cgoogler='googler --url-handler=$HOME/Scripts/html-mk-cat.sh'
 fi
 
