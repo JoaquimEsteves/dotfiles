@@ -115,3 +115,30 @@ let g:ale_lint_on_insert_leave = 0
 " OLD SCHOOL FUCK IT
 " Just run prettier/your_prefered_formatter manually if ALE isn't collaborating
 " nnoremap gp :silent %!prettier --stdin-filepath %<CR>
+
+"  _______________________________________________________________________
+" /                                                                       \
+" |                           CUSTOM FUNCTIONS                            |
+" |                                                                       |
+" |                   Call them with `call FuncName()`                    |
+" \_________________________________________________________________  __'\
+"                                                                   |/   \\
+"                                                                    \    \\  .
+"                                                                         |\\/|
+"                                                                         / " '\
+"                                                                         . .   .
+"                                                                        /    ) |
+"                                                                       '  _.'  |
+"                                                                       '-'/    \
+
+func! SetPyTab()
+    " use python -like- tabs
+	set tabstop=4
+	set expandtab
+endfunc
+
+" 🐛 Doesn't bloody work :(
+" func! SetTabNum(num = 4)
+" 	set tabstop=a:4
+" 	set expandtab
+" endfunc
