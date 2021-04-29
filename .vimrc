@@ -14,6 +14,14 @@ omap > ]
 xmap < [
 xmap > ]
 
+
+"" Window navigation
+nnoremap <C-h> <C-w>h
+nnoremap <C-j> <C-w>j
+nnoremap <C-k> <C-w>k
+nnoremap <C-l> <C-w>l
+
+
 "" REMEMBER:
 ""      Download fzf!
 "" 	C-t => Open in new tab
@@ -35,7 +43,7 @@ set laststatus=2
 "     Top tip - press "*" to search for the word under the cursor! Incredible
 set incsearch "search as you type
 set hlsearch  "Highlight Search
-" Clear highlighting by bashing escape in normal mode
+" Clear highlighting by mashing escape in normal mode
 nnoremap <esc> :noh<return><esc>
 nnoremap <esc>^[ <esc>^[
 "how line numbers
@@ -89,9 +97,17 @@ Plug 'junegunn/fzf.vim'
 " Git gutters! Tells me when a line has changed according to git diff
 " top tip: jump in between 'hunk's with [c and ]c
 Plug 'airblade/vim-gitgutter', { 'do': function('NoAutoGutter') }
+" Swag parentheses!
+Plug 'kien/rainbow_parentheses.vim'
+
 call plug#end()
 
 
+"" Autocommand to start with rainbow parentheses
+au VimEnter * RainbowParenthesesToggle
+au Syntax * RainbowParenthesesLoadRound
+au Syntax * RainbowParenthesesLoadSquare
+au Syntax * RainbowParenthesesLoadBraces
 
 "" Fix the colors on ShowMarks so they don't look like a bloody disaster
 highlight SignColumn     ctermfg=239 ctermbg=235
@@ -100,11 +116,11 @@ highlight SignatureMarkText ctermfg=Red ctermbg=235
 " Activate ale for prettier + eslint
 
 let g:ale_fixers = {
-\   '*': ['remove_trailing_lines', 'trim_whitespace'],
-\   'javascript': ['prettier', 'eslint'],
-\   'javascriptreact': ['prettier', 'eslint'],
-\   'json': ['prettier', 'eslint'],
-\}
+			\   '*': ['remove_trailing_lines', 'trim_whitespace'],
+			\   'javascript': ['prettier', 'eslint'],
+			\   'javascriptreact': ['prettier', 'eslint'],
+			\   'json': ['prettier', 'eslint'],
+			\}
 " FIX ME LATER stylelint is not fucking colaborating
 let g:ale_linter_aliases = {'jsx': ['css', 'javascript', 'javascriptreact']}
 let g:ale_linters = {'jsx': ['stylelint', 'eslint']}
@@ -132,7 +148,7 @@ let g:ale_lint_on_insert_leave = 0
 "                                                                       '-'/    \
 
 func! SetPyTab()
-    " use python -like- tabs
+	" use python -like- tabs
 	set tabstop=4
 	set expandtab
 endfunc

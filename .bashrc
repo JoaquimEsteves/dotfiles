@@ -122,6 +122,13 @@ if ! shopt -oq posix; then
 	fi
 fi
 
+
+################################################################################
+#                                                                              #
+#                                 CUSTOM SHIT                                  #
+#                                                                              #
+################################################################################
+
 export NVM_DIR="$HOME/.nvm"
 # shellcheck source=/dev/null
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm
@@ -160,7 +167,7 @@ export EDITOR=vim
 # silly things for reasonable inputs.   #
 # Obviously don't use this if you're    #
 # not on azerty.                        #
-#                                       #  
+#                                       #
 #########################################
 # Defaults fzf expansion to $$
 # fzf expands with:
@@ -168,20 +175,20 @@ export EDITOR=vim
 #   Files under the current directory
 #   - You can select multiple items with TAB key
 #    vim **<TAB>
-#    
+#
 #    # Files under parent directory
 #    vim ../**<TAB>
-#    
+#
 #    # Files under parent directory that match `fzf`
 #    vim ../fzf**<TAB>
-#    
+#
 #    # Files under your home directory
 #    vim ~/**<TAB>
-#    
-#    
+#
+#
 #    # Directories under current directory (single-selection)
 #    cd **<TAB>
-#    
+#
 #    # Directories under ~/github that match `fzf`
 #    cd ~/github/fzf**<TAB>
 export FZF_COMPLETION_TRIGGER='$$'
@@ -216,4 +223,3 @@ _fzf_compgen_dir() {
 # Allow the use of direnv
 # https://direnv.net/
 eval "$(direnv hook bash)"
-

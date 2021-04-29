@@ -207,19 +207,19 @@
     <!-- Launch LXTerminal with Ctrl+Alt+t-->
     <keybind key="C-A-t">
       <action name="Execute">
-        <command>lxterminal</command>
+        <command>alacritty</command>
       </action>
     </keybind>
     <!-- movescreen is a cool script -->
     <!-- Source: https://github.com/calandoa/movescreen-->
     <keybind key="W-S-Left">
       <action name="Execute">
-        <command>movescreen left</command>
+        <command>movescreen left a m</command>
       </action>
     </keybind>
     <keybind key="W-S-Right">
       <action name="Execute">
-        <command>movescreen right</command>
+        <command>movescreen right a m</command>
       </action>
     </keybind>
     <!-- Source: https://gist.githubusercontent.com/zrajm/3621cc90d9bc30d06bbe926fc8b2692a/raw/cdb11387bbc5ebaf91c9049ac7d1b1bf91ce0b9f/lubuntu-rc.xml-->

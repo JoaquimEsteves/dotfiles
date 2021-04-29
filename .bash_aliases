@@ -58,7 +58,9 @@ alias l='exa -F --icons'
 # ripgrep is yet another rust re-implementation
 # this time of grep funnily enough
 # batgrep is just ripgrep but with bat as output
-alias grep='$HOME/.cargo/bin/rg '
+# Removed: Too many programs where using standard grep.
+# rg is easier to type than grep anyway lol
+# alias grep='$HOME/.cargo/bin/rg '
 alias rgrep="command grep "
 # batman is just the man pages but with bat output
 alias man='$HOME/.local/bin/batman '
@@ -90,6 +92,9 @@ alias dotfiles="fd '^\.' . --maxdepth 1 --hidden --no-ignore "
 # Quick copy to clipboard
 # Use it with a pipe command for example
 alias c2b="xclip -sel clip "
+# Googler, but default size of results to 5 so it actually fits on
+# my tiny ass screen
+alias googler="googler -n 5 "
 # Googler using w3m (ie: opening results in a terminal)
 alias qgoogler="googler --url-handler w3m "
 # TMUX STUFF
