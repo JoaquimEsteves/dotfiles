@@ -46,7 +46,7 @@ _gt() {
 
 _gh() {
 	is_in_git_repo || return
-	git log --date=short --format="%C(green)%C(bold)%cd %C(auto)%h%d %s (%an)" --graph --color=always |
+	git log --date=short --format="%C(green)%C(bold)%cd %C(auto)%h%d %s (%an)" --graph --color=always "$@"|
 		fzf-tmux --ansi --no-sort --reverse --multi --bind 'alt-j:preview-down,alt-k:preview-up' \
 			--header 'Ctrl-j: Down, Ctrl-k: Up Alt-j:preview-down,Alt-k:preview-up' \
 			--preview 'grep -o "[a-f0-9]\{7,\}" <<< {} | xargs git show --color=always | head -'$LINES |

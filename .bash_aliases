@@ -3,6 +3,11 @@
 # Enable alias expansion (useful for vim)
 # See: https://stackoverflow.com/a/19819036
 shopt -s expand_aliases
+
+# Safety...
+alias rm="rm -i "
+alias rrm="command rm "
+
 # Quickly reload bash from .bashrc
 alias reloadbash=". ~/.bashrc"
 # Make my sudo experience more wholesome
@@ -49,6 +54,7 @@ alias rfind="command find "
 # exa is a pretty cool ls alternative
 alias ls='$HOME/.cargo/bin/exa --icons '
 alias lst="ls -T --level=1 "
+alias lsd="ls -d */ "
 alias rls="command ls "
 alias ll='exa -alF --icons --header --git --extended'
 alias la='exa -a --icons'

@@ -145,6 +145,7 @@ export BAT_PAGER="less --tabs=4 -RF"
 # Allows us to use zoxide, the fancy cd built with rust
 eval "$(zoxide init bash)"
 # Add a carriage return to PS1
+# (Don't ask me how this works...)
 PS1=${PS1%?}
 PS1=${PS1%?}\n'$ '
 #### CUSTOM FUNCTIONS ####
@@ -192,6 +193,11 @@ export EDITOR=vim
 #    # Directories under ~/github that match `fzf`
 #    cd ~/github/fzf**<TAB>
 export FZF_COMPLETION_TRIGGER='$$'
+
+# Setup Caps locks => escape key
+setxkbmap -option caps:escape
+
+# French Keyboard Crap!
 # maps è to /
 # xmodmap -e "keycode 16 = KP_Divide"
 # maps § to \
