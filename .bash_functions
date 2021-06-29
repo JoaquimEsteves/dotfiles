@@ -8,6 +8,21 @@ function set-title() {
 	PS1=${ORIG}${TITLE}
 }
 
+# Appropriate for lxde or such other tools
+# Uses X11 so should work on any non-wailand thing
+function set-title-x() {
+	local window_to_rename
+	window_to_rename="$(wmctrl -l -p | awk '{s = ""; for (i=5; i<= NF; i++) s= s " " $i ; print $3 "\t" s}' | fzf --header "[PID]   [NAME] Select Window To Rename!" --header-lines=0)"
+	window_to_rename="$(echo "$window_to_rename" | awk '{ print $1 }')"
+	if [ -n "$1" ]; then
+		new_name="$1"
+	else
+		echo -n 'Input new name: ';
+		read -r new_name
+	fi
+	xdotool search --onlyvisible --pid "$window_to_rename" --name "\a\b\c" set_window --name "$new_name"
+}
+
 function mkcd() {
 	# Create a dir (including parents) and then cd to it.
 	# We use cmake because mkdir -p is not recommended in many
