@@ -34,6 +34,7 @@
     <!-- with Smart placement on a multi-monitor system, try to place new windows
        on: 'Any' - any monitor, 'Mouse' - where the mouse is, 'Active' - where
        the active window is -->
+    <primaryMonitor></primaryMonitor>
   </placement>
   <theme>
     <name>Nightmare-02</name>
@@ -117,7 +118,7 @@
 
        use obconf if you want to change these without having to log out
        and back in -->
-    <number>2</number>
+    <number>1</number>
     <firstdesk>1</firstdesk>
     <names>
       <!-- set names up here if you want to, like this:
@@ -175,7 +176,7 @@
   </dock>
   <keyboard>
     <chainQuitKey>C-g</chainQuitKey>
-	<!--
+    <!--
  _______________________________________________________________________
 /                                                                       \
 |                           CUSTOM KEYBINDS                             |
@@ -190,7 +191,6 @@
                                                                       '-'/    \
 
     -->
-
     <!-- Screen Shot :) -->
     <keybind key="Print">
       <action name="Execute">
@@ -203,7 +203,6 @@
         <command>lxlock</command>
       </action>
     </keybind>
-
     <!-- Launch LXTerminal with Ctrl+Alt+t-->
     <keybind key="C-A-t">
       <action name="Execute">
@@ -289,125 +288,216 @@
     <!-- Windows-Left: Left half of screen. -->
     <keybind key="W-Left">
       <action name="Raise"/>
-      <action name="If"><query target="default">
-        <maximized>no</maximized>
-        <maximizedvertical>yes</maximizedvertical>
-      </query><then>
-        <!-- Only vertically maximized: Maximize completely. -->
-        <action name="Maximize"/>
-      </then><else>
-        <action name="If"><query target="default">
-          <maximizedhorizontal>no</maximizedhorizontal>
-        </query><then>
-          <!-- Not horizontally maximized: Maximize vertically. -->
-          <action name="Maximize"><direction>vertical</direction></action>
-        </then></action>
-        <!-- Halve window width. -->
-        <action name="Unmaximize"><direction>horizontal</direction></action>
-        <action name="If">
-          <query target="default"><name>x-terminal-emulator</name></query>
-          <then><action name="MoveResizeTo"><width client="yes">101/200</width></action></then>
-          <else><action name="MoveResizeTo"><width client="yes">1/2</width></action></else>
-        </action>
-        <!-- Put on left half of screen. -->
-        <action name="MoveResizeTo">
-          <x client="yes">-50%</x>     <!-- right edge at screen midpoint -->
-          <!--x client="yes">0</x-->   <!-- left  edge at screen edge     -->
-        </action>
-      </else></action>
+      <action name="If">
+        <query target="default">
+          <maximized>no</maximized>
+          <maximizedvertical>yes</maximizedvertical>
+        </query>
+        <then>
+          <!-- Only vertically maximized: Maximize completely. -->
+          <action name="Maximize"/>
+        </then>
+        <else>
+          <action name="If">
+            <query target="default">
+              <maximizedhorizontal>no</maximizedhorizontal>
+            </query>
+            <then>
+              <!-- Not horizontally maximized: Maximize vertically. -->
+              <action name="Maximize">
+                <direction>vertical</direction>
+              </action>
+            </then>
+          </action>
+          <!-- Halve window width. -->
+          <action name="Unmaximize">
+            <direction>horizontal</direction>
+          </action>
+          <action name="If">
+            <query target="default">
+              <name>x-terminal-emulator</name>
+            </query>
+            <then>
+              <action name="MoveResizeTo">
+                <width client="yes">101/200</width>
+              </action>
+            </then>
+            <else>
+              <action name="MoveResizeTo">
+                <width client="yes">1/2</width>
+              </action>
+            </else>
+          </action>
+          <!-- Put on left half of screen. -->
+          <action name="MoveResizeTo">
+            <x client="yes">-50%</x>
+            <!-- right edge at screen midpoint -->
+            <!--x client="yes">0</x-->
+            <!-- left  edge at screen edge     -->
+          </action>
+        </else>
+      </action>
     </keybind>
     <!-- Windows-Right: Right half screen. -->
     <keybind key="W-Right">
       <action name="Raise"/>
-      <action name="If"><query target="default">
-        <maximized>no</maximized>
-        <maximizedvertical>yes</maximizedvertical>
-      </query><then>
-        <!-- Only vertically maximized: Maximize completely. -->
-        <action name="Maximize"/>
-      </then><else>
-        <action name="If"><query target="default">
-          <maximizedhorizontal>no</maximizedhorizontal>
-        </query><then>
-          <!-- Not horizontally maximized: Maximize vertically. -->
-          <action name="Maximize"><direction>vertical</direction></action>
-        </then></action>
-        <!-- Halve window width. -->
-        <action name="Unmaximize"><direction>horizontal</direction></action>
-        <action name="If">
-          <query target="default"><name>x-terminal-emulator</name></query>
-          <then><action name="MoveResizeTo"><width client="yes">101/200</width></action></then>
-          <else><action name="MoveResizeTo"><width client="yes">1/2</width></action></else>
-        </action>
-        <!-- Put on right half of screen. -->
-        <action name="MoveResizeTo">
-          <x client="yes">50%</x>      <!-- left  edge at screen midpoint -->
-          <!--x client="yes">-0</x-->  <!-- right edge at screen edge     -->
-        </action>
-      </else></action>
+      <action name="If">
+        <query target="default">
+          <maximized>no</maximized>
+          <maximizedvertical>yes</maximizedvertical>
+        </query>
+        <then>
+          <!-- Only vertically maximized: Maximize completely. -->
+          <action name="Maximize"/>
+        </then>
+        <else>
+          <action name="If">
+            <query target="default">
+              <maximizedhorizontal>no</maximizedhorizontal>
+            </query>
+            <then>
+              <!-- Not horizontally maximized: Maximize vertically. -->
+              <action name="Maximize">
+                <direction>vertical</direction>
+              </action>
+            </then>
+          </action>
+          <!-- Halve window width. -->
+          <action name="Unmaximize">
+            <direction>horizontal</direction>
+          </action>
+          <action name="If">
+            <query target="default">
+              <name>x-terminal-emulator</name>
+            </query>
+            <then>
+              <action name="MoveResizeTo">
+                <width client="yes">101/200</width>
+              </action>
+            </then>
+            <else>
+              <action name="MoveResizeTo">
+                <width client="yes">1/2</width>
+              </action>
+            </else>
+          </action>
+          <!-- Put on right half of screen. -->
+          <action name="MoveResizeTo">
+            <x client="yes">50%</x>
+            <!-- left  edge at screen midpoint -->
+            <!--x client="yes">-0</x-->
+            <!-- right edge at screen edge     -->
+          </action>
+        </else>
+      </action>
     </keybind>
     <!-- Windows-Up: Upper half of screen. -->
     <keybind key="W-Up">
       <action name="Raise"/>
-      <action name="If"><query target="default">
-        <maximized>no</maximized>
-        <maximizedhorizontal>yes</maximizedhorizontal>
-      </query><then>
-        <!-- Only horizontally maximized: Maximize completely. -->
-        <action name="Maximize"/>
-      </then><else>
-        <action name="If"><query target="default">
-          <maximizedvertical>no</maximizedvertical>
-        </query><then>
-          <!-- Not vertically maximized: Maximize horizontally. -->
-          <action name="Maximize"><direction>horizontal</direction></action>
-        </then></action>
-        <!-- Halve window height. -->
-        <action name="Unmaximize"><direction>vertical</direction></action>
-        <action name="If">
-          <query target="default"><name>x-terminal-emulator</name></query>
-          <then><action name="MoveResizeTo"><height client="yes">101/200</height></action></then>
-          <else><action name="MoveResizeTo"><height client="yes">1/2</height></action></else>
-        </action>
-        <!-- Put on upper half of screen. -->
-        <action name="MoveResizeTo">
-          <y client="yes">-50%</y>     <!-- bottom edge at screen midpoint -->
-          <!--x client="yes">0</x-->   <!-- top    edge at screen edge     -->
-        </action>
-      </else></action>
+      <action name="If">
+        <query target="default">
+          <maximized>no</maximized>
+          <maximizedhorizontal>yes</maximizedhorizontal>
+        </query>
+        <then>
+          <!-- Only horizontally maximized: Maximize completely. -->
+          <action name="Maximize"/>
+        </then>
+        <else>
+          <action name="If">
+            <query target="default">
+              <maximizedvertical>no</maximizedvertical>
+            </query>
+            <then>
+              <!-- Not vertically maximized: Maximize horizontally. -->
+              <action name="Maximize">
+                <direction>horizontal</direction>
+              </action>
+            </then>
+          </action>
+          <!-- Halve window height. -->
+          <action name="Unmaximize">
+            <direction>vertical</direction>
+          </action>
+          <action name="If">
+            <query target="default">
+              <name>x-terminal-emulator</name>
+            </query>
+            <then>
+              <action name="MoveResizeTo">
+                <height client="yes">101/200</height>
+              </action>
+            </then>
+            <else>
+              <action name="MoveResizeTo">
+                <height client="yes">1/2</height>
+              </action>
+            </else>
+          </action>
+          <!-- Put on upper half of screen. -->
+          <action name="MoveResizeTo">
+            <y client="yes">-50%</y>
+            <!-- bottom edge at screen midpoint -->
+            <!--x client="yes">0</x-->
+            <!-- top    edge at screen edge     -->
+          </action>
+        </else>
+      </action>
     </keybind>
     <!-- Windows-Down: Lower half of screen. -->
     <keybind key="W-Down">
       <action name="Raise"/>
-      <action name="If"><query target="default">
-        <maximized>no</maximized>
-        <maximizedhorizontal>yes</maximizedhorizontal>
-      </query><then>
-        <!-- Only horizontally maximized: Maximize completely. -->
-        <action name="Maximize"/>
-      </then><else>
-        <action name="If"><query target="default">
-          <maximizedvertical>no</maximizedvertical>
-        </query><then>
-          <!-- Not vertically maximized: Maximize horizontally. -->
-          <action name="Maximize"><direction>horizontal</direction></action>
-        </then></action>
-        <!-- Halve window height. -->
-        <action name="Unmaximize"><direction>vertical</direction></action>
-        <action name="If">
-          <query target="default"><name>x-terminal-emulator</name></query>
-          <then><action name="MoveResizeTo"><height client="yes">101/200</height></action></then>
-          <else><action name="MoveResizeTo"><height client="yes">1/2</height></action></else>
-        </action>
-        <!-- Put on lower half of screen. -->
-        <action name="MoveResizeTo">
-          <y client="yes">50%</y>      <!-- top    edge at screen midpoint -->
-          <!--x client="yes">-0</x-->  <!-- bottom edge at screen edge     -->
-        </action>
-      </else></action>
+      <action name="If">
+        <query target="default">
+          <maximized>no</maximized>
+          <maximizedhorizontal>yes</maximizedhorizontal>
+        </query>
+        <then>
+          <!-- Only horizontally maximized: Maximize completely. -->
+          <action name="Maximize"/>
+        </then>
+        <else>
+          <action name="If">
+            <query target="default">
+              <maximizedvertical>no</maximizedvertical>
+            </query>
+            <then>
+              <!-- Not vertically maximized: Maximize horizontally. -->
+              <action name="Maximize">
+                <direction>horizontal</direction>
+              </action>
+            </then>
+          </action>
+          <!-- Halve window height. -->
+          <action name="Unmaximize">
+            <direction>vertical</direction>
+          </action>
+          <action name="If">
+            <query target="default">
+              <name>x-terminal-emulator</name>
+            </query>
+            <then>
+              <action name="MoveResizeTo">
+                <height client="yes">101/200</height>
+              </action>
+            </then>
+            <else>
+              <action name="MoveResizeTo">
+                <height client="yes">1/2</height>
+              </action>
+            </else>
+          </action>
+          <!-- Put on lower half of screen. -->
+          <action name="MoveResizeTo">
+            <y client="yes">50%</y>
+            <!-- top    edge at screen midpoint -->
+            <!--x client="yes">-0</x-->
+            <!-- bottom edge at screen edge     -->
+          </action>
+        </else>
+      </action>
     </keybind>
     <!--=========================================================================-->
-
     <!-- Keybindings for desktop switching -->
     <keybind key="C-A-Left">
       <action name="DesktopLeft">
