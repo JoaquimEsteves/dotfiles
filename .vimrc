@@ -6,12 +6,14 @@ runtime macros/matchit.vim
 ""     My non-US keyboard makes it hard to type [ and ].
 ""     FEAR NO MORE
 
-nmap < [
-nmap > ]
-omap < [
-omap > ]
-xmap < [
-xmap > ]
+"" nmap < [
+"" nmap > ]
+"" omap < [
+"" omap > ]
+"" xmap < [
+"" xmap > ]
+"" does what it days on the tin
+xnoremap @ :<C-u>call ExecuteMacroOverVisualRange()<CR>
 
 
 "" Window navigation
@@ -34,6 +36,16 @@ nnoremap <C-G> :Files<CR>
 " Enable bash aliases!
 let $BASH_ENV = "~/.bash_aliases"
 
+"" Set ripgrep as the default vimgrep
+set grepprg=rg\ --vimgrep\ --smart-case
+set grepformat=%f:%l:%c:%m,%f:%l:%m
+
+"" No more silly guessword! `8j` is now visually represented!!! This shit's
+"" bananas. I love it
+set relativenumber
+
+" Set the standard yank register to the godsdamned normal clipboard
+set clipboard=unnamedplus
 " Ignore 1960's compatibility mode
 set nocp
 " Always allow me to see the dang ruler
@@ -98,7 +110,8 @@ Plug 'junegunn/fzf.vim'
 Plug 'airblade/vim-gitgutter', { 'do': function('NoAutoGutter') }
 " Swag parentheses!
 Plug 'kien/rainbow_parentheses.vim'
-
+" Press F, go flying!
+Plug 'easymotion/vim-easymotion'
 call plug#end()
 
 
@@ -146,14 +159,48 @@ let g:ale_lint_on_insert_leave = 0
 "                                                                       '  _.'  |
 "                                                                       '-'/    \
 
+function! PlugLoaded(name)
+    return has_key(g:plugs, a:name)
+endfunction
+
+
+
 func! SetPyTab()
 	" use python -like- tabs
 	set tabstop=4
 	set expandtab
 endfunc
 
-" 🐛 Doesn't bloody work :(
-" func! SetTabNum(num = 4)
 " 	set tabstop=a:4
 " 	set expandtab
 " endfunc
+
+function! ExecuteMacroOverVisualRange()
+  echo "@".getcmdline()
+  execute ":'<,'>normal @".nr2char(getchar())
+endfunction
+
+""  ______________________________
+"" /                              \
+"" | neovim specific shenanigans  |
+"" \________________________  __'\
+""                          |/   \\
+""                           \    \\  .
+""                                |\\/|
+""                                / " '\
+""                                . .   .
+""                               /    ) |
+""                              '  _.'  |
+""                              '-'/    \
+
+if has("nvim")
+    set inccommand=nosplit
+endif
+
+if PlugLoaded('vim-easymotion')
+	" Enable default maps
+	" See `help easymotion.txt` -> Default Mappings
+	let g:EasyMotion_do_mapping = 1
+	nnoremap F <NOP>
+	nmap F <Plug>(easymotion-prefix)
+endif

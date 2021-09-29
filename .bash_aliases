@@ -20,7 +20,8 @@ alias update-upgrade="please apt update && please apt upgrade"
 # Easy acces to the "file explorer"
 # (it actually tries to use the sensible choice for any file you try to open)
 alias explorer="xdg-open "
-
+# nvim is good
+alias vim="nvim "
 # Philipp's funny little emoji picker with fzf
 #alias emoj="emoji-fzf preview \
 #	  | fzf --preview 'emoji-fzf get --name {1}' \
@@ -116,8 +117,14 @@ if [ -f "$HOME/Scripts/html-mk-cat.sh" ]; then
 	alias cgoogler='googler --url-handler=$HOME/Scripts/html-mk-cat.sh'
 fi
 
-### GIT AlIASES
-alias gsts="git status --short "
+################################################################################
+#                                                                              #
+#                                  Cool Shit                                   #
+#                                                                              #
+################################################################################
+
+# See https://github.com/flash-global/shipperportal-front/pull/1135
+alias music_vis="cava"
 
 # Get the weather!
 alias weather="curl wttr.in "
@@ -125,11 +132,6 @@ alias weather="curl wttr.in "
 # Neat file preview with fuzzy search and bat! Wow
 alias preview="fzf --preview '/usr/bin/batcat --color \"always\" {}'"
 
-################################################################################
-#                                                                              #
-#                                 pretty boxes                                 #
-#                                                                              #
-################################################################################
 # Usage: pbox -d shell (This selects the shell style)
 #        pbox -l (browse the styles!)
 #        pbox -d <STYLE> -l (See the style's own "man" page)

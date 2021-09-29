@@ -200,7 +200,10 @@
     <!-- Lock Screen -->
     <keybind key="W-l">
       <action name="Execute">
+	<!--Too many problems
         <command>lxlock</command>
+	-->
+        <command>lock_i3</command>
       </action>
     </keybind>
     <!-- Launch LXTerminal with Ctrl+Alt+t-->
