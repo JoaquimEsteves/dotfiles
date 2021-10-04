@@ -15,13 +15,30 @@ runtime macros/matchit.vim
 "" does what it days on the tin
 xnoremap @ :<C-u>call ExecuteMacroOverVisualRange()<CR>
 
+"" Command Line Editing Shortcuts
+"" Use emacs style editing
+cnoremap <C-a> <Home>
+cnoremap <C-e> <End>
+cnoremap <C-d> <Del>
+" back one word
+cnoremap <M-b> <S-Left>
+" forward one word
+cnoremap <M-f> <S-Right>
+" Delete word forward
+cnoremap <M-d> <S-Right><C-w>
+" Open VIM, in VIM. Short cut is now the same as in bash
+cnoremap <C-x><C-e> <C-f>
+
+"" Smooth scrolling 😎
+map <C-U> <C-Y><C-Y><C-Y><C-Y><C-Y><C-Y><C-Y><C-Y><C-Y><C-Y><C-Y><C-Y><C-Y><C-Y><C-Y><C-Y>
+map <C-D> <C-E><C-E><C-E><C-E><C-E><C-E><C-E><C-E><C-E><C-E><C-E><C-E><C-E><C-E><C-E><C-E>
+
 
 "" Window navigation
 nnoremap <C-h> <C-w>h
 nnoremap <C-j> <C-w>j
 nnoremap <C-k> <C-w>k
 nnoremap <C-l> <C-w>l
-
 
 "" REMEMBER:
 ""      Download fzf!
@@ -114,7 +131,6 @@ Plug 'kien/rainbow_parentheses.vim'
 Plug 'easymotion/vim-easymotion'
 call plug#end()
 
-
 "" Autocommand to start with rainbow parentheses
 au VimEnter * RainbowParenthesesToggle
 au Syntax * RainbowParenthesesLoadRound
@@ -162,8 +178,6 @@ let g:ale_lint_on_insert_leave = 0
 function! PlugLoaded(name)
     return has_key(g:plugs, a:name)
 endfunction
-
-
 
 func! SetPyTab()
 	" use python -like- tabs
