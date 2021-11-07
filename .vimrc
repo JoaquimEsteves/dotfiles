@@ -1,4 +1,6 @@
 " Hit `%` on `if` to jump to `else`.
+"
+" GOOD SHIT: https://github.com/ibhagwan/vim-cheatsheet
 runtime macros/matchit.vim
 " let matchit handle it
 let c_no_curly_error=1
@@ -292,6 +294,11 @@ endfunction
 
 if has("nvim")
   set inccommand=nosplit
+  "" Highlight on yank
+   augroup YankHighlight
+    autocmd!
+    autocmd TextYankPost * silent! lua vim.highlight.on_yank()
+  augroup end
 endif
 
 if (exists('+colorcolumn'))
