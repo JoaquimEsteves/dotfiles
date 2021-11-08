@@ -50,6 +50,11 @@ nnoremap <C-j> <C-w>j
 nnoremap <C-k> <C-w>k
 nnoremap <C-l> <C-w>l
 
+" Deleted: Still need a bit more practise
+" nnoremap <Leader>g :silent lgrep<Space>
+" nnoremap <silent> [f :lprevious<CR>
+" nnoremap <silent> ]f :lnext<CR>
+
 
 " Clear highlighting by mashing escape in normal mode
 nnoremap <silent><esc> :noh<return><esc>
@@ -82,7 +87,7 @@ set confirm
 "" 
 "" set cuc
 "" Set ripgrep as the default vimgrep
-set grepprg=rg\ --vimgrep\ --smart-case
+set grepprg=rg\ --vimgrep\ --smart-case\ --hidden\ -g\ \'!.git\/'
 set grepformat=%f:%l:%c:%m,%f:%l:%m
 
 "" No more silly guessword! `8j` is now visually represented!!! This shit's
@@ -450,6 +455,18 @@ if PlugLoaded('vim-easymotion')
 endif
 
 if PlugLoaded('fzf.vim')
+	let $FZF_DEFAULT_COMMAND = 'fd --type f'
+	function! RipgrepFzf(query, fullscreen)
+	  let command_fmt = "rg --hidden --column --line-number --no-heading --color=always --smart-case --glob '!.git' -- %s || true"
+	  let initial_command = printf(command_fmt, shellescape(a:query))
+	  let reload_command = printf(command_fmt, '{q}')
+	  let spec = {'options': ['--phony', '--query', a:query, '--bind', 'change:reload:'.reload_command]}
+	  call fzf#vim#grep(initial_command, 1, fzf#vim#with_preview(spec), a:fullscreen)
+	endfunction
+
+	"" custom ripgrep command that actually ignores .gitignore but not
+	"" hidden files :)
+	command! -nargs=* -bang RG call RipgrepFzf(<q-args>, <bang>0)
 	"" REMEMBER:
 	""      Download fzf!
 	"" 	C-t => Open in new tab
@@ -458,7 +475,7 @@ if PlugLoaded('fzf.vim')
 	"" Classic Ctrl-F to search lines in opened buffers
 	nnoremap <C-F> :Lines<CR>
 	"" use good ol' rip grep
-	nnoremap <M-f> :Rg<CR>
+	nnoremap <M-f> :RG<CR>
 	"" Search for files with git ls-files
 	nnoremap <C-P> :GFiles<CR>
 	"" Search _all_ files with fuzzy search
