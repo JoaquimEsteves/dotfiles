@@ -199,9 +199,9 @@ setxkbmap -option caps:escape
 
 # French Keyboard Crap!
 # maps è to /
-# xmodmap -e "keycode 16 = KP_Divide"
+# xmodmap -e "keycode 16 = KP_Divide 7"
 # maps § to \
-# xmodmap -e "keycode 15 = backslash"
+# xmodmap -e "keycode 15 = backslash 6"
 # Set capslocks to be equal to escape
 # setxkbmap -option caps:escape
 ########################################

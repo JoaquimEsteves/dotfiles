@@ -241,7 +241,7 @@ endif
 
 if has("nvim-0.6")
   "" SOON...
-  "" Plug 'github/copilot.vim'
+  Plug 'github/copilot.vim'
   Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
   Plug 'nvim-treesitter/nvim-treesitter-textobjects'
   Plug 'p00f/nvim-ts-rainbow'
@@ -287,6 +287,7 @@ highlight SignatureMarkText ctermfg=Red ctermbg=235
 command! OpenVimRc :tabnew ~/.vimrc
 command! ClearColumn :set colorcolumn&
 command! AddColumn :set colorcolumn=80,120
+command! ToggleSmartCase :set smartcase!
 
 function! ExecuteMacroOverVisualRange()
   echo "@".getcmdline()
