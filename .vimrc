@@ -3,7 +3,15 @@ runtime macros/matchit.vim
 " let matchit handle it
 let c_no_curly_error=1
 let c_no_bracket_error=1
+
+"" open help in a new tab
+cabbrev thelp tab help
+
 "" Mappings!
+
+"" set <Leader> to <Space>
+let mapleader = " "
+
 ""     Fun with EU keyboards
 ""     My non-US keyboard makes it hard to type [ and ].
 ""     FEAR NO MORE
@@ -16,8 +24,6 @@ let c_no_bracket_error=1
 "" xmap > ]
 "" does what it days on the tin (see function definition bellow)
 xnoremap @ :<C-u>call ExecuteMacroOverVisualRange()<CR>
-"" open help in a new tab
-cabbrev thelp tab help
 
 "" Command Line Editing Shortcuts
 "" Use emacs style editing
@@ -45,20 +51,35 @@ nnoremap <C-k> <C-w>k
 nnoremap <C-l> <C-w>l
 
 
+" Clear highlighting by mashing escape in normal mode
+nnoremap <silent><esc> :noh<return><esc>
+nnoremap <silent><esc>^[ <esc>^[
+
+"" GENERAL CONFIGURATION
+
 " Enable bash aliases!
 let $BASH_ENV = "~/.bash_aliases"
 
+"" Smarc case writting! Case insensitive unless /C or a capital letter in
+"" search :)
+set ignorecase
+set smartcase
+
 "" Autoload file changes.
 set autoread
+
+"" Save undo changes somewhere on /tmp
+set undofile
+
+
 "" MORE UPDATES YO
 set updatetime=100
 "" Tells me when I'm quitting unsaved files in a nicer way
 "" really useful with `qall`
 set confirm
 
-
-"" Highlights the column
-"" I am a beta...
+"" Highlights the column (I am a beta...)
+"" 
 "" set cuc
 "" Set ripgrep as the default vimgrep
 set grepprg=rg\ --vimgrep\ --smart-case
@@ -77,10 +98,8 @@ set laststatus=2
 " Search goodness!
 "     Top tip - press "*" to search for the word under the cursor! Incredible
 set incsearch "search as you type
-set hlsearch  "Highlight Search
-" Clear highlighting by mashing escape in normal mode
-nnoremap <silent><esc> :noh<return><esc>
-nnoremap <silent><esc>^[ <esc>^[
+" Highlight Search
+set hlsearch  
 "how line numbers
 set number
 " Show file stats
@@ -108,10 +127,16 @@ call plug#begin('~/.vim/plugged')
 Plug 'morhetz/gruvbox'
 Plug 'altercation/vim-colors-solarized'
 Plug 'kyazdani42/blue-moon'
+Plug 'fenetikm/falcon'
+Plug 'bluz71/vim-nightfly-guicolors'
 "" Allows me to _see_ the dang colors
 "" Main Command: :XtermColorTable
 "" :help xterm-color-table
 Plug 'guns/xterm-color-table.vim'
+
+
+Plug 'camspiers/animate.vim'
+Plug 'camspiers/lens.vim'
 
 "" Typescript - React stuff
 
@@ -187,17 +212,37 @@ Plug 'kien/rainbow_parentheses.vim'
 " Press F, go flying!
 Plug 'easymotion/vim-easymotion'
 
+
+
+function! BuildComposer(info)
+  if a:info.status != 'unchanged' || a:info.force
+    if has('nvim')
+      !cargo build --release --locked
+    else
+      !cargo build --release --locked --no-default-features --features json-rpc
+    endif
+  endif
+endfunction
+
+if executable('cargo')
+  Plug 'euclio/vim-markdown-composer', { 'do': function('BuildComposer') }
+endif
+
 if has("nvim-0.5")
   Plug 'neovim/nvim-lspconfig'
   Plug 'ray-x/lsp_signature.nvim'
+Plug 'kosayoda/nvim-lightbulb'
 endif
 
 if has("nvim-0.6")
   "" SOON...
   "" Plug 'github/copilot.vim'
   Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
+  Plug 'nvim-treesitter/nvim-treesitter-textobjects'
   Plug 'p00f/nvim-ts-rainbow'
   Plug 'nvim-treesitter/playground'
+  "" Abuses tree sitter for pretty context colors
+  Plug 'lukas-reineke/indent-blankline.nvim'
 endif
 
 
@@ -258,6 +303,19 @@ function! NERDTreeToggleInCurDir()
   endif
 endfunction
 
+
+function! FixTSRainbow()
+  hi! rainbowcol1 ctermfg=1 
+  hi! rainbowcol2 ctermfg=2 
+  hi! rainbowcol3 ctermfg=3 
+  hi! rainbowcol4 ctermfg=4 
+  hi! rainbowcol5 ctermfg=5
+  hi! rainbowcol6 ctermfg=6
+  hi! rainbowcol7 ctermfg=7
+endfunction
+
+
+
 "" I FUCKING HATE VIM SCRIPT OMG
 "" function! CallSort() range
 ""     " Get the line and column of the visual selection marks
@@ -287,6 +345,9 @@ endfunction
 
 if has("nvim")
   set inccommand=nosplit
+  "" Assume I'm using a modern terminal lol
+  "" See: https://github.com/termstandard/colors
+  set termguicolors
 endif
 
 if (exists('+colorcolumn'))
@@ -313,6 +374,32 @@ endif
 function! PlugLoaded(name)
     return has_key(g:plugs, a:name)
 endfunction
+
+
+if PlugLoaded('animate.vim')
+  "" SMOOTH AF
+  nnoremap <silent> <C-Up>    :call animate#window_delta_height(10)<CR>
+  nnoremap <silent> <C-Down>  :call animate#window_delta_height(-10)<CR>
+  nnoremap <silent> <C-Left>  :call animate#window_delta_width(10)<CR>
+  nnoremap <silent> <C-Right> :call animate#window_delta_width(-10)<CR>
+endif
+
+if PlugLoaded('nvim-ts-rainbow')
+  hi! rainbowcol1 ctermfg=1 
+  hi! rainbowcol2 ctermfg=2 
+  hi! rainbowcol3 ctermfg=3 
+  hi! rainbowcol4 ctermfg=4 
+  hi! rainbowcol5 ctermfg=5
+  hi! rainbowcol6 ctermfg=6
+  hi! rainbowcol7 ctermfg=7
+endif
+
+
+if PlugLoaded('vim-markdown-composer')
+  "" Call through :ComposerStart
+  "" see `:help markdown-composer`
+  let g:markdown_composer_autostart = 0
+endif
 
 if PlugLoaded('vim-colors-solarized')
   " Solarized theme!
@@ -382,7 +469,8 @@ endif
 if PlugLoaded("nvim-lspconfig")
 
   nnoremap <silent> <Leader>d :LspDetail<CR>
-  inoremap <buffer><silent> <C-y> <C-y><Cmd>lua vim.lsp.buf.hover()<CR>
+  " NOT WORKING YO
+  " inoremap <buffer><silent> <C-y> <C-y><Cmd>lua vim.lsp.buf.hover()<CR>
   nnoremap <silent> <Leader>h :LspHover<CR>
   "" Follow  vim convention instead of <leader>gg
   "" Remember - <C-o> to go back! I always forget lol
@@ -391,7 +479,7 @@ if PlugLoaded("nvim-lspconfig")
   "" navigation
   nnoremap <Leader>gn :LspDiagNext<CR>
   nnoremap <Leader>gp :LspDiagPrev<CR>
-  nnoremap <silent> gr :LspFindReferences<CR>
+  nnoremap <silent> <Leader>gr :LspFindReferences<CR>
 
   nnoremap <leader>rn :LspRename<CR>
 
@@ -407,6 +495,7 @@ if PlugLoaded('vim-zoom')
    silent! unmap <C-w>m
    nmap <C-w>z <Plug>(zoom-toggle)
 endif
+
 if PlugLoaded('ale')
   "" Follow [Google's shell style](https://google.github.io/styleguide/shellguide.html)
   let g:ale_sh_shfmt_options = '-i 2 -ci -bn'
