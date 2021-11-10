@@ -427,6 +427,7 @@ endif
 if PlugLoaded('gruvbox')
   colorscheme gruvbox
 
+  "" Setup pretty colors :)
   hi! link TSVariable GruvboxBlue
   hi! link Identifier GruvboxAqua
   hi! link Special GruvboxGreen
@@ -435,6 +436,8 @@ if PlugLoaded('gruvbox')
   hi! Function ctermfg=3
   hi! link Delimiter Noise
   hi! link TSStringRegex GruvBoxRed 
+  hi! link TSKeywordReturn GruvBoxPurple
+
 endif
 
 
@@ -450,9 +453,9 @@ endif
 if PlugLoaded('vim-easymotion')
   " Enable default maps
   " See `help easymotion.txt` -> Default Mappings
-  let g:EasyMotion_do_mapping = 1
-  nnoremap F <NOP>
-  nmap F <Plug>(easymotion-prefix)
+  "" let g:EasyMotion_do_mapping = 1
+  "" nnoremap F <NOP>
+  "" nmap F <Plug>(easymotion-prefix)
 endif
 
 if PlugLoaded('fzf.vim')
