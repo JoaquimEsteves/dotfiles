@@ -5,12 +5,6 @@ if &compatible
   set nocompatible
 endif
 
-" Hit `%` on `if` to jump to `else`.
-runtime macros/matchit.vim
-" let matchit handle it
-let c_no_curly_error=1
-let c_no_bracket_error=1
-
 "" open help in a new tab
 cabbrev thelp tab help
 
@@ -73,6 +67,13 @@ nnoremap <silent><esc>^[ <esc>^[
 
 "" GENERAL CONFIGURATION
 
+" Hit `%` on `if` to jump to `else`.
+runtime macros/matchit.vim
+" let matchit handle it
+let c_no_curly_error=1
+let c_no_bracket_error=1
+
+
 " Enable bash aliases!
 let $BASH_ENV = "~/.bash_aliases"
 
@@ -97,6 +98,8 @@ set confirm
 "" Highlights the column (I am a beta...)
 "" 
 "" set cuc
+
+
 "" Set ripgrep as the default vimgrep
 set grepprg=rg\ --vimgrep\ --smart-case\ --hidden\ -g\ \'!.git\/'
 set grepformat=%f:%l:%c:%m,%f:%l:%m
@@ -129,12 +132,23 @@ set encoding=utf-8
 syntax enable
 filetype plugin indent on
 
-set t_Co=256
+" set t_Co=256
 set background=dark
 
-" Modules!
+"  _____________________________________________________________________
+" /                                                                     \
+" |                              PLUGINS                                |
+" \_______________________________________________________________  __'\
+"                                                                 |/   \\
+"                                                                  \    \\  .
+"                                                                       |\\/|
+"                                                                       / " '\
+"                                                                       . .   .
+"                                                                      /    ) |
+"                                                                     '  _.'  |
+"                                                                     '-'/    \
+" 
 
-"" PLUGINS
 call plug#begin('~/.vim/plugged')
 
 "" COLORS
@@ -158,14 +172,11 @@ Plug 'camspiers/lens.vim'
 "" SYNTAX
 "" way too bloody many syntax highlighters
 "" I'm not happy with either...
-let js_files = [ 'javascript', 'javascriptreact' ]
-let ts_files = [ 'typescript', 'typescriptreact' ]
-
-
-
+"" let js_files = [ 'javascript', 'javascriptreact' ]
+"" let ts_files = [ 'typescript', 'typescriptreact' ]
 "" autocmd FileType javascriptreact set syntax=typescriptreact
 "" Plug 'HerringtonDarkholme/yats.vim'
-Plug 'styled-components/vim-styled-components', { 'branch': 'main' }
+"" Plug 'styled-components/vim-styled-components', { 'branch': 'main' }
 
 
 "" Plug 'pangloss/vim-javascript'
@@ -263,35 +274,24 @@ endif
 
 call plug#end()
 
-"" Autocommand to start with rainbow parentheses
-"" au VimEnter * RainbowParenthesesToggle
-"" au Syntax * RainbowParenthesesLoadRound
-"" au Syntax * RainbowParenthesesLoadSquare
-"" au Syntax * RainbowParenthesesLoadBraces
-"" au Syntax * RainbowParenthesesLoadChevrons
-
 "" Fix the colors on ShowMarks so they don't look like a bloody disaster
 highlight SignColumn     ctermfg=239 ctermbg=235
 highlight SignatureMarkText ctermfg=Red ctermbg=235
 
-" OLD SCHOOL FUCK IT
-" Just run prettier/your_prefered_formatter manually if ALE isn't collaborating
-" nnoremap gp :silent %!prettier --stdin-filepath %<CR>
-
-"  _______________________________________________________________________
-" /                                                                       \
-" |                           CUSTOM FUNCTIONS                            |
-" |                                                                       |
-" |                   Call them with `call FuncName()`                    |
-" \_________________________________________________________________  __'\
-"                                                                   |/   \\
-"                                                                    \    \\  .
-"                                                                         |\\/|
-"                                                                         / " '\
-"                                                                         . .   .
-"                                                                        /    ) |
-"                                                                       '  _.'  |
-"                                                                       '-'/    \
+"  _____________________________________________________________________
+" /                                                                     \
+" |                         CUSTOM FUNCTIONS                            |
+" |                                                                     |
+" |                 Call them with `call FuncName()`                    |
+" \_______________________________________________________________  __'\
+"                                                                 |/   \\
+"                                                                  \    \\  .
+"                                                                       |\\/|
+"                                                                       / " '\
+"                                                                       . .   .
+"                                                                      /    ) |
+"                                                                     '  _.'  |
+"                                                                     '-'/    \
 
 command! OpenVimRc :tabnew ~/.vimrc
 command! ClearColumn :set colorcolumn&
@@ -366,6 +366,7 @@ endfunction
 if has("nvim")
   set inccommand=nosplit
   "" Assume I'm using a modern terminal lol
+  "" use `:checkhealth` to setup proper terminal colors
   "" See: https://github.com/termstandard/colors
   set termguicolors
 endif
