@@ -1,3 +1,10 @@
+"" Stop being compatible with the 1960's
+"" This must be first, because it changes other options as a side effect.
+"" Avoid side effects when it was already reset." Avoid side-effects by
+if &compatible
+  set nocompatible
+endif
+
 " Hit `%` on `if` to jump to `else`.
 runtime macros/matchit.vim
 " let matchit handle it
@@ -24,6 +31,10 @@ let mapleader = " "
 "" xmap > ]
 "" does what it days on the tin (see function definition bellow)
 xnoremap @ :<C-u>call ExecuteMacroOverVisualRange()<CR>
+
+
+"" use gQ instead. Such a promiment key for such a minor feature is a pain in the ass.
+map Q <Nop>
 
 "" Command Line Editing Shortcuts
 "" Use emacs style editing
@@ -94,10 +105,9 @@ set grepformat=%f:%l:%c:%m,%f:%l:%m
 "" bananas. I love it
 set relativenumber
 
-" Set the standard yank register to the godsdamned normal clipboard
-set clipboard=unnamedplus
-" Ignore 1960's compatibility mode
-set nocp
+"" Set the standard yank register to the godsdamned normal clipboard
+"" set clipboard=unnamedplus
+
 " Always allow me to see the dang ruler
 set laststatus=2
 " Search goodness!
@@ -236,11 +246,10 @@ endif
 if has("nvim-0.5")
   Plug 'neovim/nvim-lspconfig'
   Plug 'ray-x/lsp_signature.nvim'
-Plug 'kosayoda/nvim-lightbulb'
+  Plug 'kosayoda/nvim-lightbulb'
 endif
 
 if has("nvim-0.6")
-  "" SOON...
   Plug 'github/copilot.vim'
   Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
   Plug 'nvim-treesitter/nvim-treesitter-textobjects'
@@ -288,6 +297,11 @@ command! OpenVimRc :tabnew ~/.vimrc
 command! ClearColumn :set colorcolumn&
 command! AddColumn :set colorcolumn=80,120
 command! ToggleSmartCase :set smartcase!
+
+" See the difference between the current buffer and the original file
+command! DiffOrig vert new | set bt=nofile | r ++edit # | 0d_ | diffthis
+		  \ | wincmd p | diffthis
+
 
 function! ExecuteMacroOverVisualRange()
   echo "@".getcmdline()
@@ -380,6 +394,22 @@ endif
 function! PlugLoaded(name)
     return has_key(g:plugs, a:name)
 endfunction
+
+
+if executable('emoji-fzf')
+  " See: https://github.com/noahp/emoji-fzf 
+  function! InsertEmoji(emoji)
+    let @a = system('cut -d " " -f 1 | emoji-fzf get', a:emoji)
+    normal! "agP
+  endfunction
+
+  command! -bang Emoj
+	\ call fzf#run({
+	\ 'source': 'emoji-fzf preview',
+	\ 'options': '--preview ''emoji-fzf get --name {1}''',
+	\ 'sink': function('InsertEmoji')
+	\ })
+endif
 
 
 if PlugLoaded('animate.vim')
