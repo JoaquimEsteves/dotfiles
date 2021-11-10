@@ -1,3 +1,6 @@
+-- Includes both lsp and tree-sitter config
+-- They go well together :)
+
 local nvim_lsp = require('lspconfig')
 require('lsp_signature').on_attach()
 
@@ -114,20 +117,4 @@ nvim_lsp.tsserver.setup {
         }
     }
 }
-
-require'nvim-treesitter.configs'.setup {
-    highlight = {
-        enable = true,
-    },
-    incremental_selection = {
-        enable = false,
-    },
-    ensure_installed = {'typescript', 'javascript'},
-    rainbow = {
-      enable = true,
-      extended_mode = true,
-      max_file_lines = 1000
-    }
-}
-
 
