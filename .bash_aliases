@@ -138,4 +138,4 @@ alias preview="fzf --preview '/usr/bin/batcat --color \"always\" {}'"
 # You can also just invoke a diferent size to change it
 # Example: pbox -s 40x8
 alias pbox="boxes -s 79x5 -a c "
-alias unicornbox="pbox -d unicornsay "
+alias unicornbox="boxes -a c -d unicornsay "
