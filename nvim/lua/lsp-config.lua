@@ -47,6 +47,12 @@ local on_attach = function(client, bufnr)
     vim.cmd("command! LspHelp lua vim.lsp.diagnostic.set_loclist()")
 end
 
+
+-- PRETTYNESS
+if vim.fn.executable('fzf') then
+  require'fzf_lsp'.setup()
+end
+
 local filetypes = {
     javascript = "eslint",
     javascriptreact = "eslint",

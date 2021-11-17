@@ -22,6 +22,7 @@ alias update-upgrade="please apt update && please apt upgrade"
 alias explorer="xdg-open "
 # nvim is good
 alias vim="nvim "
+alias g="git "
 # Philipp's funny little emoji picker with fzf
 #alias emoj="emoji-fzf preview \
 #	  | fzf --preview 'emoji-fzf get --name {1}' \
@@ -125,6 +126,10 @@ fi
 
 # See https://github.com/flash-global/shipperportal-front/pull/1135
 alias music_vis="cava"
+
+# I just keep forgetting the name of this damn program
+# `$ tldr arecord`
+alias music_record="arecord "
 
 # Get the weather!
 alias weather="curl wttr.in "

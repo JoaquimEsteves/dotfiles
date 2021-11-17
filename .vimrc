@@ -204,6 +204,9 @@ Plug 'tpope/vim-sleuth'
 Plug 'tpope/vim-fugitive'
 "" Comment with gc
 Plug 'tpope/vim-commentary'
+"" Fancy way to do search
+"" `:%Subvert/facilit{y,ies}/building{,s}/g`
+Plug 'tpope/vim-abolish'
 "" Use fuzzy search!
 "" https://github.com/junegunn/fzf.vim
 if executable('fzf')
@@ -258,6 +261,7 @@ if has("nvim-0.5")
   Plug 'neovim/nvim-lspconfig'
   Plug 'ray-x/lsp_signature.nvim'
   Plug 'kosayoda/nvim-lightbulb'
+  Plug 'gfanto/fzf-lsp.nvim'
 endif
 
 if has("nvim-0.6")
@@ -308,6 +312,28 @@ function! ExecuteMacroOverVisualRange()
   execute ":'<,'>normal @".nr2char(getchar())
 endfunction
 
+
+
+function! Redir(cmd)
+    redir => output
+        silent! execute(a:cmd )
+    redir END
+    let output = split(output, "\n")
+    
+    if bufwinnr('cmd.out') >0 
+       bdelete cmd.out
+    endif
+
+    vnew cmd.out
+    let w:scratch = 1
+    setlocal buftype=nofile bufhidden=wipe noswapfile
+    call setline(1, output)
+
+    wincmd h
+endfunction
+
+"redirect any vim command output using Redir command.
+command! -nargs=1 Redir call Redir(<f-args>)
 
 function! GetHighlightAtCursor()
   echo synIDattr(synID(line("."), col("."), 1), "name")
@@ -524,6 +550,7 @@ if PlugLoaded("nvim-lspconfig")
   " NOT WORKING YO
   " inoremap <buffer><silent> <C-y> <C-y><Cmd>lua vim.lsp.buf.hover()<CR>
   nnoremap <silent> <Leader>h :LspHover<CR>
+  nnoremap <silent> <Leader>H :LspSignatureHelp<CR>
   "" Follow  vim convention instead of <leader>gg
   "" Remember - <C-o> to go back! I always forget lol
   nnoremap <silent> <Leader>gg :LspDef<CR>
