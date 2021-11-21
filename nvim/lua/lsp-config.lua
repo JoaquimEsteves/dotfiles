@@ -2,7 +2,13 @@
 -- They go well together :)
 
 local nvim_lsp = require('lspconfig')
+local coq = require "coq"
+
 require('lsp_signature').on_attach()
+
+--Enable (broadcasting) snippet capability for completion
+local capabilities = vim.lsp.protocol.make_client_capabilities()
+capabilities.textDocument.completion.completionItem.snippetSupport = true
 
 -- Typescript only organise Imports function
 local function ts_organize_imports()
@@ -111,7 +117,7 @@ nvim_lsp.diagnosticls.setup {
     }
 }
 
-nvim_lsp.tsserver.setup {
+nvim_lsp.tsserver.setup(coq.lsp_ensure_capabilities {
     on_attach = function(client)
         client.resolved_capabilities.document_formatting = false
         on_attach(client)
@@ -122,5 +128,9 @@ nvim_lsp.tsserver.setup {
           description = "Organize Imports Through tsserver!"
         }
     }
-}
+})
+
+-- HTML + CSS
+nvim_lsp.html.setup(coq.lsp_ensure_capabilities { capabilities = capabilities })
+nvim_lsp.cssls.setup(coq.lsp_ensure_capabilities { capabilities = capabilities })
 

@@ -65,6 +65,15 @@ nnoremap <C-l> <C-w>l
 nnoremap <silent><esc> :noh<return><esc>
 nnoremap <silent><esc>^[ <esc>^[
 
+" delete without yanking
+" Also makes x and d have separate separate functionality! 
+nnoremap x "_x
+vnoremap x "_x
+
+" replace currently selected text with default register
+" without yanking it
+vnoremap <leader>p "_dP
+
 "" GENERAL CONFIGURATION
 
 " Hit `%` on `if` to jump to `else`.
@@ -109,7 +118,7 @@ set grepformat=%f:%l:%c:%m,%f:%l:%m
 set relativenumber
 
 "" Set the standard yank register to the godsdamned normal clipboard
-"" set clipboard=unnamedplus
+set clipboard=unnamedplus
 
 " Always allow me to see the dang ruler
 set laststatus=2
@@ -272,6 +281,14 @@ if has("nvim-0.6")
   Plug 'nvim-treesitter/playground'
   "" Abuses tree sitter for pretty context colors
   Plug 'lukas-reineke/indent-blankline.nvim'
+  "" auto-complete + snippets
+  "" main one
+  Plug 'ms-jpq/coq_nvim', {'branch': 'coq'}
+  "" 9000+ Snippets
+  Plug 'ms-jpq/coq.artifacts', {'branch': 'artifacts'}
+  " lua & third party sources -- See https://github.com/ms-jpq/coq.thirdparty
+  "" Plug 'ms-jpq/coq.thirdparty', {'branch': '3p'}
+
 endif
 
 
@@ -422,6 +439,15 @@ function! PlugLoaded(name)
     return has_key(g:plugs, a:name)
 endfunction
 
+if PlugLoaded('copilot.vim')
+  "" C-] ignores, C-µ accepts!
+  imap <silent><script><expr> <C-µ> copilot#Accept("\<CR>")
+  let g:copilot_no_tab_map = v:true
+endif
+
+if PlugLoaded('coq_nvim')
+  let g:coq_settings = { 'auto_start': 'shut-up' }
+endif
 
 if executable('emoji-fzf')
   " See: https://github.com/noahp/emoji-fzf 
@@ -440,9 +466,16 @@ endif
 
 
 if PlugLoaded('animate.vim')
+  "" Doesn't animate the damned window if it's there's only one
+  function! UpDown(delta)
+    if winnr('$') == 1
+      return
+    endif
+    call animate#window_delta_height(a:delta)
+  endfunction
   "" SMOOTH AF
-  nnoremap <silent> <C-Up>    :call animate#window_delta_height(10)<CR>
-  nnoremap <silent> <C-Down>  :call animate#window_delta_height(-10)<CR>
+  nnoremap <silent> <C-Up>    :call UpDown(10)<CR>
+  nnoremap <silent> <C-Down>  :call UpDown(-10)<CR>
   nnoremap <silent> <C-Left>  :call animate#window_delta_width(10)<CR>
   nnoremap <silent> <C-Right> :call animate#window_delta_width(-10)<CR>
 endif
@@ -546,19 +579,19 @@ endif
 " Uses the same controls as ale. But uses neovims built-in lsp
 if PlugLoaded("nvim-lspconfig")
 
-  nnoremap <silent> <Leader>d :LspDetail<CR>
+  nnoremap <Leader>d :LspDetail<CR>
   " NOT WORKING YO
   " inoremap <buffer><silent> <C-y> <C-y><Cmd>lua vim.lsp.buf.hover()<CR>
-  nnoremap <silent> <Leader>h :LspHover<CR>
-  nnoremap <silent> <Leader>H :LspSignatureHelp<CR>
+  nnoremap <Leader>h :LspHover<CR>
+  nnoremap <Leader>H :LspSignatureHelp<CR>
   "" Follow  vim convention instead of <leader>gg
   "" Remember - <C-o> to go back! I always forget lol
-  nnoremap <silent> <Leader>gg :LspDef<CR>
-  nnoremap <silent> <Leader>f :LspFormatting<CR>
+  nnoremap <Leader>gg :LspDef<CR>
+  nnoremap <Leader>f :LspFormatting<CR>
   "" navigation
   nnoremap <Leader>gn :LspDiagNext<CR>
   nnoremap <Leader>gp :LspDiagPrev<CR>
-  nnoremap <silent> <Leader>gr :LspFindReferences<CR>
+  nnoremap <Leader>gr :LspFindReferences<CR>
 
   nnoremap <leader>rn :LspRename<CR>
 
