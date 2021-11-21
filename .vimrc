@@ -446,7 +446,7 @@ if PlugLoaded('copilot.vim')
 endif
 
 if PlugLoaded('coq_nvim')
-  let g:coq_settings = { 'auto_start': 'shut-up' }
+  let g:coq_settings = { 'auto_start': 'shut-up', 'keymap.jump_to_mark': ''}
 endif
 
 if executable('emoji-fzf')
