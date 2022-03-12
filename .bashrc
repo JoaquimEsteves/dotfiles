@@ -129,14 +129,20 @@ fi
 #                                                                              #
 ################################################################################
 
+# Node Version Manager
 export NVM_DIR="$HOME/.nvm"
 # shellcheck source=/dev/null
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm
 # shellcheck source=/dev/null
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion" # This loads nvm bash_completion
 
-# yarn's global bin package
-export PATH="$PATH:~/.yarn/bin"
+# yarn's global bin folder
+[ -d ~/.yarn/bin ] && export PATH="$PATH:~/.yarn/bin"
+# Go's standard bin
+[ -d /usr/local/go/bin ] && export PATH=$PATH:/usr/local/go/bin
+# Locally installed Go bins
+# Generally with go install `whatever`
+[ -d ~/go/bin ] && export PATH=$PATH:~/go/bin
 
 # export local .hosts to /etc/host
 export HOSTALIASES="$HOME/.hosts"
@@ -148,6 +154,7 @@ eval "$(zoxide init bash)"
 # (Don't ask me how this works...)
 PS1=${PS1%?}
 PS1=${PS1%?}\n'$ '
+
 #### CUSTOM FUNCTIONS ####
 
 if [ -f ~/.bash_functions ]; then
@@ -160,6 +167,7 @@ export DOTNET_CLI_TELEMETRY_OPTOUT=1
 
 # use vi
 export EDITOR=vim
+
 ###### AZERTY KEYBOARD SHENANIGANS ######
 #                                       #
 # Stupid bloody azerty keyboards are    #
@@ -192,7 +200,7 @@ export EDITOR=vim
 #
 #    # Directories under ~/github that match `fzf`
 #    cd ~/github/fzf**<TAB>
-export FZF_COMPLETION_TRIGGER='$$'
+# export FZF_COMPLETION_TRIGGER='$$'
 
 # Setup Caps locks => escape key
 setxkbmap -option caps:escape
@@ -234,8 +242,10 @@ _fzf_compgen_dir() {
 # pyenv to manage multiple python versions 
 [ -x "$(command -v pyenv)" ] && eval "$(pyenv virtualenv-init -)" 
 
-PATH="/home/lab-ubuntu/perl5/bin${PATH:+:${PATH}}"; export PATH;
-PERL5LIB="/home/lab-ubuntu/perl5/lib/perl5${PERL5LIB:+:${PERL5LIB}}"; export PERL5LIB;
-PERL_LOCAL_LIB_ROOT="/home/lab-ubuntu/perl5${PERL_LOCAL_LIB_ROOT:+:${PERL_LOCAL_LIB_ROOT}}"; export PERL_LOCAL_LIB_ROOT;
-PERL_MB_OPT="--install_base \"/home/lab-ubuntu/perl5\""; export PERL_MB_OPT;
-PERL_MM_OPT="INSTALL_BASE=/home/lab-ubuntu/perl5"; export PERL_MM_OPT;
+
+# Perl crap
+[ -d ~/perl5/bin ] && export PATH=$PATH:~/perl5/bin
+PERL5LIB="~/perl5/lib/perl5${PERL5LIB:+:${PERL5LIB}}"; export PERL5LIB;
+PERL_LOCAL_LIB_ROOT="~/perl5${PERL_LOCAL_LIB_ROOT:+:${PERL_LOCAL_LIB_ROOT}}"; export PERL_LOCAL_LIB_ROOT;
+PERL_MB_OPT="--install_base \"~/perl5\""; export PERL_MB_OPT;
+PERL_MM_OPT="INSTALL_BASE=~/perl5"; export PERL_MM_OPT;

@@ -21,7 +21,7 @@ alias update-upgrade="please apt update && please apt upgrade"
 # (it actually tries to use the sensible choice for any file you try to open)
 alias explorer="xdg-open "
 # nvim is good
-alias vim="nvim "
+# alias vim="nvim "
 # Philipp's funny little emoji picker with fzf
 #alias emoj="emoji-fzf preview \
 #	  | fzf --preview 'emoji-fzf get --name {1}' \

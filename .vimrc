@@ -111,6 +111,8 @@ set relativenumber
 "" Set the standard yank register to the godsdamned normal clipboard
 "" set clipboard=unnamedplus
 
+"" Make tabs look like 4 spaces visually
+set tabstop=4
 " Always allow me to see the dang ruler
 set laststatus=2
 " Search goodness!
@@ -460,6 +462,8 @@ if PlugLoaded('gruvbox')
 
   "" Setup pretty colors :)
   hi! link TSVariable GruvboxBlue
+  hi! link TSFunction GruvboxYellow
+  hi! link TSMethod GruvboxYellow
   hi! link Identifier GruvboxAqua
   hi! link Special GruvboxGreen
   hi! link String GruvboxOrange

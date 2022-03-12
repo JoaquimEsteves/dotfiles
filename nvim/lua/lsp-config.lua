@@ -1,5 +1,5 @@
--- Includes both lsp and tree-sitter config
--- They go well together :)
+-- Badly hacked together LSP setup.
+-- Don't copy this, it's a mess.
 
 local nvim_lsp = require('lspconfig')
 require('lsp_signature').on_attach()
@@ -14,7 +14,7 @@ local function ts_organize_imports()
   vim.lsp.buf.execute_command(params)
 end
 
- -- on_attach defined here. With the maps being defined elsewhere
+ -- on_attach defined here. With the maps being defined in .vimrc
 local on_attach = function(client, bufnr)
     local buf_map = vim.api.nvim_buf_set_keymap
     local function buf_set_option(...)
@@ -62,8 +62,9 @@ local formatFiletypes = {
     typescript = "prettier",
     typescriptreact = "prettier",
     -- yaml = "prettier",
-    -- json = "prettier",
-    -- sh = "shfmt",
+    json = "prettier",
+    sh = "shfmt",
+    python = "black",
 }
 
 
@@ -91,7 +92,8 @@ local linters = {
 
 local formatters = {
     prettier = {command = "prettier", args = {"--stdin-filepath", "%filepath"}},
-    -- shfmt = {command = "shfmt", args = {"-filename", "%filepath", '-i','2','-ci','-bn' }}
+    black = {command = "black", args = {"--line-length", "120", "--quiet", "%filepath"}},
+    shfmt = {command = "shfmt", args = {"-filename", "%filepath", '-i','2','-ci','-bn' }}
 }
 
 nvim_lsp.diagnosticls.setup {
@@ -104,6 +106,10 @@ nvim_lsp.diagnosticls.setup {
         formatFiletypes = formatFiletypes
     }
 }
+
+
+nvim_lsp.pyright.setup{ on_attach = on_attach }
+nvim_lsp.gopls.setup{ on_attach = on_attach }
 
 nvim_lsp.tsserver.setup {
     on_attach = function(client)
