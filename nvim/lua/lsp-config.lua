@@ -139,3 +139,6 @@ nvim_lsp.tsserver.setup(coq.lsp_ensure_capabilities {
 nvim_lsp.html.setup(coq.lsp_ensure_capabilities { capabilities = capabilities })
 nvim_lsp.cssls.setup(coq.lsp_ensure_capabilities { capabilities = capabilities })
 
+ -- Python
+nvim_lsp.pyright.setup{ on_attach = on_attach }
+

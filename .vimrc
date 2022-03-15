@@ -251,6 +251,7 @@ Plug 'airblade/vim-gitgutter', { 'do': function('NoAutoGutter') }
 Plug 'kien/rainbow_parentheses.vim'
 " Press F, go flying!
 Plug 'easymotion/vim-easymotion'
+Plug 'chrisbra/Colorizer'
 
 
 
@@ -273,6 +274,10 @@ if has("nvim-0.5")
   Plug 'ray-x/lsp_signature.nvim'
   Plug 'kosayoda/nvim-lightbulb'
   Plug 'gfanto/fzf-lsp.nvim'
+  "" TLDR: Doesn't fuckin work
+  "" :ColorizerAttachToBuffer
+  "" :ColorizerDetachFromBuffer
+  "" Plug 'norcalli/nvim-colorizer.lua'
 endif
 
 if has("nvim-0.6")
@@ -441,14 +446,15 @@ function! PlugLoaded(name)
     return has_key(g:plugs, a:name)
 endfunction
 
-if PlugLoaded('copilot.vim')
-  "" C-] ignores, C-µ accepts!
-  imap <silent><script><expr> <C-µ> copilot#Accept("\<CR>")
-  let g:copilot_no_tab_map = v:true
-endif
+" COMMENTED: DOESN'T FUCKIN' WORK NOW DOES IT?
+" if PlugLoaded('copilot.vim')
+"   "" C-] ignores, C-µ accepts!
+"   imap <silent><script><expr> <C-µ> copilot#Accept("\<CR>")
+"   let g:copilot_no_tab_map = v:true
+" endif
 
 if PlugLoaded('coq_nvim')
-  let g:coq_settings = { 'auto_start': 'shut-up', 'keymap.jump_to_mark': ''}
+  let g:coq_settings = { 'keymap.jump_to_mark': ''}
 endif
 
 if executable('emoji-fzf')
