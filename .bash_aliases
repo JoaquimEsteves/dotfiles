@@ -144,3 +144,4 @@ alias preview="fzf --preview '/usr/bin/batcat --color \"always\" {}'"
 # Example: pbox -s 40x8
 alias pbox="boxes -s 79x5 -a c "
 alias unicornbox="boxes -a c -d unicornsay "
+alias record_screen="ffmpeg -framerate 25 -f x11grab -i :1 -f pulse -ac 2 -i default output.mp4"

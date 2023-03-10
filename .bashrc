@@ -128,6 +128,7 @@ fi
 #                                 CUSTOM SHIT                                  #
 #                                                                              #
 ################################################################################
+export DO_NOT_TRACK=1
 
 # Node Version Manager
 export NVM_DIR="$HOME/.nvm"

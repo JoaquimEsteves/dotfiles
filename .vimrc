@@ -35,12 +35,18 @@ map Q <Nop>
 cnoremap <C-a> <Home>
 cnoremap <C-e> <End>
 cnoremap <C-d> <Del>
+inoremap <C-a> <Home>
+inoremap <C-e> <End>
+inoremap <C-d> <Del>
 " back one word
 cnoremap <M-b> <S-Left>
+inoremap <M-b> <S-Left>
 " forward one word
 cnoremap <M-f> <S-Right>
+inoremap <M-f> <S-Right>
 " Delete word forward
 cnoremap <M-d> <S-Right><C-w>
+inoremap <M-d> <S-Right><C-w>
 " Open VIM, in VIM. Short cut is now the same as in bash
 cnoremap <C-x><C-e> <C-f>
 
@@ -60,7 +66,6 @@ nnoremap <C-l> <C-w>l
 " nnoremap <silent> [f :lprevious<CR>
 " nnoremap <silent> ]f :lnext<CR>
 
-
 " Clear highlighting by mashing escape in normal mode
 nnoremap <silent><esc> :noh<return><esc>
 nnoremap <silent><esc>^[ <esc>^[
@@ -72,7 +77,16 @@ vnoremap x "_x
 
 " replace currently selected text with default register
 " without yanking it
-vnoremap <leader>p "_dP
+" Note: That I've switched around the meaning of p and P.
+vnoremap <leader>p "_c<C-o>P<Esc>
+vnoremap <leader>P "_c<C-o>P<Esc>
+
+"" REMOVE ME
+
+"" FULL LINE
+"" pre tweak me post
+
+
 
 "" GENERAL CONFIGURATION
 
@@ -81,6 +95,8 @@ runtime macros/matchit.vim
 " let matchit handle it
 let c_no_curly_error=1
 let c_no_bracket_error=1
+
+let g:netrw_keepdir=0
 
 
 " Enable bash aliases!
@@ -91,12 +107,24 @@ let $BASH_ENV = "~/.bash_aliases"
 set ignorecase
 set smartcase
 
+"" Folding!
+"" By default, fold through indents
+"" But set the default foldlevel to 99, so we don't start with everything
+"" hidden away
+set foldmethod=indent
+set foldlevel=99
+
+"" Tell the preview menu to bugger off
+set completeopt=menuone,noselect,noinsert
 "" Autoload file changes.
 set autoread
 
 "" Save undo changes somewhere on /tmp
 set undofile
-
+if has('nvim')
+  "" Set the swap files to the vim default
+  set directory=.,~/tmp,/var/tmp,/tmp
+endif
 
 "" MORE UPDATES YO
 set updatetime=100
@@ -110,12 +138,16 @@ set confirm
 
 
 "" Set ripgrep as the default vimgrep
-set grepprg=rg\ --vimgrep\ --smart-case\ --hidden\ -g\ \'!.git\/'
-set grepformat=%f:%l:%c:%m,%f:%l:%m
+if executable('rg')
+  set grepprg=rg\ --vimgrep\ --smart-case\ --hidden\ -g\ \'!.git\/'
+  set grepformat=%f:%l:%c:%m,%f:%l:%m
+endif
 
 "" No more silly guessword! `8j` is now visually represented!!! This shit's
 "" bananas. I love it
 set relativenumber
+"Show line numbers (next to relativenumber)
+set number
 
 "" Set the standard yank register to the godsdamned normal clipboard
 set clipboard=unnamedplus
@@ -129,8 +161,6 @@ set laststatus=2
 set incsearch "search as you type
 " Highlight Search
 set hlsearch  
-"how line numbers
-set number
 " Show file stats
 set ruler
 
@@ -145,6 +175,26 @@ filetype plugin indent on
 
 " set t_Co=256
 set background=dark
+
+
+"  ______________________________________________________________________
+" /                                                                      \
+" |                            Auto Commands                             |
+" \________________________________________________________________  __'\
+"                                                                  |/   \\
+"                                                                   \    \\  .
+"                                                                        |\\/|
+"                                                                        / " '\
+"                                                                        . .   .
+"                                                                       /    ) |
+"                                                                      '  _.'  |
+"                                                                      '-'/    \
+" 
+"
+
+" https://fosstodon.org/@yaeunerd/109828668917540080
+" Auto resizes windows when vim's size changes
+autocmd VimResized * wincmd =
 
 "  _____________________________________________________________________
 " /                                                                     \
@@ -165,6 +215,22 @@ call plug#begin('~/.vim/plugged')
 "" COLORS
 
 Plug 'morhetz/gruvbox'
+
+function! FixGruvColors()
+  "" Tweaks to the coloring
+  hi! link TSVariable GruvboxBlue
+  hi! link TSFunction GruvboxYellow
+  hi! link TSMethod GruvboxYellow
+  hi! link Identifier GruvboxAqua
+  hi! link Special GruvboxGreen
+  hi! link String GruvboxOrange
+  hi! link Include GruvboxRed
+  hi! Function ctermfg=3
+  hi! link Delimiter Noise
+  hi! link TSStringRegex GruvBoxRed 
+  hi! link TSKeywordReturn GruvBoxPurple
+endfunction
+
 Plug 'altercation/vim-colors-solarized'
 Plug 'kyazdani42/blue-moon'
 Plug 'fenetikm/falcon'
@@ -174,32 +240,23 @@ Plug 'bluz71/vim-nightfly-guicolors'
 "" :help xterm-color-table
 Plug 'guns/xterm-color-table.vim'
 
+"" Zen mode for vim
+"" Usage: 
+"" :Goyo
+"" 
+""     Toggle Goyo
+"" 
+"" :Goyo [dimension]
+"" 
+""     Turn on or resize Goyo
+"" 
+"" :Goyo!
+Plug 'junegunn/goyo.vim'
 
-Plug 'camspiers/animate.vim'
+
+" Plug 'camspiers/animate.vim'
 Plug 'camspiers/lens.vim'
 
-"" Typescript - React stuff
-
-"" SYNTAX
-"" way too bloody many syntax highlighters
-"" I'm not happy with either...
-"" let js_files = [ 'javascript', 'javascriptreact' ]
-"" let ts_files = [ 'typescript', 'typescriptreact' ]
-"" autocmd FileType javascriptreact set syntax=typescriptreact
-"" Plug 'HerringtonDarkholme/yats.vim'
-"" Plug 'styled-components/vim-styled-components', { 'branch': 'main' }
-
-
-"" Plug 'pangloss/vim-javascript'
-"" Plug 'maxmellon/vim-jsx-pretty'
-
-"" Plug 'pangloss/vim-javascript', { 'for': js_files }
-"" Plug 'maxmellon/vim-jsx-pretty', { 'for': js_files } 
-"" Plug 'leafgarland/typescript-vim', { 'for': ts_files }
-"" Plug 'peitalin/vim-jsx-typescript', { 'for': ts_files }
-
-"" If the need arises...
-"" Plug 'jparise/vim-graphql'
 
 "" General formatter
 let ale_compatible = [ 'sh', 'css', 'sh', 'yaml' ]
@@ -218,6 +275,29 @@ Plug 'tpope/vim-commentary'
 "" Fancy way to do search
 "" `:%Subvert/facilit{y,ies}/building{,s}/g`
 Plug 'tpope/vim-abolish'
+
+
+"" use gS to turn this:
+"" <div id="foo">bar</div>
+"" 
+"" Into this:
+"" 
+"" <div id="foo">
+""   bar
+"" </div>
+"" use gJ to do the opposite!
+Plug 'AndrewRadev/splitjoin.vim'
+"" use :Tab/|
+"" FROM
+"" |start|eat|left|
+"" |12|5|7|
+"" |20|5|15|
+"" INTO
+"" | start | eat | left |
+"" | 12    | 5   | 7    |
+"" | 20    | 5   | 15   |
+"" HELP: http://vimcasts.org/episodes/aligning-text-with-tabular-vim/
+Plug 'godlygeek/tabular'
 "" Use fuzzy search!
 "" https://github.com/junegunn/fzf.vim
 if executable('fzf')
@@ -316,10 +396,16 @@ highlight SignatureMarkText ctermfg=Red ctermbg=235
 "                                                                     '  _.'  |
 "                                                                     '-'/    \
 
+command! MakeTags !ctags -R .
 command! OpenVimRc :tabnew ~/.vimrc
+command! OpenLspRc :tabnew ~/Projects/dotfiles/nvim/lua/lsp-config.lua
 command! ClearColumn :set colorcolumn&
 command! AddColumn :set colorcolumn=80,120
 command! ToggleSmartCase :set smartcase!
+
+"" Command I kept forgetting
+"" For future reference: <C-W> T
+command! MoveToTab :wincmd T
 
 " See the difference between the current buffer and the original file
 command! DiffOrig vert new | set bt=nofile | r ++edit # | 0d_ | diffthis
@@ -334,6 +420,10 @@ endfunction
 
 
 function! Redir(cmd)
+  """ Redirects the output of any command over to it's own split
+  """ Usage:
+  """   :call Redir('!pylint %')	
+  """
     redir => output
         silent! execute(a:cmd )
     redir END
@@ -380,19 +470,6 @@ function! FixTSRainbow()
 endfunction
 
 
-
-"" I FUCKING HATE VIM SCRIPT OMG
-"" function! CallSort() range
-""     " Get the line and column of the visual selection marks
-""     let [lnum1, col1] = getpos("'<")[1:2]
-""     let [lnum2, col2] = getpos("'>")[1:2]
-""
-""     " Get all the lines represented by this range
-""     let lines = getline(lnum1, lnum2)
-""   execute ":!echo " . join(lines, "\t") . "| xargs -n1 | sort"
-"" endfunction
-
-"" a b c a
 
 ""  ______________________________
 "" /                              \
@@ -441,14 +518,14 @@ function! PlugLoaded(name)
     return has_key(g:plugs, a:name)
 endfunction
 
-if PlugLoaded('copilot.vim')
-  "" C-] ignores, C-µ accepts!
-  imap <silent><script><expr> <C-µ> copilot#Accept("\<CR>")
-  let g:copilot_no_tab_map = v:true
-endif
 
 if PlugLoaded('coq_nvim')
-  let g:coq_settings = { 'auto_start': 'shut-up', 'keymap.jump_to_mark': ''}
+  " Keybindings
+  ino <silent><expr> <Esc>   pumvisible() ? "\<C-e><Esc>" : "\<Esc>"
+  ino <silent><expr> <C-c>   pumvisible() ? "\<C-e><C-c>" : "\<C-c>"
+  ino <silent><expr> <BS>    pumvisible() ? "\<C-e><BS>"  : "\<BS>"
+  ino <silent><expr> <CR>    pumvisible() ? (complete_info().selected == -1 ? "\<C-e><CR>" : "\<C-y>") : "\<CR>"
+  let g:coq_settings = { 'keymap.jump_to_mark': '', "keymap.recommended": v:false}
 endif
 
 if executable('emoji-fzf')
@@ -466,6 +543,12 @@ if executable('emoji-fzf')
 	\ })
 endif
 
+
+
+if PlugLoaded('goyo.vim')
+  " let g:goyo_linenr = 1
+  " let g:goyo_width = '50%'
+endif
 
 if PlugLoaded('animate.vim')
   "" Doesn't animate the damned window if it's there's only one
@@ -516,6 +599,7 @@ if PlugLoaded('nerdtree')
   nmap <silent> <C-n> :call NERDTreeToggleInCurDir()<CR>
 endif
 
+
 if PlugLoaded('gruvbox')
   colorscheme gruvbox
 
@@ -536,21 +620,13 @@ endif
 
 
 if PlugLoaded('vim-gitgutter')
-  let g:gitgutter_sign_added = '✚'
-  let g:gitgutter_sign_modified = '✹'
+  let g:gitgutter_sign_added = '+'
+  let g:gitgutter_sign_modified = '*'
   let g:gitgutter_sign_removed = '-'
   let g:gitgutter_sign_removed_first_line = '-'
   let g:gitgutter_sign_modified_removed = '-'
 endif
 
-
-if PlugLoaded('vim-easymotion')
-  " Enable default maps
-  " See `help easymotion.txt` -> Default Mappings
-  "" let g:EasyMotion_do_mapping = 1
-  "" nnoremap F <NOP>
-  "" nmap F <Plug>(easymotion-prefix)
-endif
 
 if PlugLoaded('fzf.vim')
 	let $FZF_DEFAULT_COMMAND = 'fd --type f'
@@ -571,7 +647,7 @@ if PlugLoaded('fzf.vim')
 	"" 	C-x => Tmux vertical
 	""   	C-v => Tmux horizontal
 	"" Classic Ctrl-F to search lines in opened buffers
-	nnoremap <C-F> :Lines<CR>
+	nnoremap <C-F> :BLines<CR>
 	"" use good ol' rip grep
 	nnoremap <M-f> :RG<CR>
 	"" Search for files with git ls-files
@@ -615,6 +691,7 @@ endif
 if PlugLoaded('ale')
   "" Follow [Google's shell style](https://google.github.io/styleguide/shellguide.html)
   let g:ale_sh_shfmt_options = '-i 2 -ci -bn'
+  let g:ale_enabled = 0
 
   let g:ale_fixers = {
 	\   '*': ['remove_trailing_lines', 'trim_whitespace'],
@@ -636,7 +713,7 @@ if PlugLoaded('ale')
   let g:ale_cursor_detail = 0
   let g:ale_hover_cursor = 1
   let g:ale_completion_autoimport = 1
-  let g:ale_echo_msg_format = '🔥 [%linter%] %code: %%s'
+  let g:ale_echo_msg_format = '🔥 [ALE+%linter%] %code: %%s'
 
   "   nnoremap <Leader>d :ALEDetail<CR>
   "   "" By default, lints only on save
