@@ -5,7 +5,7 @@ local nvim_lsp = require("lspconfig")
 local coq = require("coq")
 
 vim.diagnostic.config({
-  source = true
+	source = true,
 })
 
 --Enable (broadcasting) snippet capability for completion
@@ -128,7 +128,6 @@ local linters = {
 		},
 	},
 	mypy = {
-		sourceName = "mypy",
 		command = "mypy",
 		args = {
 			"--follow-imports=silent",
@@ -169,19 +168,6 @@ local formatters = {
 		args = { "-" },
 	},
 }
-
--- nvim_lsp.diagnosticls.init {
---   -- Use a list of default configurations
---   -- set by this plugin
---   -- (Default: false)
---   default_config = false,
-
---   -- Set to false if formatting is not needed at all,
---   -- any formatter provided will be ignored
---   -- (Default: true)
---   source = true,
---   sourceName = true,
--- }
 
 nvim_lsp.diagnosticls.setup({
 	on_attach = on_attach,

@@ -107,6 +107,9 @@ let $BASH_ENV = "~/.bash_aliases"
 set ignorecase
 set smartcase
 
+"" Easily find your line
+set cursorline
+
 "" Folding!
 "" By default, fold through indents
 "" But set the default foldlevel to 99, so we don't start with everything
@@ -258,6 +261,23 @@ Plug 'junegunn/goyo.vim'
 Plug 'camspiers/lens.vim'
 
 
+" CSV
+" Main thing is: :RainbowAlign and :RainbowShrink
+Plug 'mechatroner/rainbow_csv'
+
+"" Move things!
+"" Usage:
+"" <A-k>   Move current line/selection up
+"" <A-j>   Move current line/selection down
+"" <A-h>   Move current character/selection left
+"" <A-l>   Move current character/selection right
+"" Works best with visual mode
+Plug 'matze/vim-move'
+
+" Neat css colors (mayyyyyyyybe)
+"Plug 'norcalli/nvim-colorizer.lua'
+
+
 "" General formatter
 let ale_compatible = [ 'sh', 'css', 'sh', 'yaml' ]
 Plug 'dense-analysis/ale', { 'for': ale_compatible  } 
@@ -396,12 +416,15 @@ highlight SignatureMarkText ctermfg=Red ctermbg=235
 "                                                                     '  _.'  |
 "                                                                     '-'/    \
 
-command! MakeTags !ctags -R .
+command! MakeTags !ctags -R --exclude=node_modules  --exclude=*.json .
 command! OpenVimRc :tabnew ~/.vimrc
 command! OpenLspRc :tabnew ~/Projects/dotfiles/nvim/lua/lsp-config.lua
 command! ClearColumn :set colorcolumn&
 command! AddColumn :set colorcolumn=80,120
 command! ToggleSmartCase :set smartcase!
+command! Shfmt !shfmt -w -i 2 -ci -bn %
+command! CopyFileName let @+ = expand('%')
+
 
 "" Command I kept forgetting
 "" For future reference: <C-W> T
@@ -548,6 +571,12 @@ endif
 if PlugLoaded('goyo.vim')
   " let g:goyo_linenr = 1
   " let g:goyo_width = '50%'
+endif
+
+
+if PlugLoaded('mechatroner/rainbow_csv')
+  command! ShrinkCSV :RainbowShrink
+  command! AlignCSV :RainblowAlign
 endif
 
 if PlugLoaded('animate.vim')

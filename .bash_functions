@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+
 # rename terminal window title
 function set-title() {
   if [[ -z "$ORIG" ]]; then
@@ -45,6 +46,15 @@ function unicode-fzf() {
   unicode --brief --max 0 "$@" | fzf | awk '{ print $1 }'
 }
 
+function ascii-goat() {
+
+  echo '(_('
+  echo "/_/'_____/)"
+  echo '"  |      |'
+  echo '   |""""""|'
+
+}
+
 # These should really be their own git-something.sh functions
 # But I'm lazy atm
 
@@ -75,4 +85,41 @@ _gh() {
   git log --date=short --format="%C(green)%C(bold)%cd %C(auto)%h%d %s (%an)" --graph --color=always "$@" \
     | fzf_with_controls 'grep -o "[a-f0-9]\{7,\}" <<< {} | xargs git show --color=always | head -500' \
     | command grep -o "[a-f0-9]\{7,\}"
+}
+
+fkill() {
+  local pid
+  if [ "$UID" != "0" ]; then
+    pid=$(command ps -f -u $UID | sed 1d | fzf -m | awk '{print $2}')
+  else
+    pid=$(command ps -ef | sed 1d | fzf -m | awk '{print $2}')
+  fi
+
+  if [ "x$pid" != "x" ]; then
+    echo $pid | xargs kill -${1:-9}
+  fi
+}
+
+killport() {
+  # source https://news.ycombinator.com/item?id=35698782
+  lsof -ti :"$1" | xargs kill -9
+}
+
+########################################
+#                                      #
+#           FUZZY SEARCH FUN           #
+#                                      #
+########################################
+
+# Use fd (https://github.com/sharkdp/fd) instead of the default find
+# command for listing path candidates.
+# - The first argument to the function ($1) is the base path to start traversal
+# - See the source code (completion.{bash,zsh}) for the details.
+_fzf_compgen_path() {
+  fd --hidden --follow --exclude ".git" . "$1"
+}
+
+# Use fd to generate the list for directory completion
+_fzf_compgen_dir() {
+  fd --type d --hidden --follow --exclude ".git" . "$1"
 }

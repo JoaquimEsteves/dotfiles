@@ -50,6 +50,7 @@ alias rcat="command cat "
 # FD
 # use fd as a modern replacement for find!
 alias fd="/usr/bin/fdfind "
+alias fd_all="fd --hidden --no-ignore "
 alias find="fd "
 alias rfind="command find "
 
