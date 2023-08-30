@@ -274,6 +274,41 @@ Plug 'mechatroner/rainbow_csv'
 "" Works best with visual mode
 Plug 'matze/vim-move'
 
+
+"" An indent level object!
+"" Usage:
+"" <count>ai 	An Indentation level and line above.
+"" <count>ii 	Inner Indentation level (no line above).
+"" <count>aI 	An Indentation level and lines above/below.
+"" Example:
+""
+"" 0 | if foo == "bar":
+"" 1 |    print(foo)
+"" 2 |    print(foo)
+"" 3 |    print(foo)
+"" 4 |    print(foo)
+"" 5 |    print(foo)
+""
+"" Typing `dii` on line 1-4 would result in
+""
+"" 0 | if foo == "bar":
+""
+""
+"" Typing `dai` on line 1-4 would result in:
+""
+"" 0 | <nothing>
+""
+"" `aI` is only useful for funny languages ALGOL like languages that have a word after an if, like bash:
+""
+"" 1 | if [ my_test ]; then
+"" 2 |   echo 'foo'
+"" 3 |   echo 'foo'
+"" 4 |   echo 'foo'
+"" 5 |   echo 'foo'
+"" 6 | fi
+"" Typing daI would delete lines 1-6
+Plug 'urxvtcd/vim-indent-object'
+
 " Neat css colors (mayyyyyyyybe)
 "Plug 'norcalli/nvim-colorizer.lua'
 
@@ -376,7 +411,7 @@ if has("nvim-0.5")
 endif
 
 if has("nvim-0.6")
-  Plug 'github/copilot.vim'
+  "" Plug 'github/copilot.vim'
   Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
   Plug 'nvim-treesitter/nvim-treesitter-textobjects'
   Plug 'p00f/nvim-ts-rainbow'
@@ -541,6 +576,20 @@ function! PlugLoaded(name)
     return has_key(g:plugs, a:name)
 endfunction
 
+
+if PlugLoaded('vim-indent-object')
+  xmap ii <Plug>(indent-object_linewise-none)
+  omap ii <Plug>(indent-object_linewise-none)
+
+  xmap ai <Plug>(indent-object_linewise-start)
+  omap ai <Plug>(indent-object_linewise-start)
+
+  xmap iI <Plug>(indent-object_linewise-end)
+  omap iI <Plug>(indent-object_linewise-end)
+
+  xmap aI <Plug>(indent-object_linewise-both)
+  omap aI <Plug>(indent-object_linewise-both)
+endif
 
 if PlugLoaded('coq_nvim')
   " Keybindings
