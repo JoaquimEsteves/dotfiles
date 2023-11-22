@@ -9,6 +9,18 @@ function set-title() {
   PS1=${ORIG}${TITLE}
 }
 
+function readable_path() {
+  tr ':' '\n' <<<"$PATH"
+}
+
+function every_binary() {
+  if [[ -x $(which exa) ]]; then
+    readable_path | xargs exa -alF --icons --header --git --extended
+  else
+    readable_path | xargs ls -la
+  fi
+}
+
 # Appropriate for lxde or such other tools
 # Uses X11 so should work on any non-wailand thing
 function set-title-x() {

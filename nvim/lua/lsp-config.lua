@@ -78,7 +78,7 @@ local formatFiletypes = {
 	-- yaml = "prettier",
 	json = "prettier",
 	sh = "shfmt",
-	python = "black",
+	python = { "black", "isort" },
 	lua = "stylua",
 }
 

@@ -96,7 +96,7 @@ runtime macros/matchit.vim
 let c_no_curly_error=1
 let c_no_bracket_error=1
 
-let g:netrw_keepdir=0
+" let g:netrw_keepdir=0
 
 
 " Enable bash aliases!
@@ -106,6 +106,10 @@ let $BASH_ENV = "~/.bash_aliases"
 "" search :)
 set ignorecase
 set smartcase
+
+
+"" Don't wrap goddamn lines of text
+set nowrap
 
 "" Easily find your line
 set cursorline
@@ -828,3 +832,10 @@ if PlugLoaded('ale')
     let g:ale_virtualtext_prefix = "🔥 "
   endif
 endif
+
+
+
+""" lsp's normal formatting will cock-up your marks
+""" So if you have some format.sh in the $PATH you can just use it
+command! Format !format.sh %
+nnoremap <Leader>gf  :Format<CR>
