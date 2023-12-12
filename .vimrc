@@ -222,20 +222,43 @@ call plug#begin('~/.vim/plugged')
 "" COLORS
 
 Plug 'morhetz/gruvbox'
+if has("nvim")
+  Plug 'RRethy/nvim-base16'
+endif
+Plug 'christianchiarulli/nvcode-color-schemes.vim'
 
 function! FixGruvColors()
   "" Tweaks to the coloring
-  hi! link TSVariable GruvboxBlue
-  hi! link TSFunction GruvboxYellow
-  hi! link TSMethod GruvboxYellow
-  hi! link Identifier GruvboxAqua
-  hi! link Special GruvboxGreen
-  hi! link String GruvboxOrange
-  hi! link Include GruvboxRed
-  hi! Function ctermfg=3
-  hi! link Delimiter Noise
-  hi! link TSStringRegex GruvBoxRed 
-  hi! link TSKeywordReturn GruvBoxPurple
+  if has("nvim-0.8")
+    hi! link @variable GruvboxBlue
+    hi! link @type GruvboxGreen
+    hi! link @constructor GruvboxGreen
+    hi! link @function GruvboxYellow
+    hi! link @function.call GruvboxYellow
+    hi! link @method GruvboxYellow
+    hi! link @identifier GruvboxAqua
+    hi! link @special GruvboxGreen
+    hi! link @string GruvboxOrange
+    hi! link @include GruvboxRed
+    hi! link @punctuation.delimiter Noise
+    hi! link @string.regex GruvBoxRed 
+    hi! link @keyword.return GruvBoxPurple
+    hi! link @field GruvboxAqua
+    "" TODO: https://gist.github.com/swarn/fb37d9eefe1bc616c2a7e476c0bc0316
+    hi! @lsp.type.parameter guifg=GruvBoxPurple
+  else
+    hi! link TSVariable GruvboxBlue
+    hi! link TSFunction GruvboxYellow
+    hi! link TSMethod GruvboxYellow
+    hi! link Identifier GruvboxAqua
+    hi! link Special GruvboxGreen
+    hi! link String GruvboxOrange
+    hi! link Include GruvboxRed
+    hi! Function ctermfg=3
+    hi! link Delimiter Noise
+    hi! link TSStringRegex GruvBoxRed 
+    hi! link TSKeywordReturn GruvBoxPurple
+  endif
 endfunction
 
 Plug 'altercation/vim-colors-solarized'
@@ -412,10 +435,10 @@ if has("nvim-0.5")
   Plug 'ray-x/lsp_signature.nvim'
   Plug 'kosayoda/nvim-lightbulb'
   Plug 'gfanto/fzf-lsp.nvim'
+  Plug 'nvim-lua/plenary.nvim'
 endif
 
 if has("nvim-0.6")
-  "" Plug 'github/copilot.vim'
   Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
   Plug 'nvim-treesitter/nvim-treesitter-textobjects'
   Plug 'p00f/nvim-ts-rainbow'
@@ -424,12 +447,11 @@ if has("nvim-0.6")
   Plug 'lukas-reineke/indent-blankline.nvim'
   "" auto-complete + snippets
   "" main one
-  Plug 'ms-jpq/coq_nvim', {'branch': 'coq'}
+  "" Plug 'ms-jpq/coq_nvim', {'branch': 'coq'}
   "" 9000+ Snippets
-  Plug 'ms-jpq/coq.artifacts', {'branch': 'artifacts'}
+  "" Plug 'ms-jpq/coq.artifacts', {'branch': 'artifacts'}
   " lua & third party sources -- See https://github.com/ms-jpq/coq.thirdparty
   "" Plug 'ms-jpq/coq.thirdparty', {'branch': '3p'}
-
 endif
 
 
@@ -486,21 +508,21 @@ function! Redir(cmd)
   """ Usage:
   """   :call Redir('!pylint %')	
   """
-    redir => output
-        silent! execute(a:cmd )
-    redir END
-    let output = split(output, "\n")
-    
-    if bufwinnr('cmd.out') >0 
-       bdelete cmd.out
-    endif
+  redir => output
+      silent! execute(a:cmd )
+  redir END
+  let output = split(output, "\n")
+  
+  if bufwinnr('cmd.out') >0 
+     bdelete cmd.out
+  endif
 
-    vnew cmd.out
-    let w:scratch = 1
-    setlocal buftype=nofile bufhidden=wipe noswapfile
-    call setline(1, output)
+  vnew cmd.out
+  let w:scratch = 1
+  setlocal buftype=nofile bufhidden=wipe noswapfile
+  call setline(1, output)
 
-    wincmd h
+  wincmd h
 endfunction
 
 "redirect any vim command output using Redir command.
@@ -684,20 +706,11 @@ endif
 
 if PlugLoaded('gruvbox')
   colorscheme gruvbox
+  call FixGruvColors()
+endif
 
-  "" Setup pretty colors :)
-  hi! link TSVariable GruvboxBlue
-  hi! link TSFunction GruvboxYellow
-  hi! link TSMethod GruvboxYellow
-  hi! link Identifier GruvboxAqua
-  hi! link Special GruvboxGreen
-  hi! link String GruvboxOrange
-  hi! link Include GruvboxRed
-  hi! Function ctermfg=3
-  hi! link Delimiter Noise
-  hi! link TSStringRegex GruvBoxRed 
-  hi! link TSKeywordReturn GruvBoxPurple
-
+if PlugLoaded('nvcode-color-schemes.vim') && !has("nvim")
+  colorscheme nvcode
 endif
 
 
@@ -711,39 +724,37 @@ endif
 
 
 if PlugLoaded('fzf.vim')
-	let $FZF_DEFAULT_COMMAND = 'fd --type f'
-	function! RipgrepFzf(query, fullscreen)
-	  let command_fmt = "rg --hidden --column --line-number --no-heading --color=always --smart-case --glob '!.git' -- %s || true"
-	  let initial_command = printf(command_fmt, shellescape(a:query))
-	  let reload_command = printf(command_fmt, '{q}')
-	  let spec = {'options': ['--phony', '--query', a:query, '--bind', 'change:reload:'.reload_command]}
-	  call fzf#vim#grep(initial_command, 1, fzf#vim#with_preview(spec), a:fullscreen)
-	endfunction
+  let $FZF_DEFAULT_COMMAND = 'fd --type f'
+  function! RipgrepFzf(query, fullscreen)
+    let command_fmt = "rg --hidden --column --line-number --no-heading --color=always --smart-case --glob '!.git' -- %s || true"
+    let initial_command = printf(command_fmt, shellescape(a:query))
+    let reload_command = printf(command_fmt, '{q}')
+    let spec = {'options': ['--phony', '--query', a:query, '--bind', 'change:reload:'.reload_command]}
+    call fzf#vim#grep(initial_command, 1, fzf#vim#with_preview(spec), a:fullscreen)
+  endfunction
 
-	"" custom ripgrep command that actually ignores .gitignore but not
-	"" hidden files :)
-	command! -nargs=* -bang RG call RipgrepFzf(<q-args>, <bang>0)
-	"" REMEMBER:
-	""      Download fzf!
-	"" 	C-t => Open in new tab
-	"" 	C-x => Tmux vertical
-	""   	C-v => Tmux horizontal
-	"" Classic Ctrl-F to search lines in opened buffers
-	nnoremap <C-F> :BLines<CR>
-	"" use good ol' rip grep
-	nnoremap <M-f> :RG<CR>
-	"" Search for files with git ls-files
-	nnoremap <C-P> :GFiles<CR>
-	"" Search _all_ files with fuzzy search
-	nnoremap <C-G> :Files<CR>
+  "" custom ripgrep command that actually ignores .gitignore but not
+  "" hidden files :)
+  command! -nargs=* -bang RG call RipgrepFzf(<q-args>, <bang>0)
+  "" REMEMBER:
+  ""      Download fzf!
+  "" 	C-t => Open in new tab
+  "" 	C-x => Tmux vertical
+  ""   	C-v => Tmux horizontal
+  "" Classic Ctrl-F to search lines in opened buffers
+  nnoremap <C-F> :BLines<CR>
+  "" use good ol' rip grep
+  nnoremap <M-f> :RG<CR>
+  "" Search for files with git ls-files
+  nnoremap <C-P> :GFiles<CR>
+  "" Search _all_ files with fuzzy search
+  nnoremap <C-G> :Files<CR>
 endif
 
 " Uses the same controls as ale. But uses neovims built-in lsp
 if PlugLoaded("nvim-lspconfig")
 
   nnoremap <Leader>d :LspDetail<CR>
-  " NOT WORKING YO
-  " inoremap <buffer><silent> <C-y> <C-y><Cmd>lua vim.lsp.buf.hover()<CR>
   nnoremap <Leader>h :LspHover<CR>
   nnoremap <Leader>H :LspSignatureHelp<CR>
   "" Follow  vim convention instead of <leader>gg

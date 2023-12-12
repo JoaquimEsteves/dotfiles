@@ -2,28 +2,17 @@
 -- Don't copy this, it's a mess.
 
 local nvim_lsp = require("lspconfig")
-local coq = require("coq")
+-- Doesn't work anymore
+-- local coq = require("coq")
 
 vim.diagnostic.config({
 	source = true,
+
 })
-
---Enable (broadcasting) snippet capability for completion
-local capabilities = vim.lsp.protocol.make_client_capabilities()
-capabilities.textDocument.completion.completionItem.snippetSupport = true
-
--- Typescript only organise Imports function
-local function ts_organize_imports()
-	local params = {
-		command = "_typescript.organizeImports",
-		arguments = { vim.api.nvim_buf_get_name(0) },
-		title = "",
-	}
-	vim.lsp.buf.execute_command(params)
-end
 
 -- on_attach defined here. With the maps being defined in .vimrc
 local on_attach = function(client, bufnr)
+	-- SEE: help lspconfig-keybindings
 	local buf_map = vim.api.nvim_buf_set_keymap
 	local function buf_set_option(...)
 		vim.api.nvim_buf_set_option(bufnr, ...)
@@ -37,21 +26,33 @@ local on_attach = function(client, bufnr)
 	buf_set_option("omnifunc", "v:lua.vim.lsp.omnifunc")
 	-- COMMANDS
 	vim.cmd("command! LspDef lua vim.lsp.buf.definition()")
-	vim.cmd("command! LspFormatting lua vim.lsp.buf.formatting()")
-	vim.cmd("command! -range LspCodeRangeAction <line1>,<line2>lua vim.lsp.buf.range_code_action()")
+
+	if vim.fn.has('nvim-0.8') == 1 then
+		vim.cmd("command! LspFormatting lua vim.lsp.buf.format()")
+		vim.cmd("command! -range LspCodeRangeAction <line1>,<line2>lua vim.lsp.buf.code_action()")
+	else
+		vim.cmd("command! LspFormatting lua vim.lsp.buf.formatting()")
+		vim.cmd("command! -range LspCodeRangeAction <line1>,<line2>lua vim.lsp.buf.range_code_action()")
+	end
 	vim.cmd("command! LspCodeAction lua vim.lsp.buf.code_action()")
 	vim.cmd("command! LspHover lua vim.lsp.buf.hover()")
 	vim.cmd("command! LspRename lua vim.lsp.buf.rename()")
-	vim.cmd("command! LspOrganize lua lsp_organize_imports()")
 	vim.cmd("command! LspFindReferences lua vim.lsp.buf.references()")
 	vim.cmd("command! LspTypeDef lua vim.lsp.buf.type_definition()")
 	vim.cmd("command! LspImplementation lua vim.lsp.buf.implementation()")
-	-- DIAGNOSTICS
-	vim.cmd("command! LspDiagPrev lua vim.lsp.diagnostic.goto_prev()")
-	vim.cmd("command! LspDiagNext lua vim.lsp.diagnostic.goto_next()")
-	vim.cmd("command! LspDetail lua vim.lsp.diagnostic.show_line_diagnostics()")
 	vim.cmd("command! LspSignatureHelp lua vim.lsp.buf.signature_help()")
-	vim.cmd("command! LspHelp lua vim.lsp.diagnostic.set_loclist()")
+	-- DIAGNOSTICS
+	if vim.fn.has('nvim-0.8') == 1 then
+		vim.cmd("command! LspDiagPrev lua vim.diagnostic.goto_prev()")
+		vim.cmd("command! LspDiagNext lua vim.diagnostic.goto_next()")
+		vim.cmd('command! LspDetail lua vim.diagnostic.open_float({scope="line"})')
+		vim.cmd("command! LspHelp lua vim.diagnostic.setloclist()")
+	else
+		vim.cmd("command! LspDiagPrev lua vim.lsp.diagnostic.goto_prev()")
+		vim.cmd("command! LspDiagNext lua vim.lsp.diagnostic.goto_next()")
+		vim.cmd("command! LspDetail lua vim.lsp.diagnostic.show_line_diagnostics()")
+		vim.cmd("command! LspHelp lua vim.lsp.diagnostic.set_loclist()")
+	end
 end
 
 -- PRETTYNESS
@@ -59,15 +60,24 @@ if vim.fn.executable("fzf") then
 	require("fzf_lsp").setup()
 end
 
+-------------------------------------------------------------------------------
+--                                                                           --
+--                               Diagnostic LS                               --
+--                                                                           --
+-------------------------------------------------------------------------------
+--
+-- See: https://github.com/iamcco/diagnostic-languageserver
+
 local filetypes = {
 	javascript = "eslint",
 	javascriptreact = "eslint",
 	typescript = "eslint",
 	typescriptreact = "eslint",
+	-- Consider adding: https://github.com/astral-sh/ruff
 	python = { "flake8", "mypy" },
 	lua,
-	-- json = "eslint",
-	-- sh = "shellcheck",
+	json = "eslint",
+	sh = "shellcheck",
 }
 
 local formatFiletypes = {
@@ -153,6 +163,29 @@ local linters = {
 			error = "error",
 		},
 	},
+	shellcheck = {
+		command = "shellcheck",
+		debounce = 100,
+		args = { "--format=gcc", "-" },
+		offsetLine = 0,
+		offsetColumn = 0,
+		sourceName = "shellcheck",
+		formatLines = 1,
+		formatPattern = {
+			"^[^:]+:(\\d+):(\\d+):\\s+([^:]+):\\s+(.*)$",
+			{
+				line = 1,
+				column = 2,
+				message = 4,
+				security = 3,
+			},
+		},
+		securities = {
+			error = "error",
+			warning = "warning",
+			note = "info",
+		},
+	},
 }
 
 local formatters = {
@@ -181,22 +214,29 @@ nvim_lsp.diagnosticls.setup({
 	},
 })
 
+-------------------------------------------------------------------------------
+--                                                                           --
+--                                 Other LS                                  --
+--                                                                           --
+-------------------------------------------------------------------------------
+
+-- Consider https://github.com/mtshiba/pylyzer
+-- nvim_lsp.pylyzer.setup({ on_attach = on_attach })
 nvim_lsp.pyright.setup({ on_attach = on_attach })
 nvim_lsp.gopls.setup({ on_attach = on_attach })
 
-nvim_lsp.tsserver.setup(coq.lsp_ensure_capabilities({
+nvim_lsp.tsserver.setup({
 	on_attach = function(client)
 		client.resolved_capabilities.document_formatting = false
 		on_attach(client)
 	end,
-	commands = {
-		LspOrganizeImports = {
-			ts_organize_imports,
-			description = "Organize Imports Through tsserver!",
-		},
-	},
-}))
+})
 
 -- HTML + CSS
-nvim_lsp.html.setup(coq.lsp_ensure_capabilities({ capabilities = capabilities }))
-nvim_lsp.cssls.setup(coq.lsp_ensure_capabilities({ capabilities = capabilities }))
+
+--Enable (broadcasting) snippet capability for completion
+local capabilities = vim.lsp.protocol.make_client_capabilities()
+capabilities.textDocument.completion.completionItem.snippetSupport = true
+
+nvim_lsp.html.setup({ capabilities = capabilities })
+nvim_lsp.cssls.setup({ capabilities = capabilities })
