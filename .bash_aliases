@@ -130,6 +130,8 @@ alias music_vis="cava"
 # I just keep forgetting the name of this damn program
 # `$ tldr arecord`
 alias music_record="arecord "
+# I always forget the fekin' command for this
+alias music_on_console="mocp"
 
 # Get the weather!
 alias weather="curl wttr.in "
@@ -144,3 +146,4 @@ alias preview="fzf --preview '/usr/bin/batcat --color \"always\" {}'"
 # Example: pbox -s 40x8
 alias pbox="boxes -s 79x5 -a c "
 alias unicornbox="boxes -a c -d unicornsay "
+alias connda="conda activate psdd-boost-1-app"

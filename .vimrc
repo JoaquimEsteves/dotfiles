@@ -91,6 +91,13 @@ let $BASH_ENV = "~/.bash_aliases"
 set ignorecase
 set smartcase
 
+""
+set completeopt=menuone,noinsert
+
+"" Sane folding
+set foldlevel=99
+set foldmethod=indent
+
 "" Autoload file changes.
 set autoread
 
@@ -162,6 +169,8 @@ set background=dark
 
 call plug#begin('~/.vim/plugged')
 
+Plug 'mechatroner/rainbow_csv'
+
 "" COLORS
 
 Plug 'morhetz/gruvbox'
@@ -175,7 +184,7 @@ Plug 'bluz71/vim-nightfly-guicolors'
 Plug 'guns/xterm-color-table.vim'
 
 
-Plug 'camspiers/animate.vim'
+" Plug 'camspiers/animate.vim'
 Plug 'camspiers/lens.vim'
 
 "" Typescript - React stuff
@@ -203,7 +212,7 @@ Plug 'camspiers/lens.vim'
 
 "" General formatter
 let ale_compatible = [ 'sh', 'css', 'sh', 'yaml' ]
-Plug 'dense-analysis/ale', { 'for': ale_compatible  } 
+Plug 'dense-analysis/ale', { 'for': ale_compatible,  'on':  'ALEToggle' } 
 "" Cute little visual things on marks!
 Plug 'kshenoy/vim-signature'
 "" TPOPE GOD
@@ -218,6 +227,8 @@ Plug 'tpope/vim-commentary'
 "" Fancy way to do search
 "" `:%Subvert/facilit{y,ies}/building{,s}/g`
 Plug 'tpope/vim-abolish'
+
+Plug 'godlygeek/tabular'
 "" Use fuzzy search!
 "" https://github.com/junegunn/fzf.vim
 if executable('fzf')
@@ -384,7 +395,21 @@ function! FixTSRainbow()
   hi! rainbowcol7 ctermfg=7
 endfunction
 
+function! TabCloseRight(bang)
+    let cur=tabpagenr()
+    while cur < tabpagenr('$')
+        exe 'tabclose' . a:bang . ' ' . (cur + 1)
+    endwhile
+endfunction
 
+function! TabCloseLeft(bang)
+    while tabpagenr() > 1
+        exe 'tabclose' . a:bang . ' 1'
+    endwhile
+endfunction
+
+command! -bang TabCloseRight call TabCloseRight('<bang>')
+command! -bang TabCloseLeft call TabCloseLeft('<bang>')
 
 "" I FUCKING HATE VIM SCRIPT OMG
 "" function! CallSort() range
@@ -584,6 +609,19 @@ if PlugLoaded('fzf.vim')
 	nnoremap <C-P> :GFiles<CR>
 	"" Search _all_ files with fuzzy search
 	nnoremap <C-G> :Files<CR>
+
+	let g:fzf_action = {
+	  \ 'ctrl-t': 'tab split',
+	  \ 'ctrl-s': 'split',
+	  \ 'ctrl-v': 'vsplit',
+	  \ 'ctrl-q': 'fill_quickfix'}
+
+	let g:fzf_lsp_action = {
+	  \ 'ctrl-t': 'tab split',
+	  \ 'ctrl-s': 'split',
+	  \ 'ctrl-v': 'vsplit'}
+	  "" Doesn't work. Use the enter key
+	  "" \ 'ctrl-q': 'fill_quickfix'}
 endif
 
 " Uses the same controls as ale. But uses neovims built-in lsp
@@ -633,16 +671,16 @@ if PlugLoaded('ale')
   "" let g:ale_lint_on_text_changed = 'never'
   "" let g:ale_lint_on_insert_leave = 0
   let g:ale_completion_enabled = 1
-  let g:ale_completion_autoimport = 1
+  let g:ale_completion_autoimport = 0
   let g:ale_completion_tsserver_remove_warnings = 1
-  let g:ale_list_vertical = 1
-  let g:ale_floating_preview = 1
+  let g:ale_list_vertical = 0
+  " let g:ale_floating_preview = 1
   "" VIM's default window looks cute already :)
   let g:ale_floating_window_border = ['│', '─', '╭', '╮', '╯', '╰']
   let g:ale_cursor_detail = 0
-  let g:ale_hover_cursor = 1
+  let g:ale_hover_cursor = 0
   let g:ale_completion_autoimport = 1
-  let g:ale_echo_msg_format = '🔥 [%linter%] %code: %%s'
+  let g:ale_echo_msg_format = 'A:🔥 [%linter%] %code: %%s'
 
   "   nnoremap <Leader>d :ALEDetail<CR>
   "   "" By default, lints only on save
