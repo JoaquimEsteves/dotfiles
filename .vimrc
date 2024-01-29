@@ -477,7 +477,7 @@ highlight SignatureMarkText ctermfg=Red ctermbg=235
 "                                                                     '  _.'  |
 "                                                                     '-'/    \
 
-command! MakeTags !ctags -R --exclude=node_modules  --exclude=*.json .
+command! MakeTags !ctags -R --exclude=node_modules  --exclude=__pycache__ --exclude=.mypy_cache --exclude=*.json .
 command! OpenVimRc :tabnew ~/.vimrc
 command! OpenLspRc :tabnew ~/Projects/dotfiles/nvim/lua/lsp-config.lua
 command! ClearColumn :set colorcolumn&
@@ -553,7 +553,21 @@ function! FixTSRainbow()
   hi! rainbowcol7 ctermfg=7
 endfunction
 
+function! TabCloseRight(bang)
+    let cur=tabpagenr()
+    while cur < tabpagenr('$')
+        exe 'tabclose' . a:bang . ' ' . (cur + 1)
+    endwhile
+endfunction
 
+function! TabCloseLeft(bang)
+    while tabpagenr() > 1
+        exe 'tabclose' . a:bang . ' 1'
+    endwhile
+endfunction
+
+command! -bang TabCloseRight call TabCloseRight('<bang>')
+command! -bang TabCloseLeft call TabCloseLeft('<bang>')
 
 ""  ______________________________
 "" /                              \
