@@ -1,0 +1,105 @@
+if &compatible
+  set nocompatible
+endif
+
+set number
+set relativenumber
+
+set tabstop=8 softtabstop=0
+set expandtab
+
+set list
+set listchars=tab:>-
+
+"" use gQ instead. Such a promiment key for such a minor feature is a pain in the ass.
+map Q <Nop>
+
+
+"" Mappings!
+
+"" set <Leader> to <Space>
+let mapleader = " "
+
+"" Command Line Editing Shortcuts
+"" Use emacs style editing
+cnoremap <C-a> <Home>
+cnoremap <C-e> <End>
+cnoremap <C-d> <Del>
+inoremap <C-a> <Home>
+inoremap <C-e> <End>
+inoremap <C-d> <Del>
+" back one word
+cnoremap <M-b> <S-Left>
+inoremap <M-b> <S-Left>
+" forward one word
+cnoremap <M-f> <S-Right>
+inoremap <M-f> <S-Right>
+" Delete word forward
+cnoremap <M-d> <S-Right><C-w>
+inoremap <M-d> <S-Right><C-w>
+" Open VIM, in VIM. Short cut is now the same as in bash
+cnoremap <C-x><C-e> <C-f>
+
+" Clear highlighting by mashing escape in normal mode
+nnoremap <silent><esc> :noh<return><esc>
+nnoremap <silent><esc>^[ <esc>^[
+
+" Hit `%` on `if` to jump to `else`.
+runtime macros/matchit.vim
+
+"" Smarc case writting! Case insensitive unless /C or a capital letter in
+"" search :)
+set ignorecase
+set smartcase
+
+"" Folding!
+"" By default, fold through indents
+"" But set the default foldlevel to 99, so we don't start with everything
+"" hidden away
+set foldmethod=indent
+set foldlevel=99
+
+"" Tell the preview menu to bugger off
+set completeopt=menuone,noselect,noinsert
+"" Autoload file changes.
+set autoread
+
+"" MORE UPDATES YO
+set updatetime=100
+"" Tells me when I'm quitting unsaved files in a nicer way
+"" really useful with `qall`
+set confirm
+
+set laststatus=2
+
+" Search goodness!
+"     Top tip - press "*" to search for the word under the cursor! Incredible
+set incsearch "search as you type
+" Highlight Search
+set hlsearch  
+" Show file stats
+set ruler
+
+" Blink cursor on error instead of beeping (grr)
+set visualbell
+
+" Encoding
+set encoding=utf-8
+
+syntax enable
+filetype plugin indent on
+
+" https://fosstodon.org/@yaeunerd/109828668917540080
+" Auto resizes windows when vim's size changes
+autocmd VimResized * wincmd =
+
+command! MakeTags !ctags -R --exclude=node_modules .
+command! OpenVimRc :tabnew ~/.vimrc
+"" For future reference: <C-W> T
+command! MoveToTab :wincmd T
+
+colorscheme darkblue
+hi! String ctermfg=red
+
+
+let g:loaded_matchparen=1
