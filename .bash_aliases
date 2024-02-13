@@ -7,6 +7,9 @@ shopt -s expand_aliases
 # Safety...
 alias rm="rm -i "
 alias rrm="command rm "
+# alias cp='cp --verbose --reflink=auto --archive '
+# alias rm='rm --verbose '
+# alias mv='mv --debug '
 
 # Quickly reload bash from .bashrc
 alias reloadbash=". ~/.bashrc"
@@ -43,9 +46,11 @@ alias emojc="emoj | xclip -selection c"
 # BATCAT
 # Neat little alternative to cat.
 alias bat="/usr/bin/batcat "
-alias cat="bat "
+# Thank youtube comment at: https://www.youtube.com/watch?v=8bnd-SMYXi0&lc=UgxT4f6_P4Px1iS-mX54AaABAg.9zwHY-l7QPVA-dqPA_8_Au
+alias cat="bat --paging=never"
+alias pat="bat --paging=always"
 # Useful for piping long ass commands
-alias catm="bat -l man "
+alias catm="pat -l man "
 alias rcat="command cat "
 # FD
 # use fd as a modern replacement for find!
@@ -56,7 +61,7 @@ alias rfind="command find "
 
 # EXA
 # exa is a pretty cool ls alternative
-alias ls='$HOME/.cargo/bin/exa --icons '
+alias ls='$HOME/.cargo/bin/exa --binary --classify --all --icons '
 alias lst="ls -T --level=1 "
 alias lsd="ls -d */ "
 alias rls="command ls "
