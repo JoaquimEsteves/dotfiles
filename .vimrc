@@ -485,6 +485,10 @@ command! AddColumn :set colorcolumn=80,120
 command! ToggleSmartCase :set smartcase!
 command! Shfmt !shfmt -w -i 2 -ci -bn %
 command! CopyFileName let @+ = expand('%')
+"" Stands for buffer delete
+"" Deletes all buffers and then re-opens the one you were using before
+"" Use with confirm so you don't lose your work!
+command! Bd :%bd | e#
 
 
 "" Command I kept forgetting
