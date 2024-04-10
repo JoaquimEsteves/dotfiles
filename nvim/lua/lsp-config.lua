@@ -1,19 +1,20 @@
 -- Badly hacked together LSP setup.
 -- Don't copy this, it's a mess.
 
+-- IMPORTANT: make sure to setup neodev BEFORE lspconfig
+require("neodev").setup({})
+
 local nvim_lsp = require("lspconfig")
 -- Doesn't work anymore
 -- local coq = require("coq")
 
 vim.diagnostic.config({
 	source = true,
-
 })
 
 -- on_attach defined here. With the maps being defined in .vimrc
 local on_attach = function(client, bufnr)
 	-- SEE: help lspconfig-keybindings
-	local buf_map = vim.api.nvim_buf_set_keymap
 	local function buf_set_option(...)
 		vim.api.nvim_buf_set_option(bufnr, ...)
 	end
@@ -75,7 +76,6 @@ local filetypes = {
 	typescriptreact = "eslint",
 	-- Consider adding: https://github.com/astral-sh/ruff
 	python = { "flake8", "mypy" },
-	lua,
 	json = "eslint",
 	sh = "shellcheck",
 }
@@ -89,7 +89,7 @@ local formatFiletypes = {
 	json = "prettier",
 	sh = "shfmt",
 	python = { "black", "isort" },
-	lua = "stylua",
+	-- lua = "stylua",
 }
 
 local linters = {
@@ -196,10 +196,6 @@ local formatters = {
 		args = { "--quiet", "-" },
 	},
 	shfmt = { command = "shfmt", args = { "-filename", "%filepath", "-i", "2", "-ci", "-bn" } },
-	stylua = {
-		command = "stylua",
-		args = { "-" },
-	},
 }
 
 nvim_lsp.diagnosticls.setup({
@@ -240,3 +236,4 @@ capabilities.textDocument.completion.completionItem.snippetSupport = true
 
 nvim_lsp.html.setup({ capabilities = capabilities })
 nvim_lsp.cssls.setup({ capabilities = capabilities })
+nvim_lsp.lua_ls.setup({ on_attach = on_attach })

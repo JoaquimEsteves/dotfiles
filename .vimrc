@@ -224,6 +224,7 @@ call plug#begin('~/.vim/plugged')
 Plug 'morhetz/gruvbox'
 if has("nvim")
   Plug 'RRethy/nvim-base16'
+  Plug 'folke/neodev.nvim'
 endif
 Plug 'christianchiarulli/nvcode-color-schemes.vim'
 

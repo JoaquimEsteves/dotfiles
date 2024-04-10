@@ -54,18 +54,18 @@ alias catm="pat -l man "
 alias rcat="command cat "
 # FD
 # use fd as a modern replacement for find!
-alias fd="/usr/bin/fdfind "
+# alias fd="/usr/bin/fdfind "
 alias fd_all="fd --hidden --no-ignore "
 alias find="fd "
 alias rfind="command find "
 
 # EXA
 # exa is a pretty cool ls alternative
-alias ls='$HOME/.cargo/bin/exa --binary --classify --all --icons '
+alias ls='exa --binary --classify --all --icons '
 alias lst="ls -T --level=1 "
 alias lsd="ls -d */ "
 alias rls="command ls "
-alias ll='exa -alF --icons --header --git --extended'
+alias ll='exa -alF --icons --header --extended'
 alias la='exa -a --icons'
 alias l='exa -F --icons'
 
@@ -78,11 +78,11 @@ alias l='exa -F --icons'
 # alias grep='$HOME/.cargo/bin/rg '
 alias rgrep="command grep "
 # batman is just the man pages but with bat output
-alias man='$HOME/.local/bin/batman '
-alias rman="command man "
+# alias man='$HOME/.local/bin/batman '
+# alias rman="command man "
 # DUST
 # dust is du + rust
-alias du='$HOME/.cargo/bin/dust '
+alias du='du'
 alias rdu="command du "
 # SD
 # SD is like sed, only rational
@@ -91,14 +91,14 @@ alias rdu="command du "
 # alias rsed="command sd "
 # YTOP
 # ytop => like top only pretty
-alias top="ytop "
-alias rtop="command top "
+# alias top="ytop "
+# alias rtop="command top "
 # PS
 # procs is a ps replacement
-alias ps="procs --sortd cpu "
+# alias ps="procs --sortd cpu "
 # Adds a cute little hierarchical tree :)
-alias pst="procs --tree "
-alias rps="command ps "
+# alias pst="procs --tree "
+# alias rps="command ps "
 
 # quickly get all dotfiles
 alias dotfiles="fd '^\.' . --maxdepth 1 --hidden --no-ignore "
@@ -107,9 +107,9 @@ alias dotfiles="fd '^\.' . --maxdepth 1 --hidden --no-ignore "
 alias c2b="xclip -sel clip "
 # Googler, but default size of results to 5 so it actually fits on
 # my tiny ass screen
-alias googler="googler -n 5 "
+# alias googler="googler -n 5 "
 # Googler using w3m (ie: opening results in a terminal)
-alias qgoogler="googler --url-handler w3m "
+# alias qgoogler="googler --url-handler w3m "
 # TMUX STUFF
 # Quickly attach to a tmux session by tag
 alias tat="tmux attach -t "
@@ -131,11 +131,11 @@ fi
 ################################################################################
 
 # See https://github.com/flash-global/shipperportal-front/pull/1135
-alias music_vis="cava"
+# alias music_vis="cava"
 
 # I just keep forgetting the name of this damn program
 # `$ tldr arecord`
-alias music_record="arecord "
+# alias music_record="arecord "
 
 # Get the weather!
 alias weather="curl wttr.in "
@@ -151,3 +151,6 @@ alias preview="fzf --preview '/usr/bin/batcat --color \"always\" {}'"
 alias pbox="boxes -s 79x5 -a c "
 alias unicornbox="boxes -a c -d unicornsay "
 alias record_screen="ffmpeg -framerate 25 -f x11grab -i :1 -f pulse -ac 2 -i default output.mp4"
+
+# Allows up-arrow to go to the previous command
+alias lua="rlwrap lua"
