@@ -7,11 +7,11 @@ require'nvim-treesitter.configs'.setup {
         enable = false,
     },
     ensure_installed = {'typescript', 'javascript'},
-    rainbow = {
-      enable = true,
-      extended_mode = true,
-      max_file_lines = 1000
-    }
+    -- rainbow = {
+    --   enable = true,
+    --   extended_mode = true,
+    --   max_file_lines = 1000
+    -- }
 }
 
 

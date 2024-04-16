@@ -231,22 +231,44 @@ Plug 'christianchiarulli/nvcode-color-schemes.vim'
 function! FixGruvColors()
   "" Tweaks to the coloring
   if has("nvim-0.8")
-    hi! link @variable GruvboxBlue
-    hi! link @type GruvboxGreen
+    hi! link @constant GruvBoxPurple
+    hi! link @constant.builtin GruvboxPurple
     hi! link @constructor GruvboxGreen
+    hi! link @field GruvboxAqua
     hi! link @function GruvboxYellow
     hi! link @function.call GruvboxYellow
-    hi! link @method GruvboxYellow
+    hi! link @function.method.call GruvboxYellow
     hi! link @identifier GruvboxAqua
+    hi! link @include GruvboxRed
+    hi! link @keyword.return GruvBoxPurple
+    hi! link @method GruvboxYellow
+    hi! link @punctuation.delimiter Noise
     hi! link @special GruvboxGreen
     hi! link @string GruvboxOrange
-    hi! link @include GruvboxRed
-    hi! link @punctuation.delimiter Noise
     hi! link @string.regex GruvBoxRed 
-    hi! link @keyword.return GruvBoxPurple
-    hi! link @field GruvboxAqua
+    hi! link @string.regexp GruvBoxRed
+    hi! link @tag.attribute.javascript GruvboxAqua
+    hi! link @type GruvboxGreen
+    hi! link @variable GruvboxBlue
     "" TODO: https://gist.github.com/swarn/fb37d9eefe1bc616c2a7e476c0bc0316
-    hi! @lsp.type.parameter guifg=GruvBoxPurple
+    "" Simply type `:Inspect` and then see what your LSP tells you
+    hi! link @lsp.type.parameter GruvBoxPurple
+    hi! link @lsp.type.function.javascript GruvboxYellow
+    hi! link @lsp.typemod.variable.readonly GruvBoxBlueBold
+    hi! link @lsp.typemod.variable.defaultLibrary GruvBoxAqua
+    " Importantly this will _not_ match a member of some defaultLibrary
+    hi! link @lsp.typemod.function.defaultLibrary GruvBoxAqua
+
+    " GruvboxBlueSign xxx ctermfg=109 ctermbg=237 guifg=#83a598 guibg=#3c3836
+    " GruvboxBlueUnder ctermfg=109 ctermbg=237 guifg=#83a598 guibg=underline
+
+  " - @lsp.type.variable.javascript links to GruvboxBlue priority: 200
+  "   - @lsp.mod.declaration.javascript links to @lsp priority: 201
+  "   - @lsp.mod.readonly.javascript links to @lsp priority: 201
+  "   - @lsp.typemod.variable.declaration.javascript links to @lsp priority: 202
+  "   - @lsp.typemod.variable.readonly.javascript links to @lsp priority: 202
+
+
   else
     hi! link TSVariable GruvboxBlue
     hi! link TSFunction GruvboxYellow
@@ -442,7 +464,8 @@ endif
 if has("nvim-0.6")
   Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
   Plug 'nvim-treesitter/nvim-treesitter-textobjects'
-  Plug 'p00f/nvim-ts-rainbow'
+  " Plug 'p00f/nvim-ts-rainbow'
+  Plug 'hiphish/rainbow-delimiters.nvim'
   Plug 'nvim-treesitter/playground'
   "" Abuses tree sitter for pretty context colors
   Plug 'lukas-reineke/indent-blankline.nvim'
@@ -530,7 +553,9 @@ function! Redir(cmd)
   wincmd h
 endfunction
 
-"redirect any vim command output using Redir command.
+" redirect any vim command output using Redir command.
+" Usage:
+" Redir !pylint %
 command! -nargs=1 Redir call Redir(<f-args>)
 
 function! GetHighlightAtCursor()
@@ -545,17 +570,6 @@ function! NERDTreeToggleInCurDir()
   else
     exe ":NERDTreeFind"
   endif
-endfunction
-
-
-function! FixTSRainbow()
-  hi! rainbowcol1 ctermfg=1 
-  hi! rainbowcol2 ctermfg=2 
-  hi! rainbowcol3 ctermfg=3 
-  hi! rainbowcol4 ctermfg=4 
-  hi! rainbowcol5 ctermfg=5
-  hi! rainbowcol6 ctermfg=6
-  hi! rainbowcol7 ctermfg=7
 endfunction
 
 function! TabCloseRight(bang)
