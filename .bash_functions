@@ -1,35 +1,16 @@
 #!/usr/bin/env bash
 
-function mkcd() {
-  # Create a dir (including parents) and then cd to it.
-  # We use cmake because mkdir -p is not recommended in many
-  # manuals
-  # See: https://unix.stackexchange.com/a/277154
-  # Disabled spellcheck because we obviously _just_ created the dir
-  # shellcheck disable=SC2164
-  if [[ -x $(which cmake) ]]; then
-    cmake -E make_directory "$1"
-  else
-    mkdir -p "$dirname"
-  fi
-  cd "$1"
+function mkdir_cd() {
+  ### Create a dir (including parents) and then cd to it.
+  mkdir -p "$1" && cd "$1"
 }
 
-function touch_mkd() {
+function mkdir_touch() {
   ### Touch AND make the dir recursively
   local file_path="$1"
   local dir_name=$(dirname "$file_path")
 
-  # Create directories if they don't exist
-  if [[ -x $(which cmake) ]]; then
-    cmake -E make_directory "$dir_name"
-  else
-    mkdir -p "$dir_name"
-  fi
-
-  # Touch the file
-  touch "$file_path"
-
+  mkdir -p "$dir_name" && touch "$file_path"
 }
 
 function goat() {
