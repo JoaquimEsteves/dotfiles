@@ -1,5 +1,50 @@
 #!/usr/bin/env bash
 
+function mkcd() {
+  # Create a dir (including parents) and then cd to it.
+  # We use cmake because mkdir -p is not recommended in many
+  # manuals
+  # See: https://unix.stackexchange.com/a/277154
+  # Disabled spellcheck because we obviously _just_ created the dir
+  # shellcheck disable=SC2164
+  if [[ -x $(which cmake) ]]; then
+    cmake -E make_directory "$1"
+  else
+    mkdir -p "$dirname"
+  fi
+  cd "$1"
+}
+
+function touch_mkd() {
+  ### Touch AND make the dir recursively
+  local file_path="$1"
+  local dir_name=$(dirname "$file_path")
+
+  # Create directories if they don't exist
+  if [[ -x $(which cmake) ]]; then
+    cmake -E make_directory "$dir_name"
+  else
+    mkdir -p "$dir_name"
+  fi
+
+  # Touch the file
+  touch "$file_path"
+
+}
+
+function goat() {
+  local goat
+  goat=$(
+    command cat <<-EOF
+(_(
+/_/'_____/)
+"  |      |
+   |""""""|
+EOF
+  )
+  echo "$goat"
+}
+
 # rename terminal window title
 function set-title() {
   if [[ -z "$ORIG" ]]; then
@@ -15,7 +60,7 @@ function readable_path() {
 
 function every_binary() {
   if [[ -x $(which exa) ]]; then
-    readable_path | xargs exa -alF --icons --header --git --extended
+    readable_path | xargs exa -alF --icons --header --extended
   else
     readable_path | xargs ls -la
   fi
@@ -38,16 +83,6 @@ function set-title-x() {
   xdotool search --onlyvisible --pid "$window_to_rename" --name "\a\b\c" set_window --name "$new_name"
 }
 
-function mkcd() {
-  # Create a dir (including parents) and then cd to it.
-  # We use cmake because mkdir -p is not recommended in many
-  # manuals
-  # See: https://unix.stackexchange.com/a/277154
-  # Disabled spellcheck because we obviously _just_ created the dir
-  # shellcheck disable=SC2164
-  cmake -E make_directory "$1" && cd "$1"
-}
-
 # Call `unicode` with the given arguments, and then pipe to awk, printing the first field.
 # Throws error if no args passed
 function unicode-fzf() {
@@ -56,15 +91,6 @@ function unicode-fzf() {
     return 1
   fi
   unicode --brief --max 0 "$@" | fzf | awk '{ print $1 }'
-}
-
-function ascii-goat() {
-
-  echo '(_('
-  echo "/_/'_____/)"
-  echo '"  |      |'
-  echo '   |""""""|'
-
 }
 
 # These should really be their own git-something.sh functions

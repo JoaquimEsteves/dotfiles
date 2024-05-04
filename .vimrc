@@ -13,6 +13,9 @@ cabbrev thelp tab help
 "" set <Leader> to <Space>
 let mapleader = " "
 
+"" Open netrw on the right with Ctrl-E
+map <C-e> :Vex!<CR>
+
 ""     Fun with EU keyboards
 ""     My non-US keyboard makes it hard to type [ and ].
 ""     FEAR NO MORE
@@ -96,8 +99,22 @@ runtime macros/matchit.vim
 let c_no_curly_error=1
 let c_no_bracket_error=1
 
+"" NETRW crap
+"" See the way DOOM does it: https://github.com/doom-neovim/doom-nvim/blob/main/lua/doom/modules/features/netrw/init.lua
+" Keeps the current directory and the browsing directory synced.
+" Supposedly, This helps you avoid the move files error.
+" It just keeps messing me up doe so I leave it at the default 1
 " let g:netrw_keepdir=0
 
+" List style
+" Remember you can cycle between whem with `i`
+let g:netrw_liststyle=3
+
+
+"" Hides all files on the gitignore
+"" Pretty neat: https://github.com/eiginn/netrw/blob/master/autoload/netrw_gitignore.vim
+"" You can toggle between showing and hidding the files with the `a` key!
+let g:netrw_list_hide = netrw_gitignore#Hide()
 
 " Enable bash aliases!
 let $BASH_ENV = "~/.bash_aliases"
@@ -248,6 +265,7 @@ function! FixGruvColors()
     hi! link @string.regex GruvBoxRed 
     hi! link @string.regexp GruvBoxRed
     hi! link @tag.attribute.javascript GruvboxAqua
+    hi! link @tag.attribute.tsx GruvboxAqua
     hi! link @type GruvboxGreen
     hi! link @variable GruvboxBlue
     "" TODO: https://gist.github.com/swarn/fb37d9eefe1bc616c2a7e476c0bc0316
