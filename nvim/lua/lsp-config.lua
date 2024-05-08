@@ -2,6 +2,7 @@
 -- Don't copy this, it's a mess.
 
 -- IMPORTANT: make sure to setup neodev BEFORE lspconfig
+-- It's a LUA only thing
 require("neodev").setup({})
 
 local nvim_lsp = require("lspconfig")
@@ -12,20 +13,20 @@ vim.diagnostic.config({
 	source = true,
 })
 
--- on_attach defined here. With the maps being defined in .vimrc
-local on_attach = function(client, bufnr)
-	-- SEE: help lspconfig-keybindings
-	local function buf_set_option(...)
-		vim.api.nvim_buf_set_option(bufnr, ...)
-	end
+
+-- The Keybindings themselves are set-up through the init.vim
+-- Don't ask me why I did it this way
+--
+-- SEE: help lspconfig-keybindings
+local function setUpLspCommands(ev)
 	require("lsp_signature").on_attach({
 		bind = false,
 		hint_prefix = "",
 		floating_window = false,
 	})
+	-- Enable completion triggered by <c-x><c-o>
+	vim.bo[ev.buf].omnifunc = 'v:lua.vim.lsp.omnifunc'
 
-	buf_set_option("omnifunc", "v:lua.vim.lsp.omnifunc")
-	-- COMMANDS
 	vim.cmd("command! LspDef lua vim.lsp.buf.definition()")
 
 	if vim.fn.has('nvim-0.8') == 1 then
@@ -35,6 +36,7 @@ local on_attach = function(client, bufnr)
 		vim.cmd("command! LspFormatting lua vim.lsp.buf.formatting()")
 		vim.cmd("command! -range LspCodeRangeAction <line1>,<line2>lua vim.lsp.buf.range_code_action()")
 	end
+
 	vim.cmd("command! LspCodeAction lua vim.lsp.buf.code_action()")
 	vim.cmd("command! LspHover lua vim.lsp.buf.hover()")
 	vim.cmd("command! LspRename lua vim.lsp.buf.rename()")
@@ -55,6 +57,13 @@ local on_attach = function(client, bufnr)
 		vim.cmd("command! LspHelp lua vim.lsp.diagnostic.set_loclist()")
 	end
 end
+
+vim.api.nvim_create_autocmd('LspAttach', {
+	group = vim.api.nvim_create_augroup('UserLspConfig', {}),
+	callback = setUpLspCommands,
+	-- We just need to set up the commands once
+	once = true,
+})
 
 -- PRETTYNESS
 if vim.fn.executable("fzf") then
@@ -199,14 +208,13 @@ local formatters = {
 }
 
 nvim_lsp.diagnosticls.setup({
-	on_attach = on_attach,
 	filetypes = vim.tbl_keys(filetypes),
 	init_options = {
 		source = true,
-		filetypes = filetypes,
-		linters = linters,
-		formatters = formatters,
-		formatFiletypes = formatFiletypes,
+		filetypes,
+		linters,
+		formatters,
+		formatFiletypes,
 	},
 })
 
@@ -216,24 +224,68 @@ nvim_lsp.diagnosticls.setup({
 --                                                                           --
 -------------------------------------------------------------------------------
 
+-------------------------------------------------------------------------------
+--                                                                           --
+--                                  Python                                   --
+--                                                                           --
+-------------------------------------------------------------------------------
+--
 -- Consider https://github.com/mtshiba/pylyzer
 -- nvim_lsp.pylyzer.setup({ on_attach = on_attach })
-nvim_lsp.pyright.setup({ on_attach = on_attach })
-nvim_lsp.gopls.setup({ on_attach = on_attach })
-
+nvim_lsp.pyright.setup({})
+-------------------------------------------------------------------------------
+--                                                                           --
+--                                  GOLANG                                   --
+--                                                                           --
+-------------------------------------------------------------------------------
+nvim_lsp.gopls.setup({})
+-------------------------------------------------------------------------------
+--                                                                           --
+--                              Typescript + JS                              --
+--                                                                           --
+-------------------------------------------------------------------------------
 nvim_lsp.tsserver.setup({
 	on_attach = function(client)
 		client.resolved_capabilities.document_formatting = false
-		on_attach(client)
 	end,
 })
 
--- HTML + CSS
-
+-------------------------------------------------------------------------------
+--                                                                           --
+--                                HTML + CSS                                 --
+--                                                                           --
+-------------------------------------------------------------------------------
 --Enable (broadcasting) snippet capability for completion
 local capabilities = vim.lsp.protocol.make_client_capabilities()
 capabilities.textDocument.completion.completionItem.snippetSupport = true
+-- I don't think I actually have these ones...
+nvim_lsp.html.setup({ capabilities })
+nvim_lsp.cssls.setup({ capabilities })
+-------------------------------------------------------------------------------
+--                                                                           --
+--                                    Lua                                    --
+--                                                                           --
+-------------------------------------------------------------------------------
+nvim_lsp.lua_ls.setup({})
 
-nvim_lsp.html.setup({ capabilities = capabilities })
-nvim_lsp.cssls.setup({ capabilities = capabilities })
-nvim_lsp.lua_ls.setup({ on_attach = on_attach })
+----------------------------------------------------------------------------------------------------
+--                                              JAVA                                              --
+--                           https://github.com/mfussenegger/nvim-jdtls                           --
+--                      On their README they recommend placing this stuff on                      --
+--That wasn't working since we need the plug.vim to get all of our plugins So it's an auto command--
+----------------------------------------------------------------------------------------------------
+local function startJDTLS()
+	require('jdtls').start_or_attach({
+		-- This is a binary
+		-- It _must_ be on the path!
+		cmd = { 'jdtls' },
+		root_dir = vim.fs.dirname(vim.fs.find({ 'gradlew', '.git', 'mvnw' }, { upward = true })[1]),
+	})
+end
+
+vim.api.nvim_create_autocmd('FileType', {
+	desc = 'Start jdtls on java files',
+	pattern = 'java',
+	group = vim.api.nvim_create_augroup('jdtls_lsp', { clear = true }),
+	callback = startJDTLS,
+})
