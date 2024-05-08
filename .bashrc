@@ -283,3 +283,9 @@ if [ -d $ANDROID_HOME ]; then
 	export PATH=$PATH:$ANDROID_HOME/emulator
 	export PATH=$PATH:$ANDROID_HOME/platform-tools
 fi
+
+# update-alternatives was not setting the correct JAVA_HOME
+JAVA_HOME=/usr/lib/jvm/temurin-22-jdk-amd64
+if [ -d $JAVA_HOME ]; then
+	export JAVA_HOME
+fi

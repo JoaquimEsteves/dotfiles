@@ -103,7 +103,10 @@ let c_no_bracket_error=1
 "" See the way DOOM does it: https://github.com/doom-neovim/doom-nvim/blob/main/lua/doom/modules/features/netrw/init.lua
 " Keeps the current directory and the browsing directory synced.
 " Supposedly, This helps you avoid the move files error.
-" It just keeps messing me up doe so I leave it at the default 1
+" It just keeps messing me up doe.
+" Like when I open and close folders I want to then just press % and it _just
+" works_
+" so I leave it at the default 1
 " let g:netrw_keepdir=0
 
 " List style
@@ -497,6 +500,9 @@ if has("nvim-0.6")
 endif
 
 
+if has("nvim-0.9")
+  Plug 'mfussenegger/nvim-jdtls'
+endif
 
 call plug#end()
 
@@ -804,7 +810,6 @@ endif
 
 " Uses the same controls as ale. But uses neovims built-in lsp
 if PlugLoaded("nvim-lspconfig")
-
   nnoremap <Leader>d :LspDetail<CR>
   nnoremap <Leader>h :LspHover<CR>
   nnoremap <Leader>H :LspSignatureHelp<CR>
