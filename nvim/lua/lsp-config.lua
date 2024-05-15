@@ -49,12 +49,12 @@ local function setUpLspCommands(ev)
 		vim.cmd("command! LspDiagPrev lua vim.diagnostic.goto_prev()")
 		vim.cmd("command! LspDiagNext lua vim.diagnostic.goto_next()")
 		vim.cmd('command! LspDetail lua vim.diagnostic.open_float({scope="line"})')
-		vim.cmd("command! LspHelp lua vim.diagnostic.setloclist()")
+		vim.cmd("command! LspLocList lua vim.diagnostic.setloclist()")
 	else
 		vim.cmd("command! LspDiagPrev lua vim.lsp.diagnostic.goto_prev()")
 		vim.cmd("command! LspDiagNext lua vim.lsp.diagnostic.goto_next()")
 		vim.cmd("command! LspDetail lua vim.lsp.diagnostic.show_line_diagnostics()")
-		vim.cmd("command! LspHelp lua vim.lsp.diagnostic.set_loclist()")
+		vim.cmd("command! LspLocList lua vim.lsp.diagnostic.set_loclist()")
 	end
 end
 
@@ -83,8 +83,8 @@ local filetypes = {
 	javascriptreact = "eslint",
 	typescript = "eslint",
 	typescriptreact = "eslint",
-	-- Consider adding: https://github.com/astral-sh/ruff
-	python = { "flake8", "mypy" },
+	-- Now using ruff-lsp
+	-- python = { "flake8", "mypy" },
 	json = "eslint",
 	sh = "shellcheck",
 }
@@ -97,7 +97,7 @@ local formatFiletypes = {
 	-- yaml = "prettier",
 	json = "prettier",
 	sh = "shfmt",
-	python = { "black", "isort" },
+	-- python = { "black", "isort" },
 	-- lua = "stylua",
 }
 
@@ -231,8 +231,149 @@ nvim_lsp.diagnosticls.setup({
 -------------------------------------------------------------------------------
 --
 -- Consider https://github.com/mtshiba/pylyzer
--- nvim_lsp.pylyzer.setup({ on_attach = on_attach })
-nvim_lsp.pyright.setup({})
+-- nvim_lsp.pylyzer.setup({})
+-- See: https://github.com/DetachHead/basedpyright
+local function setup_based_pyright()
+	local util = require 'lspconfig.util'
+
+	local root_files = {
+		'pyproject.toml',
+		'setup.py',
+		'setup.cfg',
+		'requirements.txt',
+		'Pipfile',
+		'pyrightconfig.json',
+		'.git',
+	}
+
+	local function organize_imports()
+		local params = {
+			command = 'basedpyright.organizeimports',
+			arguments = { vim.uri_from_bufnr(0) },
+		}
+
+		local clients = vim.lsp.get_active_clients {
+			bufnr = vim.api.nvim_get_current_buf(),
+			name = 'basedpyright',
+		}
+		for _, client in ipairs(clients) do
+			client.request('workspace/executeCommand', params, nil, 0)
+		end
+	end
+
+	local function set_python_path(path)
+		local clients = vim.lsp.get_active_clients {
+			bufnr = vim.api.nvim_get_current_buf(),
+			name = 'basedpyright',
+		}
+		for _, client in ipairs(clients) do
+			if client.settings then
+				client.settings.python = vim.tbl_deep_extend('force', client.settings.python or {}, { pythonPath = path })
+			else
+				client.config.settings = vim.tbl_deep_extend('force', client.config.settings,
+					{ python = { pythonPath = path } })
+			end
+			client.notify('workspace/didChangeConfiguration', { settings = nil })
+		end
+	end
+
+	return {
+		default_config = {
+			cmd = { 'basedpyright-langserver', '--stdio' },
+			filetypes = { 'python' },
+			root_dir = function(fname)
+				return util.root_pattern(unpack(root_files))(fname)
+			end,
+			single_file_support = true,
+			settings = {
+				basedpyright = {
+					analysis = {
+						autoSearchPaths = true,
+						useLibraryCodeForTypes = true,
+						diagnosticMode = 'openFilesOnly',
+					},
+				},
+			},
+		},
+		commands = {
+			PyrightOrganizeImports = {
+				organize_imports,
+				description = 'Organize Imports',
+			},
+			PyrightSetPythonPath = {
+				set_python_path,
+				description = 'Reconfigure basedpyright with the provided python path',
+				nargs = 1,
+				complete = 'file',
+			},
+		},
+		docs = {
+			description = [[
+https://detachhead.github.io/basedpyright
+
+`basedpyright`, a static type checker and language server for python
+]],
+		},
+	}
+end
+
+local configs = require 'lspconfig.configs'
+-- tweak this to just use the one defined in the server_configurations when you
+-- inevitably upgrade nvim
+if not configs.basedpyright then
+	configs.basedpyright = setup_based_pyright()
+end
+nvim_lsp.basedpyright.setup({})
+
+local function setup_ruff_lsp()
+	local util = require 'lspconfig.util'
+
+	local root_files = {
+		'pyproject.toml',
+		'ruff.toml',
+	}
+
+	return {
+		default_config = {
+			cmd = { 'ruff-lsp' },
+			filetypes = { 'python' },
+			root_dir = util.root_pattern(unpack(root_files)) or util.find_git_ancestor(),
+			single_file_support = true,
+			settings = {},
+		},
+		docs = {
+			description = [[
+https://github.com/astral-sh/ruff-lsp
+
+A Language Server Protocol implementation for Ruff, an extremely fast Python linter and code transformation tool, written in Rust. It can be installed via pip.
+
+```sh
+pip install ruff-lsp
+```
+
+Extra CLI arguments for `ruff` can be provided via
+
+```lua
+require'lspconfig'.ruff_lsp.setup{
+  init_options = {
+    settings = {
+      -- Any extra CLI arguments for `ruff` go here.
+      args = {},
+    }
+  }
+}
+```
+
+  ]],
+			root_dir = [[root_pattern("pyproject.toml", "ruff.toml", ".git")]],
+		},
+	}
+end
+
+if not configs.ruff_lsp then
+	configs.ruff_lsp = setup_ruff_lsp()
+end
+nvim_lsp.ruff_lsp.setup({})
 -------------------------------------------------------------------------------
 --                                                                           --
 --                                  GOLANG                                   --
@@ -244,11 +385,7 @@ nvim_lsp.gopls.setup({})
 --                              Typescript + JS                              --
 --                                                                           --
 -------------------------------------------------------------------------------
-nvim_lsp.tsserver.setup({
-	on_attach = function(client)
-		client.resolved_capabilities.document_formatting = false
-	end,
-})
+nvim_lsp.tsserver.setup({})
 
 -------------------------------------------------------------------------------
 --                                                                           --

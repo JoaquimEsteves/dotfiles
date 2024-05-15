@@ -821,6 +821,7 @@ if PlugLoaded("nvim-lspconfig")
   nnoremap <Leader>gn :LspDiagNext<CR>
   nnoremap <Leader>gp :LspDiagPrev<CR>
   nnoremap <Leader>gr :LspFindReferences<CR>
+  nnoremap <Leader>l :LspLocList<CR>
 
   nnoremap <leader>rn :LspRename<CR>
 
