@@ -276,16 +276,23 @@ if [ -d '/var/lib/flatpak/exports/share' ] && [ -d "$HOME"/.local/share/flatpak/
 	export XDG_DATA_DIRS="$XDG_DATA_DIRS:/var/lib/flatpak/exports/share:"$HOME"/.local/share/flatpak/exports/share"
 fi
 
-ANDROID_HOME=$HOME/Android/Sdk
-
-if [ -d $ANDROID_HOME ]; then
-	export ANDROID_HOME
-	export PATH=$PATH:$ANDROID_HOME/emulator
-	export PATH=$PATH:$ANDROID_HOME/platform-tools
-fi
+# UNCOMMENT THIS WHEN YOU WANT TO WORK WITH ANDROID AGAIN
+# ANDROID_HOME=$HOME/Android/Sdk
+#
+# if [ -d $ANDROID_HOME ]; then
+# 	export ANDROID_HOME
+# 	export PATH=$PATH:$ANDROID_HOME/emulator
+# 	export PATH=$PATH:$ANDROID_HOME/platform-tools
+# fi
 
 # update-alternatives was not setting the correct JAVA_HOME
 JAVA_HOME=/usr/lib/jvm/temurin-22-jdk-amd64
 if [ -d $JAVA_HOME ]; then
 	export JAVA_HOME
+fi
+
+
+if [ -x "$(command -v ng)" ]; then
+	# Load Angular CLI autocompletion.
+	source <(ng completion script)
 fi
