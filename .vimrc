@@ -114,6 +114,17 @@ let c_no_bracket_error=1
 let g:netrw_liststyle=3
 
 
+"" Consider this instead
+"" https://github.com/arp242/xdg_open.vim
+function! OSDirExplorerNetrw()
+  """ Open some dir with xdg-open in Netrw
+  """
+  "" Trying without the dirname doesn't work for some mysterious reason...
+  echo system('echo '.getcwd().'/'.netrw#Call("NetrwGetWord").' | xargs dirname | xargs xdg-open')
+endfunction
+command! OSDirExplorerNetrw call OSDirExplorerNetrw()
+
+
 "" Hides all files on the gitignore
 "" Pretty neat: https://github.com/eiginn/netrw/blob/master/autoload/netrw_gitignore.vim
 "" You can toggle between showing and hidding the files with the `a` key!
@@ -279,17 +290,6 @@ function! FixGruvColors()
     hi! link @lsp.typemod.variable.defaultLibrary GruvBoxAqua
     " Importantly this will _not_ match a member of some defaultLibrary
     hi! link @lsp.typemod.function.defaultLibrary GruvBoxAqua
-
-    " GruvboxBlueSign xxx ctermfg=109 ctermbg=237 guifg=#83a598 guibg=#3c3836
-    " GruvboxBlueUnder ctermfg=109 ctermbg=237 guifg=#83a598 guibg=underline
-
-  " - @lsp.type.variable.javascript links to GruvboxBlue priority: 200
-  "   - @lsp.mod.declaration.javascript links to @lsp priority: 201
-  "   - @lsp.mod.readonly.javascript links to @lsp priority: 201
-  "   - @lsp.typemod.variable.declaration.javascript links to @lsp priority: 202
-  "   - @lsp.typemod.variable.readonly.javascript links to @lsp priority: 202
-
-
   else
     hi! link TSVariable GruvboxBlue
     hi! link TSFunction GruvboxYellow

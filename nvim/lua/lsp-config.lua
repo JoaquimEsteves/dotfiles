@@ -8,11 +8,15 @@ require("neodev").setup({})
 local nvim_lsp = require("lspconfig")
 -- Doesn't work anymore
 -- local coq = require("coq")
+--
+-- IN CASE SOMETHING BREAKS
+-- Then checkout `:LspLog`
+-- vim.lsp.set_log_level("TRACE")
+vim.lsp.set_log_level("OFF")
 
 vim.diagnostic.config({
 	source = true,
 })
-
 
 -- The Keybindings themselves are set-up through the init.vim
 -- Don't ask me why I did it this way
@@ -72,158 +76,61 @@ end
 
 -------------------------------------------------------------------------------
 --                                                                           --
---                               Diagnostic LS                               --
+--                                  GOLANG                                   --
 --                                                                           --
 -------------------------------------------------------------------------------
---
--- See: https://github.com/iamcco/diagnostic-languageserver
+nvim_lsp.gopls.setup({})
+-------------------------------------------------------------------------------
+--                                                                           --
+--                              Typescript + JS                              --
+--                                                                           --
+-------------------------------------------------------------------------------
+nvim_lsp.tsserver.setup({})
+-------------------------------------------------------------------------------
+--                                                                           --
+--                                HTML + CSS                                 --
+--                                                                           --
+-------------------------------------------------------------------------------
+--Enable (broadcasting) snippet capability for completion
+local capabilities = vim.lsp.protocol.make_client_capabilities()
+capabilities.textDocument.completion.completionItem.snippetSupport = true
+-- I don't think I actually have these ones...
+nvim_lsp.html.setup({ capabilities })
+nvim_lsp.cssls.setup({ capabilities })
+-------------------------------------------------------------------------------
+--                                                                           --
+--                                    Lua                                    --
+--                                                                           --
+-------------------------------------------------------------------------------
+nvim_lsp.lua_ls.setup({})
+----------------------------------------------------------------------------------------------------
+--                                              JAVA                                              --
+--                           https://github.com/mfussenegger/nvim-jdtls                           --
+--                      On their README they recommend placing this stuff on                      --
+--That wasn't working since we need the plug.vim to get all of our plugins So it's an auto command--
+----------------------------------------------------------------------------------------------------
+local function startJDTLS()
+	require('jdtls').start_or_attach({
+		-- This is a binary
+		-- It _must_ be on the path!
+		cmd = { 'jdtls' },
+		root_dir = vim.fs.dirname(vim.fs.find({ 'gradlew', '.git', 'mvnw' }, { upward = true })[1]),
+	})
+end
 
-local filetypes = {
-	javascript = "eslint",
-	javascriptreact = "eslint",
-	typescript = "eslint",
-	typescriptreact = "eslint",
-	-- Now using ruff-lsp
-	-- python = { "flake8", "mypy" },
-	json = "eslint",
-	sh = "shellcheck",
-}
-
-local formatFiletypes = {
-	javascript = "prettier",
-	javascriptreact = "prettier",
-	typescript = "prettier",
-	typescriptreact = "prettier",
-	-- yaml = "prettier",
-	json = "prettier",
-	sh = "shfmt",
-	-- python = { "black", "isort" },
-	-- lua = "stylua",
-}
-
-local linters = {
-	eslint = {
-		sourceName = "eslint",
-		-- Slightly faster than eslint as it keeps a server running
-		command = "eslint_d",
-		rootPatterns = { ".eslintrc.js", "package.json", ".eslintrc.json" },
-		debounce = 100,
-		args = { "--stdin", "--stdin-filename", "%filepath", "--format", "json" },
-		parseJson = {
-			errorsRoot = "[0].messages",
-			line = "line",
-			column = "column",
-			endLine = "endLine",
-			endColumn = "endColumn",
-			message = "🔥 ${message} [${ruleId}]",
-			security = "severity",
-		},
-		securities = { [2] = "error", [1] = "warning" },
-	},
-	flake8 = {
-		command = "flake8",
-		args = { "--format=%(row)d,%(col)d,%(code).1s,%(code)s: Flake8 %(text)s", "-" },
-		debounce = 100,
-		rootPatterns = { ".flake8", "setup.cfg", "tox.ini" },
-		offsetLine = 0,
-		offsetColumn = 0,
-		sourceName = "flake8",
-		formatLines = 1,
-		formatPattern = {
-			"(\\d+),(\\d+),([A-Z]),(.*)(\\r|\\n)*$",
-			{
-				line = 1,
-				column = 2,
-				security = 3,
-				message = 4,
-			},
-		},
-		securities = {
-			W = "warning",
-			E = "error",
-			F = "error",
-			C = "error",
-			N = "error",
-		},
-	},
-	mypy = {
-		command = "mypy",
-		args = {
-			"--follow-imports=silent",
-			"--hide-error-codes",
-			"--hide-error-context",
-			"--no-color-output",
-			"--no-error-summary",
-			"--no-pretty",
-			"--show-column-numbers",
-			"%file",
-		},
-		rootPatterns = { "mypy.ini", ".mypy.ini", "pyproject.toml", "setup.cfg" },
-		formatPattern = {
-			"^.*:(\\d+?):(\\d+?): ([a-z]+?): mypy (.*)$",
-			{
-				line = 1,
-				column = 2,
-				security = 3,
-				message = 4,
-			},
-		},
-		securities = {
-			error = "error",
-		},
-	},
-	shellcheck = {
-		command = "shellcheck",
-		debounce = 100,
-		args = { "--format=gcc", "-" },
-		offsetLine = 0,
-		offsetColumn = 0,
-		sourceName = "shellcheck",
-		formatLines = 1,
-		formatPattern = {
-			"^[^:]+:(\\d+):(\\d+):\\s+([^:]+):\\s+(.*)$",
-			{
-				line = 1,
-				column = 2,
-				message = 4,
-				security = 3,
-			},
-		},
-		securities = {
-			error = "error",
-			warning = "warning",
-			note = "info",
-		},
-	},
-}
-
-local formatters = {
-	prettier = { command = "prettier", args = { "--stdin-filepath", "%filepath" } },
-	black = { command = "python3", args = { "-m", "black", "--quiet", "-" } },
-	isort = {
-		command = "isort",
-		args = { "--quiet", "-" },
-	},
-	shfmt = { command = "shfmt", args = { "-filename", "%filepath", "-i", "2", "-ci", "-bn" } },
-}
-
-nvim_lsp.diagnosticls.setup({
-	filetypes = vim.tbl_keys(filetypes),
-	init_options = {
-		source = true,
-		filetypes,
-		linters,
-		formatters,
-		formatFiletypes,
-	},
+vim.api.nvim_create_autocmd('FileType', {
+	desc = 'Start jdtls on java files',
+	pattern = 'java',
+	group = vim.api.nvim_create_augroup('jdtls_lsp', { clear = true }),
+	callback = startJDTLS,
 })
 
 -------------------------------------------------------------------------------
 --                                                                           --
---                                 Other LS                                  --
+--                                    PHP                                    --
 --                                                                           --
 -------------------------------------------------------------------------------
-
+nvim_lsp.phpactor.setup({})
 -------------------------------------------------------------------------------
 --                                                                           --
 --                                  Python                                   --
@@ -376,53 +283,154 @@ end
 nvim_lsp.ruff_lsp.setup({})
 -------------------------------------------------------------------------------
 --                                                                           --
---                                  GOLANG                                   --
+--                               Diagnostic LS                               --
 --                                                                           --
 -------------------------------------------------------------------------------
-nvim_lsp.gopls.setup({})
--------------------------------------------------------------------------------
---                                                                           --
---                              Typescript + JS                              --
---                                                                           --
--------------------------------------------------------------------------------
-nvim_lsp.tsserver.setup({})
+--
+-- See: https://github.com/iamcco/diagnostic-languageserver
+--
+--
 
--------------------------------------------------------------------------------
---                                                                           --
---                                HTML + CSS                                 --
---                                                                           --
--------------------------------------------------------------------------------
---Enable (broadcasting) snippet capability for completion
-local capabilities = vim.lsp.protocol.make_client_capabilities()
-capabilities.textDocument.completion.completionItem.snippetSupport = true
--- I don't think I actually have these ones...
-nvim_lsp.html.setup({ capabilities })
-nvim_lsp.cssls.setup({ capabilities })
--------------------------------------------------------------------------------
---                                                                           --
---                                    Lua                                    --
---                                                                           --
--------------------------------------------------------------------------------
-nvim_lsp.lua_ls.setup({})
+local filetypes = {
+	javascript = "eslint",
+	javascriptreact = "eslint",
+	typescript = "eslint",
+	typescriptreact = "eslint",
+	-- Now using ruff-lsp
+	-- python = { "flake8", "mypy" },
+	json = "eslint",
+	sh = "shellcheck",
+	-- php = { "phpCsFixer" }
+}
 
-----------------------------------------------------------------------------------------------------
---                                              JAVA                                              --
---                           https://github.com/mfussenegger/nvim-jdtls                           --
---                      On their README they recommend placing this stuff on                      --
---That wasn't working since we need the plug.vim to get all of our plugins So it's an auto command--
-----------------------------------------------------------------------------------------------------
-local function startJDTLS()
-	require('jdtls').start_or_attach({
-		-- This is a binary
-		-- It _must_ be on the path!
-		cmd = { 'jdtls' },
-		root_dir = vim.fs.dirname(vim.fs.find({ 'gradlew', '.git', 'mvnw' }, { upward = true })[1]),
-	})
-end
+local formatFiletypes = {
+	javascript = "prettier",
+	javascriptreact = "prettier",
+	typescript = "prettier",
+	typescriptreact = "prettier",
+	-- yaml = "prettier",
+	json = "prettier",
+	sh = "shfmt",
+	php = "phpCsFixer"
+	-- python = { "black", "isort" },
+	-- lua = "stylua",
+}
 
-vim.api.nvim_create_autocmd('FileType', {
-	desc = 'Start jdtls on java files',
-	pattern = 'java',
-	group = vim.api.nvim_create_augroup('jdtls_lsp', { clear = true }),
-	callback = startJDTLS,
+local linters = {
+	phpCsFixer = {},
+	eslint = {
+		sourceName = "eslint",
+		-- Slightly faster than eslint as it keeps a server running
+		command = "eslint_d",
+		rootPatterns = { ".eslintrc.js", "package.json", ".eslintrc.json" },
+		debounce = 100,
+		args = { "--stdin", "--stdin-filename", "%filepath", "--format", "json" },
+		parseJson = {
+			errorsRoot = "[0].messages",
+			line = "line",
+			column = "column",
+			endLine = "endLine",
+			endColumn = "endColumn",
+			message = "🔥 ${message} [${ruleId}]",
+			security = "severity",
+		},
+		securities = { [2] = "error", [1] = "warning" },
+	},
+	flake8 = {
+		command = "flake8",
+		args = { "--format=%(row)d,%(col)d,%(code).1s,%(code)s: Flake8 %(text)s", "-" },
+		debounce = 100,
+		rootPatterns = { ".flake8", "setup.cfg", "tox.ini" },
+		offsetLine = 0,
+		offsetColumn = 0,
+		sourceName = "flake8",
+		formatLines = 1,
+		formatPattern = {
+			"(\\d+),(\\d+),([A-Z]),(.*)(\\r|\\n)*$",
+			{
+				line = 1,
+				column = 2,
+				security = 3,
+				message = 4,
+			},
+		},
+		securities = {
+			W = "warning",
+			E = "error",
+			F = "error",
+			C = "error",
+			N = "error",
+		},
+	},
+	mypy = {
+		command = "mypy",
+		args = {
+			"--follow-imports=silent",
+			"--hide-error-codes",
+			"--hide-error-context",
+			"--no-color-output",
+			"--no-error-summary",
+			"--no-pretty",
+			"--show-column-numbers",
+			"%file",
+		},
+		rootPatterns = { "mypy.ini", ".mypy.ini", "pyproject.toml", "setup.cfg" },
+		formatPattern = {
+			"^.*:(\\d+?):(\\d+?): ([a-z]+?): mypy (.*)$",
+			{
+				line = 1,
+				column = 2,
+				security = 3,
+				message = 4,
+			},
+		},
+		securities = {
+			error = "error",
+		},
+	},
+	shellcheck = {
+		command = "shellcheck",
+		debounce = 100,
+		args = { "--format=gcc", "-" },
+		offsetLine = 0,
+		offsetColumn = 0,
+		sourceName = "shellcheck",
+		formatLines = 1,
+		formatPattern = {
+			"^[^:]+:(\\d+):(\\d+):\\s+([^:]+):\\s+(.*)$",
+			{
+				line = 1,
+				column = 2,
+				message = 4,
+				security = 3,
+			},
+		},
+		securities = {
+			error = "error",
+			warning = "warning",
+			note = "info",
+		},
+	},
+}
+
+local formatters = {
+	prettier = { command = "prettier", args = { "--stdin-filepath", "%filepath" } },
+	black = { command = "python3", args = { "-m", "black", "--quiet", "-" } },
+	isort = {
+		command = "isort",
+		args = { "--quiet", "-" },
+	},
+	shfmt = { command = "shfmt", args = { "-filename", "%filepath", "-i", "2", "-ci", "-bn" } },
+	phpCsFixer = { command = "php-cs-fixer", args = { "fix", "--rules=@Symfony", "--no-interaction", "%filepath", } }
+}
+
+nvim_lsp.diagnosticls.setup({
+	filetypes = vim.tbl_keys(filetypes),
+	init_options = {
+		source = true,
+		filetypes,
+		linters,
+		formatters,
+		formatFiletypes,
+	},
 })
