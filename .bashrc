@@ -296,3 +296,11 @@ if [ -x "$(command -v ng)" ]; then
 	# Load Angular CLI autocompletion.
 	source <(ng completion script)
 fi
+
+if [ -x "$(command -v eslint_d)" ]; then
+	# Fix broken config shenanigans for eslint_d
+	# Basically if you have the new
+	# eslint.config.js then eslint_d just craps the bed
+	# Annoying...
+	export ESLINT_USE_FLAT_CONFIG=true
+fi

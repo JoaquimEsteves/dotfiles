@@ -59,15 +59,15 @@ alias fd_all="fd --hidden --no-ignore "
 alias find="fd "
 alias rfind="command find "
 
-# EXA
-# exa is a pretty cool ls alternative
-alias ls='exa --binary --classify --all --icons '
+# EzA
+# eza is a pretty cool ls alternative
+alias ls='eza --binary --classify --all --icons '
 alias lst="ls -T --level=1 "
 alias lsd="ls -d */ "
 alias rls="command ls "
-alias ll='exa -alF --icons --header --extended'
-alias la='exa -a --icons'
-alias l='exa -F --icons'
+alias ll='eza -alF --icons --header --extended'
+alias la='eza -a --icons'
+alias l='eza -F --icons'
 
 # RIPGREP + BAT
 # ripgrep is yet another rust re-implementation

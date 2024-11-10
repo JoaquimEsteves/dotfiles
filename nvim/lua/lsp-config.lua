@@ -85,7 +85,11 @@ nvim_lsp.gopls.setup({})
 --                              Typescript + JS                              --
 --                                                                           --
 -------------------------------------------------------------------------------
-nvim_lsp.tsserver.setup({})
+nvim_lsp.tsserver.setup({
+	on_attach = function(client)
+		client.resolved_capabilities.document_formatting = false
+	end,
+})
 -------------------------------------------------------------------------------
 --                                                                           --
 --                                HTML + CSS                                 --
@@ -95,8 +99,8 @@ nvim_lsp.tsserver.setup({})
 local capabilities = vim.lsp.protocol.make_client_capabilities()
 capabilities.textDocument.completion.completionItem.snippetSupport = true
 -- I don't think I actually have these ones...
-nvim_lsp.html.setup({ capabilities })
-nvim_lsp.cssls.setup({ capabilities })
+nvim_lsp.html.setup({ capabilities = capabilities })
+nvim_lsp.cssls.setup({ capabilities = capabilities })
 -------------------------------------------------------------------------------
 --                                                                           --
 --                                    Lua                                    --
@@ -300,7 +304,6 @@ local filetypes = {
 	-- python = { "flake8", "mypy" },
 	json = "eslint",
 	sh = "shellcheck",
-	-- php = { "phpCsFixer" }
 }
 
 local formatFiletypes = {
@@ -311,13 +314,11 @@ local formatFiletypes = {
 	-- yaml = "prettier",
 	json = "prettier",
 	sh = "shfmt",
-	php = "phpCsFixer"
 	-- python = { "black", "isort" },
 	-- lua = "stylua",
 }
 
 local linters = {
-	phpCsFixer = {},
 	eslint = {
 		sourceName = "eslint",
 		-- Slightly faster than eslint as it keeps a server running
@@ -421,16 +422,40 @@ local formatters = {
 		args = { "--quiet", "-" },
 	},
 	shfmt = { command = "shfmt", args = { "-filename", "%filepath", "-i", "2", "-ci", "-bn" } },
-	phpCsFixer = { command = "php-cs-fixer", args = { "fix", "--rules=@Symfony", "--no-interaction", "%filepath", } }
 }
 
 nvim_lsp.diagnosticls.setup({
 	filetypes = vim.tbl_keys(filetypes),
 	init_options = {
 		source = true,
-		filetypes,
-		linters,
-		formatters,
-		formatFiletypes,
+		-- WARNING!
+		-- This is __NOT__ Javascript!
+		-- Previously I had:
+		--
+		-- ```lua
+		-- init_options = {
+		--     source = true,
+		--     filetypes,
+		--     linters,
+		--     formatters,
+		--     formatFiletypes,
+		-- }
+		-- ```
+		-- This is equivalent to:
+
+		-- ```lua
+		-- init_options = {
+		--     source = true,
+		--     [1] = filetypes,
+		--     [2] = linters,
+		--     [3] = formatters,
+		--     [4] = formatFiletypes,
+		-- }
+		-- ```
+		-- So TYPE IT OUT
+		filetypes = filetypes,
+		linters = linters,
+		formatters = formatters,
+		formatFiletypes = formatFiletypes,
 	},
 })

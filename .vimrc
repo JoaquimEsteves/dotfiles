@@ -474,6 +474,11 @@ if executable('cargo')
   Plug 'euclio/vim-markdown-composer', { 'do': function('BuildComposer') }
 endif
 
+if has("nvim")
+  "" Oil is like NERDTREE but good
+  Plug 'stevearc/oil.nvim'
+endif
+
 if has("nvim-0.5")
   Plug 'neovim/nvim-lspconfig'
   Plug 'ray-x/lsp_signature.nvim'
