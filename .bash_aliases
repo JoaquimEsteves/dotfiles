@@ -154,3 +154,12 @@ alias record_screen="ffmpeg -framerate 25 -f x11grab -i :1 -f pulse -ac 2 -i def
 
 # Allows up-arrow to go to the previous command
 alias lua="rlwrap lua"
+
+
+###############################################################################
+#                                                                             #
+#                                 CLANG SHIT                                  #
+#                                                                             #
+###############################################################################
+# If necessary just add more aliases
+alias clang-format="clang-format-18"

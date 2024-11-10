@@ -304,3 +304,5 @@ if [ -x "$(command -v eslint_d)" ]; then
 	# Annoying...
 	export ESLINT_USE_FLAT_CONFIG=true
 fi
+# For some reason this was not changing despite having edited the `etc` files
+export LC_TIME=en_US.utf-8
