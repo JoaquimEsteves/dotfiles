@@ -85,7 +85,7 @@ nvim_lsp.gopls.setup({})
 --                              Typescript + JS                              --
 --                                                                           --
 -------------------------------------------------------------------------------
-nvim_lsp.tsserver.setup({
+nvim_lsp.ts_ls.setup({
 	on_attach = function(client)
 		client.resolved_capabilities.document_formatting = false
 	end,

@@ -145,6 +145,9 @@ set nowrap
 "" Easily find your line
 set cursorline
 
+"" Nicer wildmenu
+set wildmode=longest:list,full
+
 "" Folding!
 "" By default, fold through indents
 "" But set the default foldlevel to 99, so we don't start with everything
@@ -494,7 +497,9 @@ if has("nvim-0.6")
   Plug 'hiphish/rainbow-delimiters.nvim'
   Plug 'nvim-treesitter/playground'
   "" Abuses tree sitter for pretty context colors
-  Plug 'lukas-reineke/indent-blankline.nvim'
+  "" There's a weird bug with this one.
+  "" TODO: See if it's fixed in the future
+  "" Plug 'lukas-reineke/indent-blankline.nvim'
   "" auto-complete + snippets
   "" main one
   "" Plug 'ms-jpq/coq_nvim', {'branch': 'coq'}

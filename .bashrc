@@ -306,3 +306,12 @@ if [ -x "$(command -v eslint_d)" ]; then
 fi
 # For some reason this was not changing despite having edited the `etc` files
 export LC_TIME=en_US.utf-8
+if [ -x "$(command -v clangd)" ]; then
+	# Tell clangd where to find the includes
+	# This is a hack to go around me installing clangd incorrectly
+	if [ -d "/usr/lib/llvm-18/lib/clang/18/include/" ]; then
+		export CPLUS_INCLUDE_PATH=/usr/lib/llvm-18/lib/clang/18/include/
+	else
+		echo "LLVM includes not found! Fix the version"
+	fi
+fi

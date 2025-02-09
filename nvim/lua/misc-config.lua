@@ -37,6 +37,7 @@ if ma("nvim-lightbulb") then
 end
 
 -- https://github.com/lukas-reineke/indent-blankline.nvim
+-- There's a weird bug with it.
 if ma("indent_blankline") then
 	require("ibl").setup({ scope = { show_end = false } })
 end
@@ -123,6 +124,6 @@ endfunction
 "" Make the default Netrw commands available
 command! -bang -nargs=* -complete=dir Sex call SexyOil(<bang>0, <q-args>)
 command! -bang -nargs=* -complete=dir Vex call SexyVertOil(<bang>0, <q-args>)
-command! -bang -nargs=* -complete=dir Ex :Oil --float <args>
+command! -bang -nargs=* -complete=dir Ex :Oil <args>
 ]]
 end
