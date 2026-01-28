@@ -8,6 +8,29 @@ function set-title() {
   PS1=${ORIG}${TITLE}
 }
 
+function qmath() {
+  # Allows for quick math
+  # usage:
+  # $ qmath 5*5
+  # 25
+  # $ qmath '(5+3)/2'  # pass quotes for parens
+  # 4
+  echo $(($@))
+}
+
+
+touch_with_dirs() {
+    # Just like `touch` but creates the directories that lead up to it
+    local file_path="$1"
+    local dir=$(dirname "$file_path")
+
+    # Create directories if they don't exist
+    mkdir -p "$dir"
+
+    # Create the file
+    touch "$file_path"
+}
+
 # Appropriate for lxde or such other tools
 # Uses X11 so should work on any non-wailand thing
 function set-title-x() {

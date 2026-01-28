@@ -5,8 +5,8 @@
 
 # If not running interactively, don't do anything
 case $- in
-*i*) ;;
-*) return ;;
+  *i*) ;;
+  *) return ;;
 esac
 
 # don't put duplicate lines or lines starting with space in the history.
@@ -33,12 +33,12 @@ shopt -s checkwinsize
 
 # set variable identifying the chroot you work in (used in the prompt below)
 if [ -z "${debian_chroot:-}" ] && [ -r /etc/debian_chroot ]; then
-	debian_chroot=$(cat /etc/debian_chroot)
+  debian_chroot=$(cat /etc/debian_chroot)
 fi
 
 # set a fancy prompt (non-color, unless we know we "want" color)
 case "$TERM" in
-xterm-color | *-256color) color_prompt=yes ;;
+  xterm-color | *-256color) color_prompt=yes ;;
 esac
 
 # uncomment for a colored prompt, if the terminal has the capability; turned
@@ -47,42 +47,87 @@ esac
 force_color_prompt=yes
 
 if [ -n "$force_color_prompt" ]; then
-	if [ -x /usr/bin/tput ] && tput setaf 1 >&/dev/null; then
-		# We have color support; assume it's compliant with Ecma-48
-		# (ISO/IEC-6429). (Lack of such support is extremely rare, and such
-		# a case would tend to support setf rather than setaf.)
-		color_prompt=yes
-	else
-		color_prompt=
-	fi
+  if [ -x /usr/bin/tput ] && tput setaf 1 >&/dev/null; then
+    # We have color support; assume it's compliant with Ecma-48
+    # (ISO/IEC-6429). (Lack of such support is extremely rare, and such
+    # a case would tend to support setf rather than setaf.)
+    color_prompt=yes
+  else
+    color_prompt=
+  fi
 fi
 
-if [ "$color_prompt" = yes ]; then
-	PS1='${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
-else
-	PS1='${debian_chroot:+($debian_chroot)}\u@\h:\w\$ '
-fi
+function __normal_ps1() {
+  local nc='\[\033[00m\]'
+  local red='\[\033[01;31m\]' # red 31
+  local uc='\[\033[01;36m\]'  # teal 36
+  local tc='\[\033[01;32m\]'  # green 32
+  local dc='\[\033[01;34m\]'  # dark blue
+  local IFS=''
+  local res
+
+  if [ "$color_prompt" != yes ]; then
+    # The disabling is on purpose, since PS1 will re-eval
+    # every time
+    # shellcheck disable=SC2016
+    res=(
+      '$(e=$?; if [[ $e != 0 ]] ; then echo "[\$?=$e] " ; fi)'
+      '${debian_chroot:+($debian_chroot)}'
+      '\u '
+      '@ '
+      '\t '
+      'in '
+      '$(pwd)'
+      '\n\$ '
+    )
+  else
+    # shellcheck disable=SC2016
+    res=(
+      # red background
+      '$(e=$?; if [[ $e != 0 ]] ; then echo "'"$red"'\$?=$e'"$nc"' " ; fi)'
+      '${debian_chroot:+($debian_chroot)}'
+      "$uc"
+      '\u '
+      "$nc"
+      '@ '
+      "$tc"
+      '\t '
+      "$nc"
+      'in '
+      "$dc"
+      '$(pwd)'
+      "$nc"
+      '\n\$ '
+    )
+
+  fi
+
+  echo "${res[*]}"
+}
+
+PS1=$(__normal_ps1)
+
 unset color_prompt force_color_prompt
 
 # If this is an xterm set the title to user@host:dir
 case "$TERM" in
-xterm* | rxvt*)
-	PS1="\[\e]0;${debian_chroot:+($debian_chroot)}\u@\h: \w\a\]$PS1"
-	;;
-*) ;;
+  xterm* | rxvt*)
+    PS1="\[\e]0;${debian_chroot:+($debian_chroot)}\u@\h: \w\a\]$PS1"
+    ;;
+  *) ;;
 
 esac
 
 # enable color support of ls and also add handy aliases
 if [ -x /usr/bin/dircolors ]; then
-	test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
-	alias ls='ls --color=auto'
-	#alias dir='dir --color=auto'
-	#alias vdir='vdir --color=auto'
+  test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
+  alias ls='ls --color=auto'
+  #alias dir='dir --color=auto'
+  #alias vdir='vdir --color=auto'
 
-	alias grep='grep --color=auto'
-	alias fgrep='fgrep --color=auto'
-	alias egrep='egrep --color=auto'
+  alias grep='grep --color=auto'
+  alias fgrep='fgrep --color=auto'
+  alias egrep='egrep --color=auto'
 fi
 
 # colored GCC warnings and errors
@@ -105,23 +150,22 @@ alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo
 # See /usr/share/doc/bash-doc/examples in the bash-doc package.
 
 if [ -f ~/.bash_aliases ]; then
-	# shellcheck source=/dev/null
-	. ~/.bash_aliases
+  # shellcheck source=/dev/null
+  . ~/.bash_aliases
 fi
 
 # enable programmable completion features (you don't need to enable
 # this, if it's already enabled in /etc/bash.bashrc and /etc/profile
 # sources /etc/bash.bashrc).
 if ! shopt -oq posix; then
-	if [ -f /usr/share/bash-completion/bash_completion ]; then
-		# shellcheck source=/dev/null
-		. /usr/share/bash-completion/bash_completion
-	elif [ -f /etc/bash_completion ]; then
-		# shellcheck source=/dev/null
-		. /etc/bash_completion
-	fi
+  if [ -f /usr/share/bash-completion/bash_completion ]; then
+    # shellcheck source=/dev/null
+    . /usr/share/bash-completion/bash_completion
+  elif [ -f /etc/bash_completion ]; then
+    # shellcheck source=/dev/null
+    . /etc/bash_completion
+  fi
 fi
-
 
 ################################################################################
 #                                                                              #
@@ -152,14 +196,12 @@ export BAT_PAGER="less --tabs=4 -RF"
 eval "$(zoxide init bash)"
 # Add a carriage return to PS1
 # (Don't ask me how this works...)
-PS1=${PS1%?}
-PS1=${PS1%?}\n'$ '
 
 #### CUSTOM FUNCTIONS ####
 
 if [ -f ~/.bash_functions ]; then
-	# shellcheck source=/dev/null
-	. ~/.bash_functions
+  # shellcheck source=/dev/null
+  . ~/.bash_functions
 fi
 
 # FU microsoft telemetry
@@ -207,9 +249,9 @@ setxkbmap -option caps:escape
 
 # French Keyboard Crap!
 # maps è to /
-xmodmap -e "keycode 16 = KP_Divide 7"
+# xmodmap -e "keycode 16 = KP_Divide 7"
 # maps § to \
-xmodmap -e "keycode 15 = backslash 6"
+# xmodmap -e "keycode 15 = backslash 6"
 # Set capslocks to be equal to escape
 # setxkbmap -option caps:escape
 ########################################
@@ -239,19 +281,18 @@ _fzf_compgen_dir() {
 [ -x /usr/bin/direnv ] && eval "$(direnv hook bash)"
 # gh completion
 [ -x /usr/bin/gh ] && eval "$(gh completion -s bash)"
-# pyenv to manage multiple python versions 
-export PYENV_ROOT="$HOME/.pyenv"
-command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"
-eval "$(pyenv init -)"
-# [ -x "$(command -v pyenv)" ] && eval "$(pyenv virtualenv-init -)" 
-
+# pyenv to manage multiple python versions
 
 # Perl crap
 [ -d ~/perl5/bin ] && export PATH=$PATH:~/perl5/bin
-PERL5LIB="~/perl5/lib/perl5${PERL5LIB:+:${PERL5LIB}}"; export PERL5LIB;
-PERL_LOCAL_LIB_ROOT="~/perl5${PERL_LOCAL_LIB_ROOT:+:${PERL_LOCAL_LIB_ROOT}}"; export PERL_LOCAL_LIB_ROOT;
-PERL_MB_OPT="--install_base \"~/perl5\""; export PERL_MB_OPT;
-PERL_MM_OPT="INSTALL_BASE=~/perl5"; export PERL_MM_OPT;
+PERL5LIB="~/perl5/lib/perl5${PERL5LIB:+:${PERL5LIB}}"
+export PERL5LIB
+PERL_LOCAL_LIB_ROOT="~/perl5${PERL_LOCAL_LIB_ROOT:+:${PERL_LOCAL_LIB_ROOT}}"
+export PERL_LOCAL_LIB_ROOT
+PERL_MB_OPT="--install_base \"~/perl5\""
+export PERL_MB_OPT
+PERL_MM_OPT="INSTALL_BASE=~/perl5"
+export PERL_MM_OPT
 
 # >>> conda initialize >>>
 # !! Contents within this block are managed by 'conda init' !!
@@ -267,4 +308,15 @@ PERL_MM_OPT="INSTALL_BASE=~/perl5"; export PERL_MM_OPT;
 # fi
 # unset __conda_setup
 # <<< conda initialize <<<
+
+# Auto-complete folder
+export BASH_COMPLETION_USER_DIR="$HOME/.local/share/bash-completion"
+
+for bcfile in "$BASH_COMPLETION_USER_DIR"/completions/*; do
+  # shellcheck source=/dev/null
+  . "$bcfile"
+done
+
+# Luarocks bin
+[ -d "$HOME/.luarocks/bin" ] && export PATH="$HOME/.luarocks/bin:$PATH"
 

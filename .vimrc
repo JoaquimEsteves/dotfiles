@@ -13,6 +13,10 @@ cabbrev thelp tab help
 "" set <Leader> to <Space>
 let mapleader = " "
 
+
+"" Explore the folders
+map <C-e> :Lex! <CR>
+
 ""     Fun with EU keyboards
 ""     My non-US keyboard makes it hard to type [ and ].
 ""     FEAR NO MORE
@@ -97,6 +101,10 @@ set completeopt=menuone,noinsert
 "" Sane folding
 set foldlevel=99
 set foldmethod=indent
+
+"" SANE way of using netrw
+"" Remember you can toggle with the `i` key
+let g:netrw_liststyle = 3
 
 "" Autoload file changes.
 set autoread
@@ -187,29 +195,6 @@ Plug 'guns/xterm-color-table.vim'
 " Plug 'camspiers/animate.vim'
 Plug 'camspiers/lens.vim'
 
-"" Typescript - React stuff
-
-"" SYNTAX
-"" way too bloody many syntax highlighters
-"" I'm not happy with either...
-"" let js_files = [ 'javascript', 'javascriptreact' ]
-"" let ts_files = [ 'typescript', 'typescriptreact' ]
-"" autocmd FileType javascriptreact set syntax=typescriptreact
-"" Plug 'HerringtonDarkholme/yats.vim'
-"" Plug 'styled-components/vim-styled-components', { 'branch': 'main' }
-
-
-"" Plug 'pangloss/vim-javascript'
-"" Plug 'maxmellon/vim-jsx-pretty'
-
-"" Plug 'pangloss/vim-javascript', { 'for': js_files }
-"" Plug 'maxmellon/vim-jsx-pretty', { 'for': js_files } 
-"" Plug 'leafgarland/typescript-vim', { 'for': ts_files }
-"" Plug 'peitalin/vim-jsx-typescript', { 'for': ts_files }
-
-"" If the need arises...
-"" Plug 'jparise/vim-graphql'
-
 "" General formatter
 let ale_compatible = [ 'sh', 'css', 'sh', 'yaml' ]
 Plug 'dense-analysis/ale', { 'for': ale_compatible,  'on':  'ALEToggle' } 
@@ -238,15 +223,6 @@ endif
 
 "" Quality of like. <Ctrl-w>z to toggle zoom on windows
 Plug 'dhruvasagar/vim-zoom'
-
-"" REMOVED NERDTREE
-"" It was just super heavy. Disliked it a lil' bit
-"" Plug 'preservim/nerdtree'
-"" When a file is changed or deleted or added, it will be highlighted in the NerdTree.
-"" Plug 'Xuyuanp/nerdtree-git-plugin'
-"" Neat nerd-icons :)
-"" Plug 'ryanoasis/vim-devicons'
-"" Plug 'tiagofumo/vim-nerdtree-syntax-highlight' 
 
 " Git gutters! Tells me when a line has changed according to git diff
 " top tip: jump in between 'hunk's with [c and ]c
@@ -309,6 +285,10 @@ if has("nvim-0.6")
 
 endif
 
+if has("nvim-0.8")
+  Plug 'mfussenegger/nvim-jdtls'
+endif
+
 
 
 call plug#end()
@@ -332,10 +312,34 @@ highlight SignatureMarkText ctermfg=Red ctermbg=235
 "                                                                     '  _.'  |
 "                                                                     '-'/    \
 
+command! MakeTags !ctags -R --exclude=node_modules  --exclude=__pycache__ --exclude=.mypy_cache --exclude=*.json .
 command! OpenVimRc :tabnew ~/.vimrc
+command! OpenLspRc :tabnew ~/Projects/dotfiles/nvim/lua/lsp-config.lua
 command! ClearColumn :set colorcolumn&
 command! AddColumn :set colorcolumn=80,120
 command! ToggleSmartCase :set smartcase!
+command! CopyFileName let @+ = expand('%')
+"" Stands for buffer delete
+"" Deletes all buffers and then re-opens the one you were using before
+command! Bd :%bd | e#
+
+
+"" Command I kept forgetting
+"" For future reference: <C-W> T
+command! MoveToTab :wincmd T
+
+function! DeleteHiddenBuffers()
+  let tpbl=[]
+  let closed = 0
+  call map(range(1, tabpagenr('$')), 'extend(tpbl, tabpagebuflist(v:val))')
+  for buf in filter(range(1, bufnr('$')), 'bufexists(v:val) && index(tpbl, v:val)==-1')
+    if getbufvar(buf, '&mod') == 0
+      silent execute 'bwipeout' buf
+      let closed += 1
+    endif
+  endfor
+  echo "Closed ".closed." hidden buffers"
+endfunction
 
 " See the difference between the current buffer and the original file
 command! DiffOrig vert new | set bt=nofile | r ++edit # | 0d_ | diffthis
@@ -657,6 +661,7 @@ if PlugLoaded('vim-zoom')
 endif
 
 if PlugLoaded('ale')
+  let g:ale_enabled = 0
   "" Follow [Google's shell style](https://google.github.io/styleguide/shellguide.html)
   let g:ale_sh_shfmt_options = '-i 2 -ci -bn'
 
