@@ -129,7 +129,7 @@ local linters = {
 local formatters = {
 	prettier = { command = "prettier", args = { "--stdin-filepath", "%filepath" } },
 	ruff_format = { command = "ruff", args = { "format", "--quiet", "-" } },
-	black = { command = "python3", args = { "-m", "black", "--quiet", "-" } },
+	black = { command = "uv", args = { "run", "ruff", "format", "-" } },
 	isort = {
 		command = "isort",
 		args = { "--quiet", "-" },
@@ -293,7 +293,7 @@ end
 local function on_textdocument_codeaction(err, actions, ctx)
 	for _, action in ipairs(actions) do
 		-- TODO: (steelsojka) Handle more than one edit?
-		if action.command == 'java.apply.workspaceEdit' then                                     -- 'action' is Command in java format
+		if action.command == 'java.apply.workspaceEdit' then                                           -- 'action' is Command in java format
 			action.edit = fix_zero_version(action.edit or action.arguments[1])
 		elseif type(action.command) == 'table' and action.command.command == 'java.apply.workspaceEdit' then -- 'action' is CodeAction in java format
 			action.edit = fix_zero_version(action.edit or action.command.arguments[1])
@@ -322,8 +322,8 @@ end
 local root_files = {
 	-- Single-module projects
 	{
-		'build.xml', -- Ant
-		'pom.xml', -- Maven
+		'build.xml',     -- Ant
+		'pom.xml',       -- Maven
 		'settings.gradle', -- Gradle
 		'settings.gradle.kts', -- Gradle
 	},
@@ -397,3 +397,9 @@ nvim_lsp.jdtls.setup({
 
 -- END JAVA LSP
 
+-- CPP and C
+--
+nvim_lsp.clangd.setup {
+	filetypes = { "c", "cpp", "objc", "objcpp", "cuda", "proto", "hpp"},
+	on_attach = on_attach
+}

@@ -320,3 +320,6 @@ done
 # Luarocks bin
 [ -d "$HOME/.luarocks/bin" ] && export PATH="$HOME/.luarocks/bin:$PATH"
 
+if [ -x "$(command -v tldr)" ]; then
+  tldr "$(tldr --list | shuf -n1)"
+fi

@@ -290,6 +290,9 @@ if has("nvim-0.8")
 endif
 
 
+if has("nvim")
+  Plug 'jbyuki/venn.nvim'
+endif
 
 call plug#end()
 
@@ -650,9 +653,9 @@ if PlugLoaded("nvim-lspconfig")
   "" Refactor :)
   ""     TOP TIP: use 'V' to select the whole line and then apply the
   ""     refactor
-  vnoremap <Leader>r  :LspCodeRangeAction<CR>
+  vnoremap <Leader>a  :LspCodeRangeAction<CR>
   "" Also fixes simple errors inline!
-  nnoremap <Leader>r  :LspCodeAction<CR>
+  nnoremap <Leader>a  :LspCodeAction<CR>
 endif
 
 if PlugLoaded('vim-zoom')
