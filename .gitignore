@@ -4,3 +4,8 @@
 .tmux/resurrect/
 .vim/.netrwhist
 .vim/plugged/
+# Vim crap
+*.swo
+*.swp
+*.un~
+Session.vim

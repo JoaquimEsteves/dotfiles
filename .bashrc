@@ -5,8 +5,8 @@
 
 # If not running interactively, don't do anything
 case $- in
-*i*) ;;
-*) return ;;
+  *i*) ;;
+  *) return ;;
 esac
 
 # don't put duplicate lines or lines starting with space in the history.
@@ -33,12 +33,12 @@ shopt -s checkwinsize
 
 # set variable identifying the chroot you work in (used in the prompt below)
 if [ -z "${debian_chroot:-}" ] && [ -r /etc/debian_chroot ]; then
-	debian_chroot=$(cat /etc/debian_chroot)
+  debian_chroot=$(cat /etc/debian_chroot)
 fi
 
 # set a fancy prompt (non-color, unless we know we "want" color)
 case "$TERM" in
-xterm-color | *-256color) color_prompt=yes ;;
+  xterm-color | *-256color) color_prompt=yes ;;
 esac
 
 # uncomment for a colored prompt, if the terminal has the capability; turned
@@ -47,42 +47,88 @@ esac
 force_color_prompt=yes
 
 if [ -n "$force_color_prompt" ]; then
-	if [ -x /usr/bin/tput ] && tput setaf 1 >&/dev/null; then
-		# We have color support; assume it's compliant with Ecma-48
-		# (ISO/IEC-6429). (Lack of such support is extremely rare, and such
-		# a case would tend to support setf rather than setaf.)
-		color_prompt=yes
-	else
-		color_prompt=
-	fi
+  if [ -x /usr/bin/tput ] && tput setaf 1 >&/dev/null; then
+    # We have color support; assume it's compliant with Ecma-48
+    # (ISO/IEC-6429). (Lack of such support is extremely rare, and such
+    # a case would tend to support setf rather than setaf.)
+    color_prompt=yes
+  else
+    color_prompt=
+  fi
 fi
 
-if [ "$color_prompt" = yes ]; then
-	PS1='${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
-else
-	PS1='${debian_chroot:+($debian_chroot)}\u@\h:\w\$ '
-fi
+function __setup_ps1() {
+  local nc='\[\033[00m\]'
+  local red='\[\033[01;31m\]' # red 31
+  local uc='\[\033[01;36m\]'  # teal 36
+  local tc='\[\033[01;32m\]'  # green 32
+  local dc='\[\033[01;34m\]'  # dark blue
+  local IFS=''
+  local res
+
+  if [ "$color_prompt" != yes ]; then
+    # The disabling is on purpose, since PS1 will re-eval
+    # every time
+    # shellcheck disable=SC2016
+    res=(
+      '$(e=$?; if [[ $e != 0 ]] ; then echo "[\$?=$e] " ; fi)'
+      '${debian_chroot:+($debian_chroot)}'
+      '\u '
+      '@ '
+      '\t '
+      'in '
+      '$(pwd)'
+      '\n\$ '
+    )
+  else
+    # shellcheck disable=SC2016
+    res=(
+      # red background
+      '$(e=$?; if [[ $e != 0 ]] ; then echo "'"$red"'\$?=$e'"$nc"' " ; fi)'
+      '${debian_chroot:+($debian_chroot)}'
+      "$uc"
+      '\u '
+      "$nc"
+      '@ '
+      "$tc"
+      '\t '
+      "$nc"
+      'in '
+      "$dc"
+      '$(pwd)'
+      "$nc"
+      '\n\$ '
+    )
+
+  fi
+
+  echo "${res[*]}"
+}
+
+PS1=$(__setup_ps1)
+
 unset color_prompt force_color_prompt
 
 # If this is an xterm set the title to user@host:dir
 case "$TERM" in
-xterm* | rxvt*)
-	PS1="\[\e]0;${debian_chroot:+($debian_chroot)}\u@\h: \w\a\]$PS1"
-	;;
-*) ;;
+  xterm* | rxvt*)
+    PS1="\[\e]0;${debian_chroot:+($debian_chroot)}\u@\h: \w\a\]$PS1"
+    ;;
+  *) ;;
 
 esac
 
 # enable color support of ls and also add handy aliases
 if [ -x /usr/bin/dircolors ]; then
-	test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
-	alias ls='ls --color=auto'
-	#alias dir='dir --color=auto'
-	#alias vdir='vdir --color=auto'
+  # shellcheck disable=SC2015
+  test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
+  alias ls='ls --color=auto'
+  #alias dir='dir --color=auto'
+  #alias vdir='vdir --color=auto'
 
-	alias grep='grep --color=auto'
-	alias fgrep='fgrep --color=auto'
-	alias egrep='egrep --color=auto'
+  alias grep='grep --color=auto'
+  alias fgrep='fgrep --color=auto'
+  alias egrep='egrep --color=auto'
 fi
 
 # colored GCC warnings and errors
@@ -105,21 +151,21 @@ alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo
 # See /usr/share/doc/bash-doc/examples in the bash-doc package.
 
 if [ -f ~/.bash_aliases ]; then
-	# shellcheck source=/dev/null
-	. ~/.bash_aliases
+  # shellcheck source=/dev/null
+  . ~/.bash_aliases
 fi
 
 # enable programmable completion features (you don't need to enable
 # this, if it's already enabled in /etc/bash.bashrc and /etc/profile
 # sources /etc/bash.bashrc).
 if ! shopt -oq posix; then
-	if [ -f /usr/share/bash-completion/bash_completion ]; then
-		# shellcheck source=/dev/null
-		. /usr/share/bash-completion/bash_completion
-	elif [ -f /etc/bash_completion ]; then
-		# shellcheck source=/dev/null
-		. /etc/bash_completion
-	fi
+  if [ -f /usr/share/bash-completion/bash_completion ]; then
+    # shellcheck source=/dev/null
+    . /usr/share/bash-completion/bash_completion
+  elif [ -f /etc/bash_completion ]; then
+    # shellcheck source=/dev/null
+    . /etc/bash_completion
+  fi
 fi
 
 ################################################################################
@@ -129,8 +175,8 @@ fi
 ################################################################################
 
 if [ -f ~/.bash_functions ]; then
-	# shellcheck source=/dev/null
-	. ~/.bash_functions
+  # shellcheck source=/dev/null
+  source ~/.bash_functions
 fi
 
 export DO_NOT_TRACK=1
@@ -138,11 +184,11 @@ export DO_NOT_TRACK=1
 # Node Version Manager
 NVM_DIR="$HOME/.nvm"
 if [ -d "$NVM_DIR" ]; then
-	export NVM_DIR
-	# shellcheck source=/dev/null
-	[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh" # This loads nvm
-	# shellcheck source=/dev/null
-	[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion" # This loads nvm bash_completion
+  export NVM_DIR
+  # shellcheck source=/dev/null
+  [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh" # This loads nvm
+  # shellcheck source=/dev/null
+  [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion" # This loads nvm bash_completion
 fi
 
 # yarn's global bin folder
@@ -159,10 +205,6 @@ export HOSTALIASES="$HOME/.hosts"
 export BAT_PAGER="less --tabs=4 -RF"
 # Allows us to use zoxide, the fancy cd built with rust
 [ -x "$(command -v zoxide)" ] && eval "$(zoxide init bash)"
-# Add a carriage return to PS1
-# (Don't ask me how this works...)
-PS1=${PS1%?}
-PS1=${PS1%?}\n'$ '
 
 # FU microsoft telemetry
 export DOTNET_CLI_TELEMETRY_OPTOUT=1
@@ -223,6 +265,8 @@ export EDITOR=vim
 # Allows shells to remember the history of other shells. (Useful for fzf + tmux)
 # __REMOVED__: It was actually a pain in the ass
 export PROMPT_COMMAND="history -a; history -n"
+
+# shellcheck source=/dev/null
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash
 
 # Allow the use of direnv
@@ -233,47 +277,33 @@ export PROMPT_COMMAND="history -a; history -n"
 
 # Perl crap
 if [ -d ~/perl5/bin ]; then
-	export PATH=$PATH:~/perl5/bin
+  export PATH=$PATH:~/perl5/bin
 
-	PERL5LIB="$HOME/perl5/lib/perl5${PERL5LIB:+:${PERL5LIB}}"
-	export PERL5LIB
+  PERL5LIB="$HOME/perl5/lib/perl5${PERL5LIB:+:${PERL5LIB}}"
+  export PERL5LIB
 
-	PERL_LOCAL_LIB_ROOT="$HOME/perl5${PERL_LOCAL_LIB_ROOT:+:${PERL_LOCAL_LIB_ROOT}}"
-	export PERL_LOCAL_LIB_ROOT
+  PERL_LOCAL_LIB_ROOT="$HOME/perl5${PERL_LOCAL_LIB_ROOT:+:${PERL_LOCAL_LIB_ROOT}}"
+  export PERL_LOCAL_LIB_ROOT
 
-	PERL_MB_OPT="--install_base \"$HOME/perl5\""
-	export PERL_MB_OPT
+  # shellcheck disable=SC2089
+  PERL_MB_OPT="--install_base \"$HOME/perl5\""
+  export PERL_MB_OPT
 
-	PERL_MM_OPT="INSTALL_BASE=$HOME/perl5"
-	export PERL_MM_OPT
-fi
-
-# pyenv - install multiple version of python
-PYENV_ROOT="$HOME/Programs/pyenv"
-if [ -d "$PYENV_ROOT" ]; then
-	export PYENV_ROOT
-	command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"
-	eval "$(pyenv init -)"
-
-	# Optional plugin: https://github.com/pyenv/pyenv-virtualenv
-	# eval "$(pyenv virtualenv-init -)"
+  PERL_MM_OPT="INSTALL_BASE=$HOME/perl5"
+  export PERL_MM_OPT
 fi
 
 # LUA PATH SHENANIGANS
 if [ -x "$(command -v luarocks)" ]; then
-	eval "$(luarocks path)"
+  eval "$(luarocks path)"
 fi
 
 ## COMPLETION
 ## Should be automatic - but isn't lol
 if [ -d "$HOME"/.local/share/bash-completion/completions ]; then
-	for f in "$HOME"/.local/share/bash-completion/completions/*; do
-		[ -f "$f" ] && . "$f"
-	done
-fi
-
-if [ -d '/var/lib/flatpak/exports/share' ] && [ -d "$HOME"/.local/share/flatpak/exports/share ]; then
-	export XDG_DATA_DIRS="$XDG_DATA_DIRS:/var/lib/flatpak/exports/share:"$HOME"/.local/share/flatpak/exports/share"
+  for f in "$HOME"/.local/share/bash-completion/completions/*; do
+    [ -f "$f" ] && . "$f"
+  done
 fi
 
 # UNCOMMENT THIS WHEN YOU WANT TO WORK WITH ANDROID AGAIN
@@ -288,30 +318,33 @@ fi
 # update-alternatives was not setting the correct JAVA_HOME
 JAVA_HOME=/usr/lib/jvm/temurin-22-jdk-amd64
 if [ -d $JAVA_HOME ]; then
-	export JAVA_HOME
+  export JAVA_HOME
 fi
 
-
 if [ -x "$(command -v ng)" ]; then
-	# Load Angular CLI autocompletion.
-	source <(ng completion script)
+  # Load Angular CLI autocompletion.
+  source <(ng completion script)
 fi
 
 if [ -x "$(command -v eslint_d)" ]; then
-	# Fix broken config shenanigans for eslint_d
-	# Basically if you have the new
-	# eslint.config.js then eslint_d just craps the bed
-	# Annoying...
-	export ESLINT_USE_FLAT_CONFIG=true
+  # Fix broken config shenanigans for eslint_d
+  # Basically if you have the new
+  # eslint.config.js then eslint_d just craps the bed
+  # Annoying...
+  export ESLINT_USE_FLAT_CONFIG=true
 fi
 # For some reason this was not changing despite having edited the `etc` files
 export LC_TIME=en_US.utf-8
-if [ -x "$(command -v clangd)" ]; then
-	# Tell clangd where to find the includes
-	# This is a hack to go around me installing clangd incorrectly
-	if [ -d "/usr/lib/llvm-18/lib/clang/18/include/" ]; then
-		export CPLUS_INCLUDE_PATH=/usr/lib/llvm-18/lib/clang/18/include/
-	else
-		echo "LLVM includes not found! Fix the version"
-	fi
+# if [ -x "$(command -v clangd)" ]; then
+#   # Tell clangd where to find the includes
+#   # This is a hack to go around me installing clangd incorrectly
+#   if [ -d "/usr/lib/llvm-18/lib/clang/18/include/" ]; then
+#     export CPLUS_INCLUDE_PATH=/usr/lib/llvm-18/lib/clang/18/include/
+#   else
+#     echo "LLVM includes not found! Fix the version"
+#   fi
+# fi
+#
+if [ -x "$(command -v tldr)" ]; then
+  tldr "$(tldr --list | shuf -n1)"
 fi

@@ -2,28 +2,25 @@
 
 function mkdir_cd() {
   ### Create a dir (including parents) and then cd to it.
-  mkdir -p "$1" && cd "$1"
+  mkdir -p "$1" && cd "$1" || return 1
 }
 
 function mkdir_touch() {
   ### Touch AND make the dir recursively
   local file_path="$1"
-  local dir_name=$(dirname "$file_path")
+  local dir_name
+  dirname=$(dirname "$file_path")
 
   mkdir -p "$dir_name" && touch "$file_path"
 }
 
 function goat() {
-  local goat
-  goat=$(
-    command cat <<-EOF
+command cat <<-EOF
 (_(
 /_/'_____/)
 "  |      |
    |""""""|
 EOF
-  )
-  echo "$goat"
 }
 
 # rename terminal window title
@@ -47,6 +44,26 @@ function every_binary() {
   fi
 }
 
+function tempe() {
+    cd "$(mktemp -d)" || return 1
+    # Only I - the user, can read/write/execute
+    # Doesn't seem to be necessary...
+    # chmod -R a+rwx,g-rwx,o-rwx .
+}
+
+touch_with_dirs() {
+    # Just like `touch` but creates the directories that lead up to it
+    local file_path="$1"
+    local dir
+    dir=$(dirname "$file_path")
+
+    # Create directories if they don't exist
+    mkdir -p "$dir"
+
+    # Create the file
+    touch "$file_path"
+}
+
 # Appropriate for lxde or such other tools
 # Uses X11 so should work on any non-wailand thing
 function set-title-x() {
@@ -62,6 +79,28 @@ function set-title-x() {
     read -r new_name
   fi
   xdotool search --onlyvisible --pid "$window_to_rename" --name "\a\b\c" set_window --name "$new_name"
+}
+
+function mkcd() {
+  # Create a dir (including parents) and then cd to it.
+  # We use cmake because mkdir -p is not recommended in many
+  # manuals
+  # See: https://unix.stackexchange.com/a/277154
+  # Disabled spellcheck because we obviously _just_ created the dir
+  # shellcheck disable=SC2164
+  cmake -E make_directory "$1" && cd "$1"
+}
+
+function tnt() {
+
+if ! [ -z "$1" ]
+then
+     tmux
+else
+  tmux new -s $1
+fi
+
+
 }
 
 # Call `unicode` with the given arguments, and then pipe to awk, printing the first field.

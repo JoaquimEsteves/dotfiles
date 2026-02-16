@@ -1,37 +1,182 @@
+"" # vim: shiftwidth=2 expandtab:
+"" This is my vimrc
+"" The idea is that it _should_ just work for both `vim` and `nvim`
+"" I _might_ not have vim in some weird remote machine, and so we do a bunch
+"" of checks
+"" FOR NEOVIM NERDS: Your `init.vim` should basically just be:
+"" ```vim
+"" set runtimepath^=~/.vim runtimepath+=~/.vim/after
+"" let &packpath = &runtimepath
+"" source ~/.vimrc
+"" ```
+"" ______________________________________________________________________
+""/                                                                      \
+""|                                 SETS                                 |
+""\________________________________________________________________  __'\
+""                                                                 |/   \\
+""                                                                  \    \\  .
+""                                                                       |\\/|
+""                                                                       / " '\
+""                                                                       . .   .
+""                                                                      /    ) |
+""                                                                     '  _.'  |
+""                                                                     '-'/    \
+""
+"" This is the meat and potatoes of vim.
+"" 
 "" Stop being compatible with the 1960's
 "" This must be first, because it changes other options as a side effect.
 "" Avoid side effects when it was already reset." Avoid side-effects by
 if &compatible
   set nocompatible
 endif
+"" When I close a buffer _ACTUALLY_ close it
+set nohidden
+""Show (partial) command in the last line of the screen
+set showcmd
+"" Smarc case writting! Case insensitive unless /C or a capital letter in
+"" search :)
+set ignorecase
+set smartcase
+"" Don't wrap goddamn lines of text
+set nowrap
+"" Easily find your line
+set cursorline
+"" Nicer wildmenu
+set wildmode=list:longest,full
+"" Folding!
+"" By default, fold through indents
+"" But set the default foldlevel to 99, so we don't start with everything
+"" hidden away
+"" (Treesitter later changes this. But I'm unsure how happy I am about
+"" that...)
+set foldmethod=indent
+"" Note that later on we reset this with treesitter
+set foldlevel=99
+"" Tell the preview menu to bugger off
+set completeopt=menu,menuone,noselect,noinsert,popup
+"" Autoload file changes.
+set autoread
+"" Save undo changes somewhere on /tmp
+set undofile
+if has('nvim')
+  "" Set the swap files to the vim default
+  "" Why the hell would they be stored in this ghasthly directory:
+  "" $XDG_DATA_HOME/nvim/swap/
+  set directory=.,~/tmp,/var/tmp,/tmp
+endif
+"" MORE UPDATES YO
+set updatetime=100
+"" Tells me when I'm quitting unsaved files in a nicer way
+"" really useful with `qall`
+set confirm
+"" No more silly guessword! `8j` is now visually represented!!! This shit's
+"" bananas. I love it
+set relativenumber
+"Show line numbers (next to relativenumber)
+set number
+"" Set the standard yank register to the godsdamned normal clipboard
+"" set clipboard=unnamedplus
+"" Make tabs look like 4 spaces visually
+set tabstop=4
+" Always allow me to see the dang ruler
+set laststatus=2
+" Search goodness!
+" Top tip - press "*" to search for the word under the cursor! Incredible
+set incsearch "search as you type
+" Highlight Search
+set hlsearch  
+" Show file stats
+set ruler
+" Blink cursor on error instead of beeping (grr)
+set visualbell
+set encoding=utf-8
+" set t_Co=256
+set background=dark
+"" Set ripgrep as the default vimgrep
+"" and make it SANE
+"" TODO(Joaquim): Credit the source of this, I forgot where it came from.
+if executable('rg')
+  set grepprg=rg\ --vimgrep\ --smart-case\ --hidden\ -g\ \'!.git\/'
+  set grepformat=%f:%l:%c:%m,%f:%l:%m
+
+  function! Grep(...)
+    return system(join([&grepprg] + [expandcmd(join(a:000, ' '))], ' '))
+  endfunction
+
+
+  command! -nargs=+ -complete=file_in_path -bar Grep  cgetexpr Grep(<f-args>)
+  command! -nargs=+ -complete=file_in_path -bar LGrep lgetexpr Grep(<f-args>)
+
+  cnoreabbrev <expr> grep  (getcmdtype() ==# ':' && getcmdline() ==# 'grep')  ? 'Grep'  : 'grep'
+  cnoreabbrev <expr> lgrep (getcmdtype() ==# ':' && getcmdline() ==# 'lgrep') ? 'LGrep' : 'lgrep'
+
+  augroup quickfix
+    autocmd!
+    autocmd QuickFixCmdPost cgetexpr cwindow
+    autocmd QuickFixCmdPost lgetexpr lwindow
+  augroup END
+endif
+if has("nvim")
+  set inccommand=nosplit
+  "" Assume I'm using a modern terminal lol
+  "" use `:checkhealth` to setup proper terminal colors
+  "" See: https://github.com/termstandard/colors
+  set termguicolors
+endif
+
+""  ______________________________________________________________________
+"" /                                                                      \
+"" |                                 Lets                                 |
+"" \________________________________________________________________  __'\
+""                                                                  |/   \\
+""                                                                   \    \\  .
+""                                                                        |\\/|
+""                                                                        / " '\
+""                                                                        . .   .
+""                                                                       /    ) |
+""                                                                      '  _.'  |
+""                                                                      '-'/    \
+"" <Leader> is now <Space>
+let mapleader = " "
+"" GENERAL CONFIGURATION
+" Hit `%` on `if` to jump to `else`.
+runtime macros/matchit.vim
+" let matchit handle it
+let c_no_curly_error=1
+let c_no_bracket_error=1
+" Enable bash aliases!
+let $BASH_ENV = "~/.bash_aliases"
+
+filetype plugin indent on
+if ! has('nvim')
+  syntax enable
+endif
+
+""  ______________________________________________________________________
+"" /                                                                      \
+"" |                          MAPS AND COMMANDS                           |
+"" \________________________________________________________________  __'\
+""                                                                  |/   \\
+""                                                                   \    \\  .
+""                                                                        |\\/|
+""                                                                        / " '\
+""                                                                        . .   .
+""                                                                       /    ) |
+""                                                                      '  _.'  |
+""                                                                      '-'/    \
 
 "" open help in a new tab
 cabbrev thelp tab help
-
-"" Mappings!
-
-"" set <Leader> to <Space>
-let mapleader = " "
-
-"" Open netrw on the right with Ctrl-E
+"" Open netrw/oil on the right with Ctrl-E
 map <C-e> :Vex!<CR>
-
-""     Fun with EU keyboards
-""     My non-US keyboard makes it hard to type [ and ].
-""     FEAR NO MORE
-
-"" nmap < [
-"" nmap > ]
-"" omap < [
-"" omap > ]
-"" xmap < [
-"" xmap > ]
-"" does what it days on the tin (see function definition bellow)
-xnoremap @ :<C-u>call ExecuteMacroOverVisualRange()<CR>
-
-
-"" use gQ instead. Such a promiment key for such a minor feature is a pain in the ass.
-map Q <Nop>
+" Break insert change when making a new line.
+" That way each inserted line is a different change that you can undo, without
+" loosing all the lines typed before the last one.
+inoremap <cr> <c-]><c-g>u<cr>
+"" I prefer keeping the vim clipboard separate
+vnoremap <Leader>y "+y:echom 'Yanked to clipboard'<ENTER>
+vnoremap <C-C> "+y:echom 'Yanked to clipboard'<ENTER>
 
 "" Command Line Editing Shortcuts
 "" Use emacs style editing
@@ -52,171 +197,152 @@ cnoremap <M-d> <S-Right><C-w>
 inoremap <M-d> <S-Right><C-w>
 " Open VIM, in VIM. Short cut is now the same as in bash
 cnoremap <C-x><C-e> <C-f>
-
-"" Smooth scrolling 😎
-map <C-U> <C-Y><C-Y><C-Y><C-Y><C-Y><C-Y><C-Y><C-Y><C-Y><C-Y><C-Y><C-Y><C-Y><C-Y><C-Y><C-Y>
-map <C-D> <C-E><C-E><C-E><C-E><C-E><C-E><C-E><C-E><C-E><C-E><C-E><C-E><C-E><C-E><C-E><C-E>
-
-
 "" Window navigation
 nnoremap <C-h> <C-w>h
 nnoremap <C-j> <C-w>j
 nnoremap <C-k> <C-w>k
 nnoremap <C-l> <C-w>l
-
-" Deleted: Still need a bit more practise
-" nnoremap <Leader>g :silent lgrep<Space>
-" nnoremap <silent> [f :lprevious<CR>
-" nnoremap <silent> ]f :lnext<CR>
+" dont loose selection on indenting
+xnoremap > >gv
+xnoremap < <gv
 
 " Clear highlighting by mashing escape in normal mode
 nnoremap <silent><esc> :noh<return><esc>
 nnoremap <silent><esc>^[ <esc>^[
-
 " delete without yanking
 " Also makes x and d have separate separate functionality! 
 nnoremap x "_x
 vnoremap x "_x
-
 " replace currently selected text with default register
 " without yanking it
 " Note: That I've switched around the meaning of p and P.
 vnoremap <leader>p "_c<C-o>P<Esc>
 vnoremap <leader>P "_c<C-o>P<Esc>
 
-"" REMOVE ME
+if ! has('nvim')
+  "" These boys come by default in NVIM but vim doesn't have them!
+  "" From nvim's defaults
 
-"" FULL LINE
-"" pre tweak me post
+  "" use gQ instead. Such a promiment key for such a minor feature is a pain in the ass.
+  "" In neovim Q repears the last recorded register
+  map Q <Nop>
 
-
-
-"" GENERAL CONFIGURATION
-
-" Hit `%` on `if` to jump to `else`.
-runtime macros/matchit.vim
-" let matchit handle it
-let c_no_curly_error=1
-let c_no_bracket_error=1
-
-"" NETRW crap
-"" See the way DOOM does it: https://github.com/doom-neovim/doom-nvim/blob/main/lua/doom/modules/features/netrw/init.lua
-" Keeps the current directory and the browsing directory synced.
-" Supposedly, This helps you avoid the move files error.
-" It just keeps messing me up doe.
-" Like when I open and close folders I want to then just press % and it _just
-" works_
-" so I leave it at the default 1
-" let g:netrw_keepdir=0
-
-" List style
-" Remember you can cycle between whem with `i`
-let g:netrw_liststyle=3
+  "" & repeats the last substitution
+  nnoremap & :&&<CR>
+  nnoremap [q :cprevious
+  nnoremap ]q :cnext
+  nnoremap [l :lprevious
+  nnoremap ]l :lnext
+endif
 
 
-"" Consider this instead
-"" https://github.com/arp242/xdg_open.vim
-function! OSDirExplorerNetrw()
-  """ Open some dir with xdg-open in Netrw
-  """
-  "" Trying without the dirname doesn't work for some mysterious reason...
-  echo system('echo '.getcwd().'/'.netrw#Call("NetrwGetWord").' | xargs dirname | xargs xdg-open')
+command! MakeTags !ctags -R --exclude=node_modules  --exclude=__pycache__ --exclude=.mypy_cache --exclude=*.json .
+command! OpenVimRc :tabnew ~/.vimrc
+command! OpenLspRc :tabnew ~/Projects/dotfiles/nvim/lua/lsp-config.lua
+command! ClearColumn :set colorcolumn&
+command! AddColumn :set colorcolumn=80,120
+command! ToggleSmartCase :set smartcase!
+if executable('shfmt')
+  command! Shfmt !shfmt -w -i 2 -ci -bn %
+endif
+command! CopyFileName let @+ = expand('%')
+command! CopyFileNameWithLineNumber let @+ = expand('%') . ':' . line('.')
+"" Stands for buffer delete
+"" Deletes all buffers and then re-opens the one you were using before
+"" Use with confirm so you don't lose your work!
+command! Bd :%bd | e#
+"" Command I kept forgetting
+"" For future reference: <C-W> T
+command! MoveToTab :wincmd T
+" See the difference between the current buffer and the original file
+command! DiffOrig vert new | set bt=nofile | r ++edit # | 0d_ | diffthis
+      \ | wincmd p | diffthis
+
+"" nvim (SUPPOSEDLY) does this by default - but it doesn't actually
+xnoremap @ :<C-u>call ExecuteMacroOverVisualRange()<CR>
+function! ExecuteMacroOverVisualRange()
+  echo "@".getcmdline()
+  execute ":'<,'>normal @".nr2char(getchar())
 endfunction
-command! OSDirExplorerNetrw call OSDirExplorerNetrw()
 
+" redirect any vim command output using Redir command.
+" Particularly useful for external commands
+" Usage:
+" Redir !pylint %
+" Redir :messages
+"
+command! -nargs=1 Redir call Redir(<f-args>)
+function! Redir(cmd)
+  redir => output
+  silent! execute(a:cmd )
+  redir END
+  let output = split(output, "\n")
 
-"" Hides all files on the gitignore
-"" Pretty neat: https://github.com/eiginn/netrw/blob/master/autoload/netrw_gitignore.vim
-"" You can toggle between showing and hidding the files with the `a` key!
-let g:netrw_list_hide = netrw_gitignore#Hide()
+  if bufwinnr('cmd.out') >0 
+    bdelete cmd.out
+  endif
 
-" Enable bash aliases!
-let $BASH_ENV = "~/.bash_aliases"
+  vnew cmd.out
+  let w:scratch = 1
+  setlocal buftype=nofile bufhidden=wipe noswapfile
+  call setline(1, output)
+  wincmd h
+endfunction
 
-"" Smarc case writting! Case insensitive unless /C or a capital letter in
-"" search :)
-set ignorecase
-set smartcase
+command! GetHighlightAtCursor call GetHighlightAtCursor()
+function! GetHighlightAtCursor()
+  echo synIDattr(synID(line("."), col("."), 1), "name")
+endfunction
 
+function! TabCloseRight(bang)
+  let cur=tabpagenr()
+  while cur < tabpagenr('$')
+    exe 'tabclose' . a:bang . ' ' . (cur + 1)
+  endwhile
+endfunction
 
-"" Don't wrap goddamn lines of text
-set nowrap
+function! TabCloseLeft(bang)
+  while tabpagenr() > 1
+    exe 'tabclose' . a:bang . ' 1'
+  endwhile
+endfunction
 
-"" Easily find your line
-set cursorline
+command! -bang TabCloseRight call TabCloseRight('<bang>')
+command! -bang TabCloseLeft call TabCloseLeft('<bang>')
 
-"" Nicer wildmenu
-set wildmode=longest:list,full
+"
+" Stolen from https://stackoverflow.com/a/72220548/6595024
+" Invoke `ToggleResizeModel` and then press the arrow keys
+"
+command! ToggleResizeMode call ToggleResizeMode()
 
-"" Folding!
-"" By default, fold through indents
-"" But set the default foldlevel to 99, so we don't start with everything
-"" hidden away
-set foldmethod=indent
-set foldlevel=99
+function! ToggleResizeMode()
+  if s:KeyResizeEnabled
+    call NormalArrowKeys()
+    let s:KeyResizeEnabled = 0
+  else
+    call ResizeArrowKeys()
+    let s:KeyResizeEnabled = 1
+  endif
+endfunction
 
-"" Tell the preview menu to bugger off
-set completeopt=menuone,noselect,noinsert
-"" Autoload file changes.
-set autoread
+function! NormalArrowKeys()
+  " unmap arrow keys
+  echom 'normal arrow keys'
+  nunmap <Up>
+  nunmap <Down>
+  nunmap <Left>
+  nunmap <Right>
+endfunction
 
-"" Save undo changes somewhere on /tmp
-set undofile
-if has('nvim')
-  "" Set the swap files to the vim default
-  set directory=.,~/tmp,/var/tmp,/tmp
-endif
-
-"" MORE UPDATES YO
-set updatetime=100
-"" Tells me when I'm quitting unsaved files in a nicer way
-"" really useful with `qall`
-set confirm
-
-"" Highlights the column (I am a beta...)
-"" 
-"" set cuc
-
-
-"" Set ripgrep as the default vimgrep
-if executable('rg')
-  set grepprg=rg\ --vimgrep\ --smart-case\ --hidden\ -g\ \'!.git\/'
-  set grepformat=%f:%l:%c:%m,%f:%l:%m
-endif
-
-"" No more silly guessword! `8j` is now visually represented!!! This shit's
-"" bananas. I love it
-set relativenumber
-"Show line numbers (next to relativenumber)
-set number
-
-"" Set the standard yank register to the godsdamned normal clipboard
-set clipboard=unnamedplus
-
-"" Make tabs look like 4 spaces visually
-set tabstop=4
-" Always allow me to see the dang ruler
-set laststatus=2
-" Search goodness!
-"     Top tip - press "*" to search for the word under the cursor! Incredible
-set incsearch "search as you type
-" Highlight Search
-set hlsearch  
-" Show file stats
-set ruler
-
-" Blink cursor on error instead of beeping (grr)
-set visualbell
-
-" Encoding
-set encoding=utf-8
-
-syntax enable
-filetype plugin indent on
-
-" set t_Co=256
-set background=dark
-
+function! ResizeArrowKeys()
+  " Remap arrow keys to resize window
+  echom 'Resize window with arrow keys'
+  nnoremap <Up>    :resize +2<CR>
+  nnoremap <Down>  :resize -2<CR>
+  nnoremap <Left>  :vertical resize -2<CR>
+  nnoremap <Right> :vertical resize +2<CR>
+endfunction
 
 "  ______________________________________________________________________
 " /                                                                      \
@@ -237,6 +363,22 @@ set background=dark
 " Auto resizes windows when vim's size changes
 autocmd VimResized * wincmd =
 
+" When using `dd` in the quickfix list, remove the item from the quickfix list.
+" Only works with a _real_ quickfix list like the one `:make` does
+" Neovims diagnostic crap is (of course) more of a PITA to handle
+" TODO(Joaquim): Add an enhancement so that this works for neovims
+" `Diagnostics` too
+function! RemoveQFItem()
+  let curqfidx = line('.') - 1
+  let qfall = getqflist()
+  call remove(qfall, curqfidx)
+  call setqflist(qfall, 'r')
+  execute curqfidx + 1 . "cfirst"
+  copen
+endfunction
+" Use map <buffer> to only map dd in the quickfix window. Requires +localmap
+autocmd FileType qf map <buffer> dd :call RemoveQFItem()<cr>
+
 "  _____________________________________________________________________
 " /                                                                     \
 " |                              PLUGINS                                |
@@ -251,63 +393,24 @@ autocmd VimResized * wincmd =
 "                                                                     '-'/    \
 " 
 
+" Note that if we're copying this over to some new location that doesn't have
+" `plugged` then all we godda do is comment all lines bellow
+" Vim should still work as up until this stage everything was "normal"
 call plug#begin('~/.vim/plugged')
 
-"" COLORS
-
 Plug 'morhetz/gruvbox'
-if has("nvim")
-  Plug 'RRethy/nvim-base16'
-  Plug 'folke/neodev.nvim'
-endif
+"" Use :UndotreeToggle to check out what's on your undotree!
+"" You could also just do g- and g+ (but that's jank)
+Plug 'mbbill/undotree'
+"" A simple plugin that persists the words added with zG and zW to a spellfile specific to the current file or directory.
+"" (zG - mark good; zW - mark bad)
+"" You can also add a file called .dialectmain to a directory and all files in its subdirectories will use the spellfile there.
+Plug 'dbmrq/vim-dialect'
+"" `:Ditto` highlights the most frequent word in the current file or in the current visual selection
+"" `:NoDitto` clears them
+"" (Useful when we're writting text and don't want to look ike a baboon"
+Plug 'dbmrq/vim-ditto'
 Plug 'christianchiarulli/nvcode-color-schemes.vim'
-
-function! FixGruvColors()
-  "" Tweaks to the coloring
-  if has("nvim-0.8")
-    hi! link @constant GruvBoxPurple
-    hi! link @constant.builtin GruvboxPurple
-    hi! link @constructor GruvboxGreen
-    hi! link @field GruvboxAqua
-    hi! link @function GruvboxYellow
-    hi! link @function.call GruvboxYellow
-    hi! link @function.method.call GruvboxYellow
-    hi! link @identifier GruvboxAqua
-    hi! link @include GruvboxRed
-    hi! link @keyword.return GruvBoxPurple
-    hi! link @method GruvboxYellow
-    hi! link @punctuation.delimiter Noise
-    hi! link @special GruvboxGreen
-    hi! link @string GruvboxOrange
-    hi! link @string.regex GruvBoxRed 
-    hi! link @string.regexp GruvBoxRed
-    hi! link @tag.attribute.javascript GruvboxAqua
-    hi! link @tag.attribute.tsx GruvboxAqua
-    hi! link @type GruvboxGreen
-    hi! link @variable GruvboxBlue
-    "" TODO: https://gist.github.com/swarn/fb37d9eefe1bc616c2a7e476c0bc0316
-    "" Simply type `:Inspect` and then see what your LSP tells you
-    hi! link @lsp.type.parameter GruvBoxPurple
-    hi! link @lsp.type.function.javascript GruvboxYellow
-    hi! link @lsp.typemod.variable.readonly GruvBoxBlueBold
-    hi! link @lsp.typemod.variable.defaultLibrary GruvBoxAqua
-    " Importantly this will _not_ match a member of some defaultLibrary
-    hi! link @lsp.typemod.function.defaultLibrary GruvBoxAqua
-  else
-    hi! link TSVariable GruvboxBlue
-    hi! link TSFunction GruvboxYellow
-    hi! link TSMethod GruvboxYellow
-    hi! link Identifier GruvboxAqua
-    hi! link Special GruvboxGreen
-    hi! link String GruvboxOrange
-    hi! link Include GruvboxRed
-    hi! Function ctermfg=3
-    hi! link Delimiter Noise
-    hi! link TSStringRegex GruvBoxRed 
-    hi! link TSKeywordReturn GruvBoxPurple
-  endif
-endfunction
-
 Plug 'altercation/vim-colors-solarized'
 Plug 'kyazdani42/blue-moon'
 Plug 'fenetikm/falcon'
@@ -316,7 +419,6 @@ Plug 'bluz71/vim-nightfly-guicolors'
 "" Main Command: :XtermColorTable
 "" :help xterm-color-table
 Plug 'guns/xterm-color-table.vim'
-
 "" Zen mode for vim
 "" Usage: 
 "" :Goyo
@@ -329,26 +431,9 @@ Plug 'guns/xterm-color-table.vim'
 "" 
 "" :Goyo!
 Plug 'junegunn/goyo.vim'
-
-
-" Plug 'camspiers/animate.vim'
-Plug 'camspiers/lens.vim'
-
-
 " CSV
 " Main thing is: :RainbowAlign and :RainbowShrink
 Plug 'mechatroner/rainbow_csv'
-
-"" Move things!
-"" Usage:
-"" <A-k>   Move current line/selection up
-"" <A-j>   Move current line/selection down
-"" <A-h>   Move current character/selection left
-"" <A-l>   Move current character/selection right
-"" Works best with visual mode
-Plug 'matze/vim-move'
-
-
 "" An indent level object!
 "" Usage:
 "" <count>ai 	An Indentation level and line above.
@@ -382,30 +467,32 @@ Plug 'matze/vim-move'
 "" 6 | fi
 "" Typing daI would delete lines 1-6
 Plug 'urxvtcd/vim-indent-object'
-
-" Neat css colors (mayyyyyyyybe)
-"Plug 'norcalli/nvim-colorizer.lua'
-
-
-"" General formatter
-let ale_compatible = [ 'sh', 'css', 'sh', 'yaml' ]
-Plug 'dense-analysis/ale', { 'for': ale_compatible  } 
 "" Cute little visual things on marks!
 Plug 'kshenoy/vim-signature'
 "" TPOPE GOD
+"" TODO(Joaquim): Add dispatch back for `Make`
 "" Surround words and stuff
 Plug 'tpope/vim-surround'
-"" Automatic indent rules
-Plug 'tpope/vim-sleuth'
 "" :Git is good
 Plug 'tpope/vim-fugitive'
-"" Comment with gc
-Plug 'tpope/vim-commentary'
+"" Automatic indent rules
+Plug 'tpope/vim-sleuth'
+"" Invoke `:Make` for async making!
+"" Open it with `:Copen`
+"" Godlike plugin
+Plug 'tpope/vim-dispatch'
+
 "" Fancy way to do search
 "" `:%Subvert/facilit{y,ies}/building{,s}/g`
 Plug 'tpope/vim-abolish'
-
-
+"" Move things!
+"" Usage:
+"" <A-k>   Move current line/selection up
+"" <A-j>   Move current line/selection down
+"" <A-h>   Move current character/selection left
+"" <A-l>   Move current character/selection right
+"" Works best with visual mode
+Plug 'matze/vim-move'
 "" use gS to turn this:
 "" <div id="foo">bar</div>
 "" 
@@ -416,6 +503,13 @@ Plug 'tpope/vim-abolish'
 "" </div>
 "" use gJ to do the opposite!
 Plug 'AndrewRadev/splitjoin.vim'
+"" Quality of like. <Ctrl-w>z to toggle zoom on windows
+Plug 'dhruvasagar/vim-zoom'
+"" Start with `:RainbowParenthesesToggle`
+"" nvim solution's with tree sitter are dogshit
+Plug 'kien/rainbow_parentheses.vim'
+" Press <Leader><Leader>F, go flying!
+Plug 'easymotion/vim-easymotion'
 "" use :Tab/|
 "" FROM
 "" |start|eat|left|
@@ -427,25 +521,6 @@ Plug 'AndrewRadev/splitjoin.vim'
 "" | 20    | 5   | 15   |
 "" HELP: http://vimcasts.org/episodes/aligning-text-with-tabular-vim/
 Plug 'godlygeek/tabular'
-"" Use fuzzy search!
-"" https://github.com/junegunn/fzf.vim
-if executable('fzf')
-  Plug '$HOME/.fzf'
-  Plug 'junegunn/fzf.vim'
-endif
-
-"" Quality of like. <Ctrl-w>z to toggle zoom on windows
-Plug 'dhruvasagar/vim-zoom'
-
-"" REMOVED NERDTREE
-"" It was just super heavy. Disliked it a lil' bit
-"" Plug 'preservim/nerdtree'
-"" When a file is changed or deleted or added, it will be highlighted in the NerdTree.
-"" Plug 'Xuyuanp/nerdtree-git-plugin'
-"" Neat nerd-icons :)
-"" Plug 'ryanoasis/vim-devicons'
-"" Plug 'tiagofumo/vim-nerdtree-syntax-highlight' 
-
 " Git gutters! Tells me when a line has changed according to git diff
 " top tip: jump in between 'hunk's with [c and ]c
 function! NoAutoGutter(info)
@@ -454,48 +529,64 @@ function! NoAutoGutter(info)
   "" Add new git diffs on save
   autocmd BufWritePost * GitGutter
 endfunction
-
 Plug 'airblade/vim-gitgutter', { 'do': function('NoAutoGutter') }
-" Swag parentheses!
-Plug 'kien/rainbow_parentheses.vim'
-" Press F, go flying!
-Plug 'easymotion/vim-easymotion'
+"" Use fuzzy search!
+"" https://github.com/junegunn/fzf.vim
+if executable('fzf')
+  Plug '$HOME/.fzf'
+  Plug 'junegunn/fzf.vim'
+endif
 
+if ! has('nvim')
+  "" LSP but for vim.
+  "" It's the good shit! Although it takes some configuring
+  let ale_compatible = [ 'sh', 'css', 'sh', 'yaml' ]
+  Plug 'dense-analysis/ale', { 'for': ale_compatible  } 
+  "" Comment with gc
+  "" nvim has this by default
+  Plug 'tpope/vim-commentary'
 
+endif
 
-function! BuildComposer(info)
-  if a:info.status != 'unchanged' || a:info.force
-    if has('nvim')
-      !cargo build --release --locked
-    else
-      !cargo build --release --locked --no-default-features --features json-rpc
+if executable('cargo') && has('nvim')
+  function! BuildComposer(info)
+    if a:info.status != 'unchanged' || a:info.force
+      if has('nvim')
+        !cargo build --release --locked
+      else
+        !cargo build --release --locked --no-default-features --features json-rpc
+      endif
     endif
-  endif
-endfunction
-
-if executable('cargo')
+  endfunction
   Plug 'euclio/vim-markdown-composer', { 'do': function('BuildComposer') }
 endif
 
+"" NVIM ONLY PLUGINS
+
 if has("nvim")
+  "" Select some text and type `:Refactor` and then tab complete
+  "" (Doesn't work very well sadly, but it's close enough sometimes)
+  Plug 'ThePrimeagen/refactoring.nvim'
+  Plug 'lukas-reineke/indent-blankline.nvim'
+  "" Use :CoAuthor when editing a commit message
+  Plug '2kabhishek/co-author.nvim'
+  Plug 'RRethy/nvim-base16'
+  "" Draw pictures!
+  "" TODO(Joaquim): Add a little explanation here
+  Plug 'jbyuki/venn.nvim'
   "" Oil is like NERDTREE but good
   Plug 'stevearc/oil.nvim'
-endif
-
-if has("nvim-0.5")
   Plug 'neovim/nvim-lspconfig'
-  Plug 'ray-x/lsp_signature.nvim'
+  "" Plug 'ray-x/lsp_signature.nvim'
   Plug 'kosayoda/nvim-lightbulb'
-  Plug 'gfanto/fzf-lsp.nvim'
+  "" Not updated in years :((((
+  "" It was the best...(I'll consider forking this shit)
+  "" Plug 'gfanto/fzf-lsp.nvim'
   Plug 'nvim-lua/plenary.nvim'
-endif
-
-if has("nvim-0.6")
   Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
   Plug 'nvim-treesitter/nvim-treesitter-textobjects'
-  " Plug 'p00f/nvim-ts-rainbow'
-  Plug 'hiphish/rainbow-delimiters.nvim'
-  Plug 'nvim-treesitter/playground'
+  "" Fixes treesitters recent bullshit
+  Plug 'MeanderingProgrammer/treesitter-modules.nvim'
   "" Abuses tree sitter for pretty context colors
   "" There's a weird bug with this one.
   "" TODO: See if it's fixed in the future
@@ -507,148 +598,21 @@ if has("nvim-0.6")
   "" Plug 'ms-jpq/coq.artifacts', {'branch': 'artifacts'}
   " lua & third party sources -- See https://github.com/ms-jpq/coq.thirdparty
   "" Plug 'ms-jpq/coq.thirdparty', {'branch': '3p'}
-endif
-
-
-if has("nvim-0.9")
   Plug 'mfussenegger/nvim-jdtls'
+  "" Abuses tree sitter for pretty context colors
+  Plug 'lukas-reineke/indent-blankline.nvim' 
 endif
-
 call plug#end()
 
 "" Fix the colors on ShowMarks so they don't look like a bloody disaster
 highlight SignColumn     ctermfg=239 ctermbg=235
 highlight SignatureMarkText ctermfg=Red ctermbg=235
 
-"  _____________________________________________________________________
-" /                                                                     \
-" |                         CUSTOM FUNCTIONS                            |
-" |                                                                     |
-" |                 Call them with `call FuncName()`                    |
-" \_______________________________________________________________  __'\
-"                                                                 |/   \\
-"                                                                  \    \\  .
-"                                                                       |\\/|
-"                                                                       / " '\
-"                                                                       . .   .
-"                                                                      /    ) |
-"                                                                     '  _.'  |
-"                                                                     '-'/    \
-
-command! MakeTags !ctags -R --exclude=node_modules  --exclude=__pycache__ --exclude=.mypy_cache --exclude=*.json .
-command! OpenVimRc :tabnew ~/.vimrc
-command! OpenLspRc :tabnew ~/Projects/dotfiles/nvim/lua/lsp-config.lua
-command! ClearColumn :set colorcolumn&
-command! AddColumn :set colorcolumn=80,120
-command! ToggleSmartCase :set smartcase!
-command! Shfmt !shfmt -w -i 2 -ci -bn %
-command! CopyFileName let @+ = expand('%')
-"" Stands for buffer delete
-"" Deletes all buffers and then re-opens the one you were using before
-"" Use with confirm so you don't lose your work!
-command! Bd :%bd | e#
-
-
-"" Command I kept forgetting
-"" For future reference: <C-W> T
-command! MoveToTab :wincmd T
-
-" See the difference between the current buffer and the original file
-command! DiffOrig vert new | set bt=nofile | r ++edit # | 0d_ | diffthis
-		  \ | wincmd p | diffthis
-
-
-function! ExecuteMacroOverVisualRange()
-  echo "@".getcmdline()
-  execute ":'<,'>normal @".nr2char(getchar())
-endfunction
-
-
-
-function! Redir(cmd)
-  """ Redirects the output of any command over to it's own split
-  """ Usage:
-  """   :call Redir('!pylint %')	
-  """
-  redir => output
-      silent! execute(a:cmd )
-  redir END
-  let output = split(output, "\n")
-  
-  if bufwinnr('cmd.out') >0 
-     bdelete cmd.out
-  endif
-
-  vnew cmd.out
-  let w:scratch = 1
-  setlocal buftype=nofile bufhidden=wipe noswapfile
-  call setline(1, output)
-
-  wincmd h
-endfunction
-
-" redirect any vim command output using Redir command.
-" Usage:
-" Redir !pylint %
-command! -nargs=1 Redir call Redir(<f-args>)
-
-function! GetHighlightAtCursor()
-  echo synIDattr(synID(line("."), col("."), 1), "name")
-endfunction
-
-
-function! NERDTreeToggleInCurDir()
-  " If NERDTree is open in the current buffer
-  if (exists("t:NERDTreeBufName") && bufwinnr(t:NERDTreeBufName) != -1)
-    exe ":NERDTreeClose"
-  else
-    exe ":NERDTreeFind"
-  endif
-endfunction
-
-function! TabCloseRight(bang)
-    let cur=tabpagenr()
-    while cur < tabpagenr('$')
-        exe 'tabclose' . a:bang . ' ' . (cur + 1)
-    endwhile
-endfunction
-
-function! TabCloseLeft(bang)
-    while tabpagenr() > 1
-        exe 'tabclose' . a:bang . ' 1'
-    endwhile
-endfunction
-
-command! -bang TabCloseRight call TabCloseRight('<bang>')
-command! -bang TabCloseLeft call TabCloseLeft('<bang>')
-
-""  ______________________________
-"" /                              \
-"" | nvim specific shenanigans  |
-"" \________________________  __'\
-""                          |/   \\
-""                           \    \\  .
-""                                |\\/|
-""                                / " '\
-""                                . .   .
-""                               /    ) |
-""                              '  _.'  |
-""                              '-'/    \
-
-
-if has("nvim")
-  set inccommand=nosplit
-  "" Assume I'm using a modern terminal lol
-  "" use `:checkhealth` to setup proper terminal colors
-  "" See: https://github.com/termstandard/colors
-  set termguicolors
-endif
-
 if (exists('+colorcolumn'))
-    "" reset it to default:
-    "" set colorcolumn&
-    "" set colorcolumn=80,120
-    highlight ColorColumn ctermbg=8
+  "" reset it to default:
+  "" set colorcolumn&
+  "" set colorcolumn=80,120
+  highlight ColorColumn ctermbg=8
 endif
 
 ""  ______________________________
@@ -666,7 +630,7 @@ endif
 
 
 function! PlugLoaded(name)
-    return has_key(g:plugs, a:name)
+  return has_key(g:plugs, a:name)
 endfunction
 
 
@@ -701,20 +665,17 @@ if executable('emoji-fzf')
   endfunction
 
   command! -bang Emoj
-	\ call fzf#run({
-	\ 'source': 'emoji-fzf preview',
-	\ 'options': '--preview ''emoji-fzf get --name {1}''',
-	\ 'sink': function('InsertEmoji')
-	\ })
+        \ call fzf#run({
+        \ 'source': 'emoji-fzf preview',
+        \ 'options': '--preview ''emoji-fzf get --name {1}''',
+        \ 'sink': function('InsertEmoji')
+        \ })
 endif
-
-
 
 if PlugLoaded('goyo.vim')
   " let g:goyo_linenr = 1
   " let g:goyo_width = '50%'
 endif
-
 
 if PlugLoaded('mechatroner/rainbow_csv')
   command! ShrinkCSV :RainbowShrink
@@ -761,17 +722,42 @@ if PlugLoaded('vim-colors-solarized')
   "" hi Comment ctermfg=64
 endif
 
-if PlugLoaded('nerdtree')
-  "" AutoOpen Nerdtree (but don't focus on it)
-  autocmd VimEnter * NERDTree
-  autocmd VimEnter * wincmd p
-  "" AutoClose NerdTree
-  autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
-  nmap <silent> <C-n> :call NERDTreeToggleInCurDir()<CR>
-endif
 
 
 if PlugLoaded('gruvbox')
+
+  function! FixGruvColors()
+    "" Tweaks to the coloring
+    hi! link @constant GruvBoxPurple
+    hi! link @constant.builtin GruvboxPurple
+    hi! link @constructor GruvboxGreen
+    hi! link @field GruvboxAqua
+    hi! link @function GruvboxYellow
+    hi! link @function.call GruvboxYellow
+    hi! link @function.method.call GruvboxYellow
+    hi! link @identifier GruvboxAqua
+    hi! link @include GruvboxRed
+    hi! link @keyword.return GruvBoxPurple
+    hi! link @method GruvboxYellow
+    hi! link @punctuation.delimiter Noise
+    hi! link @special GruvboxGreen
+    hi! link @string GruvboxOrange
+    hi! link @string.regex GruvBoxRed 
+    hi! link @string.regexp GruvBoxRed
+    hi! link @tag.attribute.javascript GruvboxAqua
+    hi! link @tag.attribute.tsx GruvboxAqua
+    hi! link @type GruvboxGreen
+    hi! link @variable GruvboxBlue
+    "" TODO: https://gist.github.com/swarn/fb37d9eefe1bc616c2a7e476c0bc0316
+    "" Simply type `:Inspect` and then see what your LSP tells you
+    hi! link @lsp.type.parameter GruvBoxPurple
+    hi! link @lsp.type.function.javascript GruvboxYellow
+    hi! link @lsp.typemod.variable.readonly GruvBoxBlueBold
+    hi! link @lsp.typemod.variable.defaultLibrary GruvBoxAqua
+    " Importantly this will _not_ match a member of some defaultLibrary
+    hi! link @lsp.typemod.function.defaultLibrary GruvBoxAqua
+  endfunction
+
   colorscheme gruvbox
   call FixGruvColors()
 endif
@@ -819,12 +805,15 @@ if PlugLoaded('fzf.vim')
 endif
 
 " Uses the same controls as ale. But uses neovims built-in lsp
+" Note: The `lsp-config` will warn me if I'm using these as they _should_ be a
+" bad habit
 if PlugLoaded("nvim-lspconfig")
   nnoremap <Leader>d :LspDetail<CR>
   nnoremap <Leader>h :LspHover<CR>
-  nnoremap <Leader>H :LspSignatureHelp<CR>
+  nnoremap <Leader>H <C-W>}<CR>
   "" Follow  vim convention instead of <leader>gg
   "" Remember - <C-o> to go back! I always forget lol
+
   nnoremap <Leader>gg :LspDef<CR>
   nnoremap <Leader>f :LspFormatting<CR>
   "" navigation
@@ -835,30 +824,29 @@ if PlugLoaded("nvim-lspconfig")
 
   nnoremap <leader>rn :LspRename<CR>
 
-  "" Refactor :)
-  ""     TOP TIP: use 'V' to select the whole line and then apply the
-  ""     refactor
-  vnoremap <Leader>r  :LspCodeRangeAction<CR>
   "" Also fixes simple errors inline!
-  nnoremap <Leader>r  :LspCodeAction<CR>
+  nnoremap <Leader>ra  :LspCodeAction<CR>
+  nnoremap <Leader>rr  :LspRestart<CR>
 endif
 
 if PlugLoaded('vim-zoom')
-   silent! unmap <C-w>m
-   nmap <C-w>z <Plug>(zoom-toggle)
+  silent! unmap <C-w>m
+  nmap <C-w>z <Plug>(zoom-toggle)
 endif
 
+"" We have LSP at home
+"" (Except, in some ways it was even better lol)
 if PlugLoaded('ale')
   "" Follow [Google's shell style](https://google.github.io/styleguide/shellguide.html)
   let g:ale_sh_shfmt_options = '-i 2 -ci -bn'
   let g:ale_enabled = 0
 
   let g:ale_fixers = {
-	\   '*': ['remove_trailing_lines', 'trim_whitespace'],
-	\   'css': ['prettier'],
-	\   'sh': ['shfmt'],
-	\   'yaml': ['prettier', 'yamlfix']
-	\}
+        \   '*': ['remove_trailing_lines', 'trim_whitespace'],
+        \   'css': ['prettier'],
+        \   'sh': ['shfmt'],
+        \   'yaml': ['prettier', 'yamlfix']
+        \}
   " ALE now __only__ tries to fix shit when I invoke `:AleFix`
   let g:ale_fix_on_save = 0
   "" let g:ale_lint_on_text_changed = 'never'
@@ -875,45 +863,33 @@ if PlugLoaded('ale')
   let g:ale_completion_autoimport = 1
   let g:ale_echo_msg_format = '🔥 [ALE+%linter%] %code: %%s'
 
-  "   nnoremap <Leader>d :ALEDetail<CR>
-  "   "" By default, lints only on save
-  "   "" but we can call the linter again
-  "   nnoremap <Leader>l :ALELint<CR>
+  nnoremap <Leader>d :ALEDetail<CR>
+  "" By default, lints only on save
+  "" but we can call the linter again
+  nnoremap <Leader>l :ALELint<CR>
 
-  "   nnoremap <Leader>f :ALEFix<CR>
-  "   nnoremap <Leader>F :ALEFixSuggest<CR>
+  nnoremap <Leader>f :ALEFix<CR>
+  nnoremap <Leader>F :ALEFixSuggest<CR>
 
-  "   nnoremap <Leader>h :ALEHover<CR>
-  "   nnoremap <Leader>gg :ALEGoToDefinition -tab<CR>
+  nnoremap <Leader>h :ALEHover<CR>
+  nnoremap <Leader>gg :ALEGoToDefinition -tab<CR>
   "   "" Follow  vim convention instead of <leader>gg
   "   "" Remember - <C-o> to go back! I always forget lol
-  "   "" autocmd FileType typescript map <buffer> <c-]> :ALEGoToDefinition<CR>
-  "   "" autocmd FileType typescriptreact map <buffer> <c-]> :ALEGoToDefinition<CR>
+  autocmd FileType typescript map <buffer> <c-]> :ALEGoToDefinition<CR>
+  autocmd FileType typescriptreact map <buffer> <c-]> :ALEGoToDefinition<CR>
 
   "   "" navigation
-  "   nnoremap <Leader>gf :ALEFirst<CR>
-  "   nnoremap <Leader>gn :ALENext<CR>
-  "   nnoremap <Leader>gp :ALEPrevious<CR>
-  "   nnoremap <silent> gr :ALEFindReferences<CR>
+  nnoremap <Leader>gf :ALEFirst<CR>
+  nnoremap <Leader>gn :ALENext<CR>
+  nnoremap <Leader>gp :ALEPrevious<CR>
+  nnoremap <silent> gr :ALEFindReferences<CR>
 
-  "   nnoremap <leader>rn :ALERename<CR>
+  nnoremap <leader>rn :ALERename<CR>
 
-  "   "" Refactor :)
-  "   ""     TOP TIP: use 'V' to select the whole line and then apply the
-  "   ""     refactor
-  "   vnoremap <Leader>r  :ALECodeAction<CR>
-  "   "" Also fixes simple errors inline!
-  "   nnoremap <Leader>r  :ALECodeAction<CR>
-
-  if has("nvim")
-    let g:ale_virtualtext_cursor = 1
-    let g:ale_virtualtext_prefix = "🔥 "
-  endif
+  "" Refactor :)
+  ""     TOP TIP: use 'V' to select the whole line and then apply the
+  ""     refactor
+  vnoremap <Leader>r  :ALECodeAction<CR>
+  "" Also fixes simple errors inline!
+  nnoremap <Leader>r  :ALECodeAction<CR>
 endif
-
-
-
-""" lsp's normal formatting will cock-up your marks
-""" So if you have some format.sh in the $PATH you can just use it
-command! Format !format.sh %
-nnoremap <Leader>gf  :Format<CR>
