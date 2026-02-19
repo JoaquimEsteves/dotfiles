@@ -724,8 +724,7 @@ endif
 
 
 
-if PlugLoaded('gruvbox')
-
+if PlugLoaded('gruvbox') && has('nvim')
   function! FixGruvColors()
     "" Tweaks to the coloring
     hi! link @constant GruvBoxPurple

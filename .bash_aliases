@@ -187,6 +187,8 @@ alias record_screen="ffmpeg -framerate 25 -f x11grab -i :1 -f pulse -ac 2 -i def
 # Allows up-arrow to go to the previous command
 alias lua="rlwrap lua"
 
+alias venv='source .venv/bin/activate'
+
 ###############################################################################
 #                                                                             #
 #                                 CLANG SHIT                                  #
