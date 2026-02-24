@@ -2,24 +2,35 @@
 -- Badly hacked together LSP setup.
 -- Don't copy this, it's a mess.
 
--- IMPORTANT: make sure to setup neodev BEFORE lspconfig
--- It's a LUA only thing
--- require("neodev").setup({})
--- require('lazydev')
-
--- local nvim_lsp = require("lspconfig")
--- Doesn't work anymore
--- local coq = require("coq")
---
 -- IN CASE SOMETHING BREAKS
 -- Then checkout `:LspLog`
 -- vim.lsp.set_log_level("TRACE")
+--
+--
+local ma = require("module_available")
+
 vim.lsp.set_log_level("OFF")
 
 vim.diagnostic.config({
     source = true,
 })
 
+local definition = vim.lsp.buf.definition
+local references = vim.lsp.buf.references
+local implementation = vim.lsp.buf.implementation
+local code_action = vim.lsp.buf.code_action
+local type_definition = vim.lsp.buf.type_definition
+
+if ma("fzf_lsp") then
+    -- When using my own commands we use the fzf ones
+    -- That way we get to keep the good-stuff, while only using the old ones
+    local fzf_lsp = require("fzf_lsp")
+    definition = fzf_lsp.definition
+    references = fzf_lsp.references
+    implementation = fzf_lsp.implementation
+    code_action = fzf_lsp.code_action
+    type_definition = fzf_lsp.type_definition
+end
 
 ---@param full boolean?
 local function toggle_virtual_line(full)
@@ -35,14 +46,18 @@ local function toggle_virtual_line(full)
         -- If turned on by default
         -- So we use `<leader>v` and `<leader>V` to toggle it on and off
         if vim.diagnostic.config().virtual_lines then
+            print("Virtual Lines are OFF")
             vim.diagnostic.config({ virtual_lines = false })
+            return
+        end
+        if full then
+            print("Virtual Lines are HELLA ON")
+            vim.diagnostic.config({ virtual_lines = true })
         else
-            if full then
-                vim.diagnostic.config({ virtual_lines = true })
-            else
-                -- just for the current line
-                vim.diagnostic.config({ virtual_lines = { current_line = true } })
-            end
+            -- just for the current line
+            --
+            print("Virtual Lines are ON")
+            vim.diagnostic.config({ virtual_lines = { current_line = true } })
         end
     end
 end
@@ -77,42 +92,42 @@ local function setUpLspCommands(ev)
     end
 
     command("LspDef", function()
-        print('Bad habit! Use the default |CTRL-]"|CTRL-]|, |CTRL-W_]|')
-        vim.lsp.buf.definition()
+        vim.notify('Bad habit! Use the default |CTRL-]"|CTRL-]|, |CTRL-W_]|', 4)
+        definition()
     end)
 
     command("LspHover", function()
-        print("Bad habit! Use K")
+        vim.notify("Bad habit! Use K", 4)
         vim.lsp.buf.hover()
     end)
 
     command("LspFindReferences", function()
-        print("Bad habit! Use grr")
-        vim.lsp.buf.references()
+        vim.notify("Bad habit! Use grr", 4)
+        references()
     end)
 
     command("LspImplementation", function()
-        print("Bad habit! Use gri")
-        vim.lsp.buf.implementation()
+        vim.notify("Bad habit! Use gri", 4)
+        implementation()
     end)
 
     command("LspCodeAction", function()
-        print("Bad habit! Use gra")
-        vim.lsp.buf.code_action()
+        vim.notify("Bad habit! Use gra", 4)
+        code_action()
     end)
 
     command("LspRename", function()
-        print("Bad habit! Use grn")
+        vim.notify("Bad habit! Use grn", 4)
         vim.lsp.buf.rename()
     end)
 
     command("LspTypeDef", function()
-        print("Bad habit! Use grt")
-        vim.lsp.buf.type_definition()
+        vim.notify("Bad habit! Use grt", 4)
+        type_definition()
     end)
 
     command("LspDiagNext", function()
-        print("Bad habit! Use ]d")
+        vim.notify("Bad habit! Use ]d", 4)
         vim.diagnostic.jump({ count = 1, float = true })
         -- VERY SANE API AS OPPOSED TO THE ONE BELLOW
         -- THANKS NEOVIM
@@ -120,7 +135,7 @@ local function setUpLspCommands(ev)
     end)
 
     command("LspDiagPrev", function()
-        print("Bad habit! Use [d")
+        vim.notify("Bad habit! Use [d", 3)
         vim.diagnostic.jump({ count = -1, float = true })
         -- vim.diagnostic.goto_prev()
     end)
@@ -166,17 +181,18 @@ vim.api.nvim_create_autocmd("LspAttach", {
 
 vim.lsp.config("*", {
     on_attach = function(client, bufnr)
-        -- Without this `CTRL-Y` won't auto import or do other lsp side-effecty
-        -- things
-        vim.lsp.completion.enable(true, client.id, bufnr)
+        if client:supports_method("textDocument/completion") then
+            -- Without this `CTRL-Y` won't auto import or do other lsp side-effecty
+            -- things
+            vim.lsp.completion.enable(true, client.id, bufnr)
+        end
     end,
 })
 
-
 -- Doesn't work because I have to set it up
 -- But omni-func works just fine (???)
-vim.keymap.set('i', '<c-space>', function()
-  vim.lsp.completion.get()
+vim.keymap.set("i", "<c-space>", function()
+    vim.lsp.completion.get()
 end)
 
 ---@param prog string

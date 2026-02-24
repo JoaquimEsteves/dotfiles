@@ -183,7 +183,7 @@ vnoremap <C-C> "+y:echom 'Yanked to clipboard'<ENTER>
 cnoremap <C-a> <Home>
 cnoremap <C-e> <End>
 cnoremap <C-d> <Del>
-inoremap <C-a> <Home>
+inoremap <C-a> <C-O>^
 inoremap <C-e> <End>
 inoremap <C-d> <Del>
 " back one word
@@ -316,6 +316,8 @@ command! -bang TabCloseLeft call TabCloseLeft('<bang>')
 "
 command! ToggleResizeMode call ToggleResizeMode()
 
+let s:KeyResizeEnabled = 0
+
 function! ToggleResizeMode()
   if s:KeyResizeEnabled
     call NormalArrowKeys()
@@ -397,6 +399,9 @@ autocmd FileType qf map <buffer> dd :call RemoveQFItem()<cr>
 " `plugged` then all we godda do is comment all lines bellow
 " Vim should still work as up until this stage everything was "normal"
 call plug#begin('~/.vim/plugged')
+
+"" Toggle the quickfix and loclist
+Plug 'milkypostman/vim-togglelist'
 
 Plug 'morhetz/gruvbox'
 "" Use :UndotreeToggle to check out what's on your undotree!
@@ -564,9 +569,8 @@ endif
 "" NVIM ONLY PLUGINS
 
 if has("nvim")
-  "" Select some text and type `:Refactor` and then tab complete
-  "" (Doesn't work very well sadly, but it's close enough sometimes)
-  Plug 'ThePrimeagen/refactoring.nvim'
+  "" Open a repl for some language
+  Plug 'Vigemus/iron.nvim'
   Plug 'lukas-reineke/indent-blankline.nvim'
   "" Use :CoAuthor when editing a commit message
   Plug '2kabhishek/co-author.nvim'
@@ -581,7 +585,7 @@ if has("nvim")
   Plug 'kosayoda/nvim-lightbulb'
   "" Not updated in years :((((
   "" It was the best...(I'll consider forking this shit)
-  "" Plug 'gfanto/fzf-lsp.nvim'
+  Plug 'DanSM-5/fzf-lsp.nvim'
   Plug 'nvim-lua/plenary.nvim'
   Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
   Plug 'nvim-treesitter/nvim-treesitter-textobjects'
@@ -633,6 +637,16 @@ function! PlugLoaded(name)
   return has_key(g:plugs, a:name)
 endfunction
 
+
+if PlugLoaded('vim-togglelist')
+  nmap <script> <silent> <leader>l :call ToggleLocationList()<CR>
+  nmap <script> <silent> <leader>q :call ToggleQuickfixList()<CR>
+
+
+  if PlugLoaded('dispatch')
+    let g:toggle_list_copen_command="Copen"
+  endif
+endif
 
 if PlugLoaded('vim-indent-object')
   xmap ii <Plug>(indent-object_linewise-none)
@@ -808,6 +822,7 @@ endif
 " bad habit
 if PlugLoaded("nvim-lspconfig")
   nnoremap <Leader>d :LspDetail<CR>
+  nnoremap <Leader>dd :LspLocList<CR>
   nnoremap <Leader>h :LspHover<CR>
   nnoremap <Leader>H <C-W>}<CR>
   "" Follow  vim convention instead of <leader>gg
@@ -819,7 +834,7 @@ if PlugLoaded("nvim-lspconfig")
   nnoremap <Leader>gn :LspDiagNext<CR>
   nnoremap <Leader>gp :LspDiagPrev<CR>
   nnoremap <Leader>gr :LspFindReferences<CR>
-  nnoremap <Leader>l :LspLocList<CR>
+  nnoremap grl :LspLocList<CR>
 
   nnoremap <leader>rn :LspRename<CR>
 
@@ -874,8 +889,7 @@ if PlugLoaded('ale')
   nnoremap <Leader>gg :ALEGoToDefinition -tab<CR>
   "   "" Follow  vim convention instead of <leader>gg
   "   "" Remember - <C-o> to go back! I always forget lol
-  autocmd FileType typescript map <buffer> <c-]> :ALEGoToDefinition<CR>
-  autocmd FileType typescriptreact map <buffer> <c-]> :ALEGoToDefinition<CR>
+  nnoremap <c-]> :ALEGoToDefinition<CR>
 
   "   "" navigation
   nnoremap <Leader>gf :ALEFirst<CR>

@@ -86,6 +86,55 @@ if ma("indent_blankline") then
     require("ibl").setup({ scope = { show_end = false } })
 end
 
+if ma('iron.core') then
+    local iron = require("iron.core")
+    local common = require("iron.fts.common")
+
+    iron.setup {
+        config = {
+            -- Whether a repl should be discarded or not
+            -- (False - we want to do it ourselves)
+            scratch_repl = true,
+            close_window_on_exit = true,
+            repl_definition = {
+                sh = {
+                    command = { "bash" }
+                },
+                python = {
+                    command = { "uv", 'run', 'python' }, -- or { "ipython", "--no-autoindent" }
+                    format = common.bracketed_paste_python,
+                    block_dividers = { "# %%", "#%%" },
+                    env = { PYTHON_BASIC_REPL = "1" } --this is needed for python3.13 and up.
+                }
+            },
+            dap_integration = false,
+            -- Use a normal vim-split
+            repl_open_cmd = "belowright split",
+
+        },
+        -- Ensure that the repl will always syntax highlighting
+        repl_filetype = function(buffrn, ft)
+            -- this doens't seem to work
+            return vim.fn.getbufvar(buffrn, '&filetype')
+        end,
+        -- Iron doesn't set keymaps by default anymore.
+        -- You can set them here or manually add keymaps to the functions in iron.core
+        keymaps = {
+            toggle_repl = "<space>ir", -- toggles the repl open and closed.
+            send_file = "<space>if",
+            send_motion = "<space>ic",
+            send_line = "<space>il",
+            exit = "<space>iq",
+        },
+        -- If the highlight is on, you can change how it looks
+        -- For the available options, check nvim_set_hl
+        highlight = {
+            italic = true
+        },
+        ignore_blank_lines = true, -- ignore blank lines when sending visual select lines
+    }
+end
+
 if ma("oil") then
     local oil = require("oil")
     oil.setup({

@@ -1,11 +1,16 @@
-
+"" Allows me to re-use the vim plugins
 set runtimepath^=~/.vim runtimepath+=~/.vim/after
 let &packpath = &runtimepath
 source ~/.vimrc
 "" Let tree-sitter handle it
-"" Note that this goes in the end sice
+"" Note that this goes in the end since
 "" SOME plugin appears to set syntax to `enable`
 syntax off
+
+if PlugLoaded('vim-fugitive')
+  "" UNLESS we open fugitive
+  autocmd FileType fugitive syntax enable
+endif
 
 
 "  _____________________________________________________________________
