@@ -825,7 +825,9 @@ if PlugLoaded('fzf.vim')
   "" use good ol' rip grep
   nnoremap <M-f> :RG<CR>
   "" Search for files with git ls-files
-  nnoremap <C-P> :GFiles<CR>
+  nnoremap <C-P> :call fzf#vim#gitfiles('--recurse-submodules')<CR>
+  "" Search only the files with changes
+  nnoremap <A-p> :GFiles?<CR>
   "" Search _all_ files with fuzzy search
   nnoremap <C-G> :Files<CR>
 endif
