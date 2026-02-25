@@ -151,7 +151,12 @@ let $BASH_ENV = "~/.bash_aliases"
 filetype plugin indent on
 if ! has('nvim')
   syntax enable
+else
+  "" Open your program in gdb in vim
+  "" `:Termdebug your_binary` should _just work_
+  packadd! termdebug
 endif
+
 
 ""  ______________________________________________________________________
 "" /                                                                      \
@@ -233,6 +238,14 @@ if ! has('nvim')
   nnoremap ]q :cnext
   nnoremap [l :lprevious
   nnoremap ]l :lnext
+endif
+
+if has('nvim')
+  "" Same keys as I use normally
+  tnoremap <C-W>k <C-\><C-N>:wincmd k<CR>
+  tnoremap <C-W>j <C-\><C-N>:wincmd j<CR>
+  tnoremap <C-h>h <C-\><C-N>:wincmd h<CR>
+  tnoremap <C-l>l <C-\><C-N>:wincmd l<CR>
 endif
 
 
@@ -360,7 +373,7 @@ endfunction
 "                                                                      '-'/    \
 " 
 "
-
+"
 " https://fosstodon.org/@yaeunerd/109828668917540080
 " Auto resizes windows when vim's size changes
 autocmd VimResized * wincmd =
@@ -402,6 +415,8 @@ call plug#begin('~/.vim/plugged')
 
 "" Toggle the quickfix and loclist
 Plug 'milkypostman/vim-togglelist'
+"" Send text over to a REPL
+Plug 'jpalardy/vim-slime'
 
 Plug 'morhetz/gruvbox'
 "" Use :UndotreeToggle to check out what's on your undotree!
@@ -569,8 +584,6 @@ endif
 "" NVIM ONLY PLUGINS
 
 if has("nvim")
-  "" Open a repl for some language
-  Plug 'Vigemus/iron.nvim'
   Plug 'lukas-reineke/indent-blankline.nvim'
   "" Use :CoAuthor when editing a commit message
   Plug '2kabhishek/co-author.nvim'
@@ -846,6 +859,23 @@ endif
 if PlugLoaded('vim-zoom')
   silent! unmap <C-w>m
   nmap <C-w>z <Plug>(zoom-toggle)
+endif
+
+if PlugLoaded('vim-slime')
+  let g:slime_target = "tmux"
+  "" We want to set the mappings ourselves
+  let g:slime_no_mappings = 1
+  "" By default - send the whole thing over to pane-1 of tmux
+  let g:slime_default_config = {"socket_name": "default", "target_pane": "1"}
+  "" Stops ipython from adding silly indents
+  let g:slime_python_ipython = 1
+  
+  "send visual selection
+  xmap <leader>s <Plug>SlimeRegionSend
+  "send based on motion or text object
+  nmap <leader>s <Plug>SlimeMotionSend
+  "send line
+  nmap <leader>ss <Plug>SlimeLineSend
 endif
 
 "" We have LSP at home
