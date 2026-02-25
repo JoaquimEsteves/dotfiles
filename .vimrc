@@ -867,6 +867,8 @@ if PlugLoaded('vim-slime')
   let g:slime_no_mappings = 1
   "" By default - send the whole thing over to pane-1 of tmux
   let g:slime_default_config = {"socket_name": "default", "target_pane": "1"}
+  "" AND DON'T ASK ME ABOUT IT
+  let g:slime_dont_ask_default = 1
   "" Stops ipython from adding silly indents
   let g:slime_python_ipython = 1
   
@@ -876,6 +878,7 @@ if PlugLoaded('vim-slime')
   nmap <leader>s <Plug>SlimeMotionSend
   "send line
   nmap <leader>ss <Plug>SlimeLineSend
+  command! SlimeWholeFile :%SlimeSend
 endif
 
 "" We have LSP at home
