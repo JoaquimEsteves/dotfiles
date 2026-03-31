@@ -1,0 +1,29 @@
+[user]
+	email = your_email@here.com
+	name = Joaquim Esteves
+	signingkey = /home/<etc>/.ssh/id_rsa.pub
+[fetch]
+	prune = true
+[core]
+	editor = vim
+[alias]
+	st = status -sb
+	lg = log --date=short --format='%C(green)%C(bold)%cd %C(auto)%h%d %s (%an)' --graph --color=always
+	really-push = push --no-verify --force-with-lease
+[color]
+	status = always
+[commit]
+	; Always show the differences when you git commit
+	verbose = true
+[merge]
+    tool = nvimdiff
+[mergetool "nvimdiff"]
+  layout = "LOCAL,BASE,REMOTE / MERGED"
+
+; Example includeIf
+[includeIf "gitdir:~/Projects/EXAMPLE/"]
+	path = ~/.gitconfig-EXAMPLE
+[init]
+	defaultBranch = trunk
+[pull]
+	ff = only
