@@ -12,25 +12,14 @@ if not ma('nvim-treesitter') then
     return
 end
 
-if ma('treesitter-modules') then
-    -- The nvimtreesitter boys IN THEIR INFINITE WISDOWM
-    -- Decided to remove `incremental_selection`
-    -- They also made the configuration complete bullshit, but I don't want to
-    -- be relying on this `treesitter-modules` too much
-    local treesitter = require('treesitter-modules')
-    treesitter.setup({
-        incremental_selection = {
-            enable = true,
-            keymaps = {
-                init_selection = "<C-space>",
-                node_incremental = "<C-space>",
-                scope_incremental = false,
-                node_decremental = "<bs>",
-            },
-        }
-    })
-end
 
+-- The nvimtreesitter boys IN THEIR INFINITE WISDOWM
+-- Decided to remove `incremental_selection`
+-- (EDIT: They added it back! My crashout is still valid doe
+-- Removed `treesitter-modules` helper
+-- We can now do incremental selection with  v_an and v_in)
+-- They also made the configuration complete bullshit, but I don't want to
+-- be relying on this `treesitter-modules` too much
 -- COMPARE THE OLD - SANE SOLUTION WITH THIS NONSENSE
 -- Honestly this is the worst thing about nvim.
 -- I undertand that treesitter ie eXpErImEnTaL

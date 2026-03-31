@@ -155,6 +155,29 @@ else
   "" Open your program in gdb in vim
   "" `:Termdebug your_binary` should _just work_
   packadd! termdebug
+  "" fancy diff for nvim
+  "" Example config:
+  "" :packadd nvim.difftool
+  "" [difftool "nvim_difftool"]
+  ""   cmd = nvim -d \"$LOCAL\" \"$REMOTE\"
+  "" [diff]
+  ""   tool = nvim_difftool
+  "" The top tip remains to set the git mergetool to be `--tool=nvimdiff`
+  "" Example:
+  "" [merge]
+  ""     tool = nvimdiff
+  packadd! nvim.difftool
+  "" It's undotree! Allows you to see the history of your edits
+  "" as a tree, since edits are not necessarily linear
+  packadd! nvim.undotree
+  "" Press `_j` to adjust lines of text
+  "" Or by invokig `:Justify`
+  "" Example:
+  "" Before:
+  "" 12312312312 xD
+  "" After:
+  ""                               12312312312                               xD
+  packadd! justify
 endif
 
 
@@ -223,6 +246,14 @@ vnoremap x "_x
 " Note: That I've switched around the meaning of p and P.
 vnoremap <leader>p "_c<C-o>P<Esc>
 vnoremap <leader>P "_c<C-o>P<Esc>
+
+"" Window resize
+"" I'm not very happy with it since it's jank when it's not the "correct"
+"" window. It's reversed for example if we're on the bottom window.
+nnoremap <C-Up>    :resize +2<CR>
+nnoremap <C-Down>  :resize -2<CR>
+nnoremap <C-Left>  :vertical resize -2<CR>
+nnoremap <C-Right> :vertical resize +2<CR>
 
 if ! has('nvim')
   "" These boys come by default in NVIM but vim doesn't have them!
@@ -323,42 +354,6 @@ endfunction
 command! -bang TabCloseRight call TabCloseRight('<bang>')
 command! -bang TabCloseLeft call TabCloseLeft('<bang>')
 
-"
-" Stolen from https://stackoverflow.com/a/72220548/6595024
-" Invoke `ToggleResizeModel` and then press the arrow keys
-"
-command! ToggleResizeMode call ToggleResizeMode()
-
-let s:KeyResizeEnabled = 0
-
-function! ToggleResizeMode()
-  if s:KeyResizeEnabled
-    call NormalArrowKeys()
-    let s:KeyResizeEnabled = 0
-  else
-    call ResizeArrowKeys()
-    let s:KeyResizeEnabled = 1
-  endif
-endfunction
-
-function! NormalArrowKeys()
-  " unmap arrow keys
-  echom 'normal arrow keys'
-  nunmap <Up>
-  nunmap <Down>
-  nunmap <Left>
-  nunmap <Right>
-endfunction
-
-function! ResizeArrowKeys()
-  " Remap arrow keys to resize window
-  echom 'Resize window with arrow keys'
-  nnoremap <Up>    :resize +2<CR>
-  nnoremap <Down>  :resize -2<CR>
-  nnoremap <Left>  :vertical resize -2<CR>
-  nnoremap <Right> :vertical resize +2<CR>
-endfunction
-
 "  ______________________________________________________________________
 " /                                                                      \
 " |                            Auto Commands                             |
@@ -419,9 +414,6 @@ Plug 'milkypostman/vim-togglelist'
 Plug 'jpalardy/vim-slime'
 
 Plug 'morhetz/gruvbox'
-"" Use :UndotreeToggle to check out what's on your undotree!
-"" You could also just do g- and g+ (but that's jank)
-Plug 'mbbill/undotree'
 "" A simple plugin that persists the words added with zG and zW to a spellfile specific to the current file or directory.
 "" (zG - mark good; zW - mark bad)
 "" You can also add a file called .dialectmain to a directory and all files in its subdirectories will use the spellfile there.
@@ -565,7 +557,10 @@ if ! has('nvim')
   "" Comment with gc
   "" nvim has this by default
   Plug 'tpope/vim-commentary'
-
+  "" Use :UndotreeToggle to check out what's on your undotree!
+  "" You could also just do g- and g+ (but that's jank)
+  "" nvim has this by default with undotree
+  Plug 'mbbill/undotree'
 endif
 
 if executable('cargo') && has('nvim')
@@ -880,7 +875,8 @@ if PlugLoaded('vim-slime')
   nmap <leader>s <Plug>SlimeMotionSend
   "send line
   nmap <leader>ss <Plug>SlimeLineSend
-  command! SlimeWholeFile :%SlimeSend
+  "send the whole file
+  nmap <silent> <leader>sf :%SlimeSend<CR>
 endif
 
 "" We have LSP at home

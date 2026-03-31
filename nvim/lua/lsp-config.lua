@@ -9,7 +9,7 @@
 --
 local ma = require("module_available")
 
-vim.lsp.set_log_level("OFF")
+vim.lsp.log.set_level("OFF")
 
 vim.diagnostic.config({
     source = true,
@@ -196,7 +196,7 @@ vim.keymap.set("i", "<c-space>", function()
 end)
 
 ---@param prog string
-local has = function(prog)
+local which = function(prog)
     return vim.fn.executable(prog) == 1
 end
 
@@ -213,7 +213,7 @@ end
 --                                                                           --
 -------------------------------------------------------------------------------
 
-if has("gopls") then
+if which("gopls") then
     vim.lsp.enable("gopls")
 end
 -------------------------------------------------------------------------------
@@ -221,7 +221,7 @@ end
 --                              Typescript + JS                              --
 --                                                                           --
 -------------------------------------------------------------------------------
-if has("typescript-language-server") then
+if which("typescript-language-server") then
     vim.lsp.config("ts_ls", {
         --- Doesn't fekin work
         --- param client vim.lsp.Client
@@ -237,7 +237,7 @@ end
 --                                HTML + CSS                                 --
 --                                                                           --
 -------------------------------------------------------------------------------
-if has("vscode-html-language-server") == 1 then
+if which("vscode-html-language-server") == 1 then
     vim.lsp.enable({ "html", "cssls" })
 end
 -------------------------------------------------------------------------------
@@ -245,7 +245,7 @@ end
 --                                    Lua                                    --
 --                                                                           --
 -------------------------------------------------------------------------------
-if has("lua-language-server") then
+if which("lua-language-server") then
     --- @param client vim.lsp.Client
     local on_init = function(client)
         if not client.workspace_folders then
@@ -354,11 +354,11 @@ end
 -- nvim_lsp.pylyzer.setup({})
 -- See: https://github.com/DetachHead/basedpyright
 
-if has("basedpyright") then
+if which("basedpyright") then
     vim.lsp.enable("basedpyright")
 end
 
-if has("ruff") then
+if which("ruff") then
     vim.lsp.enable("ruff")
 end
 
@@ -368,7 +368,7 @@ end
 --                                                                           --
 -------------------------------------------------------------------------------
 
-if has("clangd") then
+if which("clangd") then
     vim.lsp.enable("clangd")
 end
 -------------------------------------------------------------------------------
@@ -381,7 +381,7 @@ end
 --
 --
 
-if has("diagnostic-languageserver") then
+if which("diagnostic-languageserver") then
     local filetypes = {
         javascript = "eslint",
         javascriptreact = "eslint",
@@ -507,6 +507,15 @@ if has("diagnostic-languageserver") then
     vim.lsp.enable("diagnosticls")
 end
 
-if has("vim-language-server") then
+if which("vim-language-server") then
     vim.lsp.enable("vimls")
+end
+
+if which("asm-lsp") then
+    vim.lsp.config('asm_lsp', {
+        filetypes = {
+            "asm", "s", "S"
+        }
+    })
+    vim.lsp.enable("asm_lsp")
 end

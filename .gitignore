@@ -4,6 +4,7 @@
 .tmux/resurrect/
 .vim/.netrwhist
 .vim/plugged/
+.vim/spell/
 # Vim crap
 *.swo
 *.swp
