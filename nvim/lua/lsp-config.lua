@@ -9,11 +9,21 @@
 --
 local ma = require("module_available")
 
-vim.lsp.log.set_level("OFF")
+-- vim.lsp.log.set_level("OFF")
 
-vim.diagnostic.config({
+local default_diagnostic_config = {
     source = true,
-})
+    signs = false,
+    -- Removes ugly 'E:X W:Y' from the statusline
+    status = {
+        format = function() return '' end,
+    },
+    severity_sort = true,
+    -- Only update on InsertLeave
+    update_in_insert = false,
+}
+
+vim.diagnostic.config(default_diagnostic_config)
 
 local definition = vim.lsp.buf.definition
 local references = vim.lsp.buf.references
@@ -91,8 +101,12 @@ local function setUpLspCommands(ev)
         vim.api.nvim_create_user_command(what, func, { nargs = 0 })
     end
 
+    command('LspLog', function()
+        vim.cmd('split ' .. vim.lsp.log.get_filename())
+    end)
+
     command("LspDef", function()
-        vim.notify('Bad habit! Use the default |CTRL-]"|CTRL-]|, |CTRL-W_]|', 4)
+        vim.notify('Bad habit! Use the default |CTRL-]"|CTRL-]|, |CTRL-W_i]|', 4)
         definition()
     end)
 
@@ -179,12 +193,23 @@ vim.api.nvim_create_autocmd("LspAttach", {
     once = true,
 })
 
+local no_format = { tsserver = true, sqls = true }
+
 vim.lsp.config("*", {
     on_attach = function(client, bufnr)
         if client:supports_method("textDocument/completion") then
             -- Without this `CTRL-Y` won't auto import or do other lsp side-effecty
             -- things
             vim.lsp.completion.enable(true, client.id, bufnr)
+        end
+
+        if no_format[client.name] then
+            -- DOES NOT WORK FOR SQLS
+            -- I HATE THAT SILLY THING
+            -- I had to `:checkhealth lsp` and then edit the
+            -- plugin manually
+            -- Very, very silly!
+            client.server_capabilities.documentFormattingProvider = false
         end
     end,
 })
@@ -200,13 +225,6 @@ local which = function(prog)
     return vim.fn.executable(prog) == 1
 end
 
--- PRETTYNESS
--- Doesn't work anymore :(((
--- All the nerds now use telescope...which is just 20 times worse
--- if vim.fn.executable("fzf") then
--- 	require("fzf_lsp").setup()
--- end
-
 -------------------------------------------------------------------------------
 --                                                                           --
 --                                  GOLANG                                   --
@@ -214,6 +232,7 @@ end
 -------------------------------------------------------------------------------
 
 if which("gopls") then
+    -- go install golang.org/x/tools/gopls@latest
     vim.lsp.enable("gopls")
 end
 -------------------------------------------------------------------------------
@@ -222,6 +241,7 @@ end
 --                                                                           --
 -------------------------------------------------------------------------------
 if which("typescript-language-server") then
+    -- npm install -g typescript typescript-language-server
     vim.lsp.config("ts_ls", {
         --- Doesn't fekin work
         --- param client vim.lsp.Client
@@ -232,12 +252,17 @@ if which("typescript-language-server") then
     })
     vim.lsp.enable("ts_ls")
 end
+
+if which('ngserver') then
+    vim.lsp.enable('angularls')
+end
 -------------------------------------------------------------------------------
 --                                                                           --
 --                                HTML + CSS                                 --
 --                                                                           --
 -------------------------------------------------------------------------------
-if which("vscode-html-language-server") == 1 then
+if which("vscode-html-language-server") then
+    -- npm i -g vscode-langservers-extracted
     vim.lsp.enable({ "html", "cssls" })
 end
 -------------------------------------------------------------------------------
@@ -246,6 +271,8 @@ end
 --                                                                           --
 -------------------------------------------------------------------------------
 if which("lua-language-server") then
+    -- https://luals.github.io/#neovim-install
+
     --- @param client vim.lsp.Client
     local on_init = function(client)
         if not client.workspace_folders then
@@ -322,21 +349,22 @@ end
 --                      On their README they recommend placing this stuff on                      --
 --That wasn't working since we need the plug.vim to get all of our plugins So it's an auto command--
 ----------------------------------------------------------------------------------------------------
--- local function startJDTLS()
--- 	require('jdtls').start_or_attach({
--- 		-- This is a binary
--- 		-- It _must_ be on the path!
--- 		cmd = { 'jdtls' },
--- 		root_dir = vim.fs.dirname(vim.fs.find({ 'gradlew', '.git', 'mvnw' }, { upward = true })[1]),
--- 	})
--- end
 
--- vim.api.nvim_create_autocmd('FileType', {
--- 	desc = 'Start jdtls on java files',
--- 	pattern = 'java',
--- 	group = vim.api.nvim_create_augroup('jdtls_lsp', { clear = true }),
--- 	callback = startJDTLS,
--- })
+if which("jdtls") then
+    -- https://github.com/eclipse-jdtls/eclipse.jdt.ls#installation
+    local root_dir = vim.fs.dirname(vim.fs.find({ 'gradlew', '.git', 'mvnw', 'pom.xml' }, { upward = true })[1])
+    vim.lsp.config('jdtls', {
+        cmd = {
+            'jdtls',
+            -- REPLACE THIS WITH WHEREVER YOU LEFT LOMBOK
+            '--jvm-arg=-javaagent:/Users/jesteves/.local/share/lombok/lombok.jar',
+            '--java-executable=/opt/homebrew/opt/openjdk/bin/java',
+        },
+        root_dir = root_dir
+
+    })
+    vim.lsp.enable("jdtls")
+end
 
 -------------------------------------------------------------------------------
 --                                                                           --
@@ -355,10 +383,13 @@ end
 -- See: https://github.com/DetachHead/basedpyright
 
 if which("basedpyright") then
+    -- npm install -i basedpyright
+    -- (or uv)
     vim.lsp.enable("basedpyright")
 end
 
 if which("ruff") then
+    -- uv tool install ruff
     vim.lsp.enable("ruff")
 end
 
@@ -369,6 +400,8 @@ end
 -------------------------------------------------------------------------------
 
 if which("clangd") then
+    -- https://clangd.llvm.org/installation
+    -- (Most likely use the scripts or your systems' package manager)
     vim.lsp.enable("clangd")
 end
 -------------------------------------------------------------------------------
@@ -382,26 +415,18 @@ end
 --
 
 if which("diagnostic-languageserver") then
+    -- npm install -g diagnostic-languageserver
     local filetypes = {
-        javascript = "eslint",
-        javascriptreact = "eslint",
-        typescript = "eslint",
-        typescriptreact = "eslint",
-        -- Now using ruff-lsp
-        -- python = { "flake8", "mypy" },
         json = "eslint",
-        sh = "shellcheck",
+        yaml = "eslint",
+        typescriptreact = 'eslint',
     }
 
     local formatFiletypes = {
-        javascript = "prettier",
-        javascriptreact = "prettier",
-        typescript = "prettier",
-        typescriptreact = "prettier",
-        -- yaml = "prettier",
+        yaml = "prettier",
+        typescriptreact = 'prettier',
         json = "prettier",
         sh = "shfmt",
-        -- python = { "black", "isort" },
         lua = "stylua",
     }
 
@@ -451,12 +476,7 @@ if which("diagnostic-languageserver") then
 
     local formatters = {
         prettier = { command = "prettier", args = { "--stdin-filepath", "%filepath" } },
-        black = { command = "python3", args = { "-m", "black", "--quiet", "-" } },
-        isort = {
-            command = "isort",
-            args = { "--quiet", "-" },
-        },
-        shfmt = { command = "shfmt", args = { "-filename", "%filepath", "-i", "2", "-ci", "-bn" } },
+        shfmt = { command = "shfmt", args = { "-filename", "%filepath", "-i", "4", "-ci", "-bn" } },
         stylua = {
             command = "stylua",
             args = {
@@ -508,14 +528,51 @@ if which("diagnostic-languageserver") then
 end
 
 if which("vim-language-server") then
+    -- npm install -g vim-language-server
     vim.lsp.enable("vimls")
 end
 
 if which("asm-lsp") then
+    -- cargo install asm-lsp
+    -- (Or download the binary from https://github.com/bergercookie/asm-lsp)
     vim.lsp.config('asm_lsp', {
         filetypes = {
             "asm", "s", "S"
         }
     })
     vim.lsp.enable("asm_lsp")
+end
+
+if which('docker-language-server') then
+    -- go install github.com/docker/docker-language-server/cmd/docker-language-server@latest
+    vim.lsp.enable('docker_language_server')
+end
+
+if which('bash-language-server') then
+    -- npm i -g bash-language-server
+    -- It's a bit ass doe
+    vim.lsp.enable('bashls')
+end
+
+if which('tombi') then
+    -- uv tool install tombi
+    vim.lsp.enable('tombi')
+end
+
+-- This one is kind of shit
+if which('sqls') then
+    -- go install github.com/sqls-server/sqls@latest
+    -- This little guy requires some boilerplate (and is goddamn finicky as well....)
+    -- First, it requires the `sqls.nvim` package
+    -- It then requires a config, and it's a PITA to switch in between sqlite dbs
+    -- See: .bash_functions@set_as_current_db
+    vim.lsp.enable('sqls')
+end
+
+-- FUCK!
+-- IT'S SO GOOD ACTUALLY
+-- FINALLY
+if which('sqruff') then
+    -- uv tool install sqruff
+    vim.lsp.enable('sqruff')
 end

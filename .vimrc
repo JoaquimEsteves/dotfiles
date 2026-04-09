@@ -26,7 +26,7 @@
 "" 
 "" Stop being compatible with the 1960's
 "" This must be first, because it changes other options as a side effect.
-"" Avoid side effects when it was already reset." Avoid side-effects by
+"" Avoid side effects when it was already reset.
 if &compatible
   set nocompatible
 endif
@@ -57,6 +57,8 @@ set foldlevel=99
 set completeopt=menu,menuone,noselect,noinsert,popup
 "" Autoload file changes.
 set autoread
+"" When scrolling keep at least 10 lines above/below the cursor
+set scrolloff=10
 "" Save undo changes somewhere on /tmp
 set undofile
 if has('nvim')
@@ -116,13 +118,43 @@ if executable('rg')
     autocmd QuickFixCmdPost cgetexpr cwindow
     autocmd QuickFixCmdPost lgetexpr lwindow
   augroup END
+
+
+  function! JumpToCSS()
+    let id_pos = searchpos("id", "nb", line('.'))[1]
+    let class_pos = searchpos("class", "nb", line('.'))[1]
+
+    if class_pos > 0 || id_pos > 0
+      if class_pos < id_pos
+        execute ":Grep '#".expand('<cword>')."'"
+      elseif class_pos > id_pos
+        execute ":Grep '.".expand('<cword>')."'"
+      endif
+    endif
+  endfunction
+
+  nnoremap <F9> :call JumpToCSS()<CR>
+
 endif
+if ! has ("nvim")
+  colorscheme zaibatsu
+  set termguicolors
+endif
+
 if has("nvim")
   set inccommand=nosplit
   "" Assume I'm using a modern terminal lol
   "" use `:checkhealth` to setup proper terminal colors
   "" See: https://github.com/termstandard/colors
-  set termguicolors
+  "" set termguicolors
+  "" Weirdly enough I (sometimes) like it better without
+endif
+
+if &term =~ '256color'
+  " disable Background Color Erase (BCE) so that color schemes
+  " render properly when inside 256-color tmux and GNU screen.
+  " see also http://snk.tuxfamily.org/log/vim-256color-bce.html
+  set t_ut=
 endif
 
 ""  ______________________________________________________________________
@@ -205,6 +237,16 @@ inoremap <cr> <c-]><c-g>u<cr>
 "" I prefer keeping the vim clipboard separate
 vnoremap <Leader>y "+y:echom 'Yanked to clipboard'<ENTER>
 vnoremap <C-C> "+y:echom 'Yanked to clipboard'<ENTER>
+"" Change the word under the cursor, adding it to the search path.
+"" Pressing `.` will repeat the change
+nnoremap <Leader>c *Ncgn
+
+"" CONTROVERSIAL YO
+"" Swap the very useful `:` with `;`
+"" (Use no remap so we don't go into a funky loop)
+"nnoremap ; :
+"" Now I have to consider what to replace original danrned `;` with...
+"nnoremap <leader>, ;
 
 "" Command Line Editing Shortcuts
 "" Use emacs style editing
@@ -230,7 +272,7 @@ nnoremap <C-h> <C-w>h
 nnoremap <C-j> <C-w>j
 nnoremap <C-k> <C-w>k
 nnoremap <C-l> <C-w>l
-" dont loose selection on indenting
+" don't loose selection on indenting
 xnoremap > >gv
 xnoremap < <gv
 
@@ -272,17 +314,34 @@ if ! has('nvim')
 endif
 
 if has('nvim')
+  "" do vterm ls -la to quickly run commands from a terminal on a split
+  "" TODO(Joaquim): Fix this so I can tab-complete to a command
+  cnoreabbrev vterm vertical terminal
+  cnoreabbrev hterm horizontal terminal
   "" Same keys as I use normally
   tnoremap <C-W>k <C-\><C-N>:wincmd k<CR>
   tnoremap <C-W>j <C-\><C-N>:wincmd j<CR>
   tnoremap <C-h>h <C-\><C-N>:wincmd h<CR>
   tnoremap <C-l>l <C-\><C-N>:wincmd l<CR>
+
+
+  command! Restart :mksession! Session.vim | restart source Session.vim
 endif
 
 
+function! Rm()
+  !command rm %
+  bd
+endfunction
+
+command! Rm call Rm()
+"" Old-school goto definition
 command! MakeTags !ctags -R --exclude=node_modules  --exclude=__pycache__ --exclude=.mypy_cache --exclude=*.json .
 command! OpenVimRc :tabnew ~/.vimrc
-command! OpenLspRc :tabnew ~/Projects/dotfiles/nvim/lua/lsp-config.lua
+if has('nvim')
+  command! OpenLspRc :tabnew ~/Programs/dotfiles/nvim/lua/lsp-config.lua
+  command! OpenTSRc :tabnew ~/Programs/dotfiles/nvim/lua/treesitter-config.lua
+endif
 command! ClearColumn :set colorcolumn&
 command! AddColumn :set colorcolumn=80,120
 command! ToggleSmartCase :set smartcase!
@@ -291,6 +350,7 @@ if executable('shfmt')
 endif
 command! CopyFileName let @+ = expand('%')
 command! CopyFileNameWithLineNumber let @+ = expand('%') . ':' . line('.')
+command! Realpath !realpath % | c2b
 "" Stands for buffer delete
 "" Deletes all buffers and then re-opens the one you were using before
 "" Use with confirm so you don't lose your work!
@@ -337,6 +397,8 @@ command! GetHighlightAtCursor call GetHighlightAtCursor()
 function! GetHighlightAtCursor()
   echo synIDattr(synID(line("."), col("."), 1), "name")
 endfunction
+"" See your highlighting
+command! HighlightSettings :so $VIMRUNTIME/syntax/hitest.vim
 
 function! TabCloseRight(bang)
   let cur=tabpagenr()
@@ -389,6 +451,76 @@ endfunction
 " Use map <buffer> to only map dd in the quickfix window. Requires +localmap
 autocmd FileType qf map <buffer> dd :call RemoveQFItem()<cr>
 
+set tabline=%!MyTabLine()  " custom tab pages line
+                           " Modified from: https://vim.fandom.com/wiki/Show_tab_number_in_your_tab_line
+function MyTabLine()
+  let res = ''
+  " tabpagenr('$') = total number of tab pages ('$' means "last index")
+  for t in range(tabpagenr('$'))
+    let tab_index = t + 1
+
+    " %#GroupName# — switches active highlight group mid-string
+    let res .= '%#TabLine#'
+    " %×T — marks start of mouse-clickable region that switches to tab ×
+    let res .= '%' . tab_index . 'T'
+    let res .= '[' . tab_index . ']'
+
+    let bufnames = []
+    let modified = 0
+
+    " tabpagebuflist(n) — buffer numbers of every window open in tab n
+    for b in tabpagebuflist(tab_index)
+      " getbufvar(buf, '&opt') — reads a buffer-local option ('&' prefix = option, not variable)
+      let buff_type = getbufvar(b, '&buftype')
+      " buftype='quickfix' covers both the quickfix list and location lists
+      " We don't care about these
+      if buff_type == 'quickfix'
+        continue
+      endif
+      " ???? - debug later
+      "if buff_type == 'nofile'
+      "  continue
+      "endif
+      if buff_type == 'terminal'
+        " terminal bufnames look like: term://<CWD>//<PID>:command
+        " '[^:]*$' matches everything after the last ':', which is the command
+        " (A clanker vibed the regex, it appears to work)
+        let cmd = matchstr(bufname(b), '[^:]*$')
+        call add(bufnames, ':term<' . (cmd != '' ? cmd : '?') . '>')
+        continue
+      endif
+
+      if buff_type == 'help'
+        " fnamemodify(path, ':t') — ':t' modifier returns the tail (basename) of a path
+        call add(bufnames, ':help<' . fnamemodify(bufname(b), ':t') . '>')
+        continue
+      endif
+
+      " getbufvar(buf, '&modified') — true if buffer has unsaved changes
+      if getbufvar(b, '&modified')
+        let modified = 1
+      endif
+
+      let buffer_name = bufname(b)
+      call add(bufnames, buffer_name != '' ? buffer_name : '[No Name]')
+    endfor
+
+    if modified
+      let res .= '+'
+    endif
+
+    let res .= tab_index == tabpagenr() ? '%#TabLineSel#' : '%#TabLine#'
+    let res .= join(bufnames, ' ')
+    let res .= '%#TabLine# '
+  endfor
+
+  " %T here with no number resets the clickable-region state
+  let res .= '%#TabLineFill#%T'
+  " %= — Right align
+  let res .= '%=%#Tag#' . getcwd()
+  return res
+endfunction
+
 "  _____________________________________________________________________
 " /                                                                     \
 " |                              PLUGINS                                |
@@ -408,7 +540,11 @@ autocmd FileType qf map <buffer> dd :call RemoveQFItem()<cr>
 " Vim should still work as up until this stage everything was "normal"
 call plug#begin('~/.vim/plugged')
 
+"" Makes * and # work with a visual range!
+Plug 'subnut/visualstar.vim'
+
 "" Toggle the quickfix and loclist
+"" default is <leader>q and <leader>l
 Plug 'milkypostman/vim-togglelist'
 "" Send text over to a REPL
 Plug 'jpalardy/vim-slime'
@@ -416,17 +552,21 @@ Plug 'jpalardy/vim-slime'
 Plug 'morhetz/gruvbox'
 "" A simple plugin that persists the words added with zG and zW to a spellfile specific to the current file or directory.
 "" (zG - mark good; zW - mark bad)
+"" Remember zu too UNDO
 "" You can also add a file called .dialectmain to a directory and all files in its subdirectories will use the spellfile there.
 Plug 'dbmrq/vim-dialect'
 "" `:Ditto` highlights the most frequent word in the current file or in the current visual selection
 "" `:NoDitto` clears them
 "" (Useful when we're writting text and don't want to look ike a baboon"
 Plug 'dbmrq/vim-ditto'
-Plug 'christianchiarulli/nvcode-color-schemes.vim'
-Plug 'altercation/vim-colors-solarized'
-Plug 'kyazdani42/blue-moon'
-Plug 'fenetikm/falcon'
-Plug 'bluz71/vim-nightfly-guicolors'
+" Color plugins.
+" Removed since I only ever use gruvbox
+" One day I'll make my own
+"Plug 'christianchiarulli/nvcode-color-schemes.vim'
+"Plug 'altercation/vim-colors-solarized'
+"Plug 'kyazdani42/blue-moon'
+"Plug 'fenetikm/falcon'
+"Plug 'bluz71/vim-nightfly-guicolors'
 "" Allows me to _see_ the dang colors
 "" Main Command: :XtermColorTable
 "" :help xterm-color-table
@@ -443,6 +583,9 @@ Plug 'guns/xterm-color-table.vim'
 "" 
 "" :Goyo!
 Plug 'junegunn/goyo.vim'
+"" When sharing code:
+"" Didn't like it
+"" Plug 'junegunn/limelight.vim'
 " CSV
 " Main thing is: :RainbowAlign and :RainbowShrink
 Plug 'mechatroner/rainbow_csv'
@@ -482,7 +625,6 @@ Plug 'urxvtcd/vim-indent-object'
 "" Cute little visual things on marks!
 Plug 'kshenoy/vim-signature'
 "" TPOPE GOD
-"" TODO(Joaquim): Add dispatch back for `Make`
 "" Surround words and stuff
 Plug 'tpope/vim-surround'
 "" :Git is good
@@ -492,7 +634,10 @@ Plug 'tpope/vim-sleuth'
 "" Invoke `:Make` for async making!
 "" Open it with `:Copen`
 "" Godlike plugin
+let g:dispatch_no_maps = 1
 Plug 'tpope/vim-dispatch'
+"" :DB <your_db>
+Plug 'tpope/vim-dadbod'
 
 "" Fancy way to do search
 "" `:%Subvert/facilit{y,ies}/building{,s}/g`
@@ -521,7 +666,8 @@ Plug 'dhruvasagar/vim-zoom'
 "" nvim solution's with tree sitter are dogshit
 Plug 'kien/rainbow_parentheses.vim'
 " Press <Leader><Leader>F, go flying!
-Plug 'easymotion/vim-easymotion'
+" Removed since I never use it lol
+" Plug 'easymotion/vim-easymotion'
 "" use :Tab/|
 "" FROM
 "" |start|eat|left|
@@ -541,12 +687,15 @@ function! NoAutoGutter(info)
   "" Add new git diffs on save
   autocmd BufWritePost * GitGutter
 endfunction
+
 Plug 'airblade/vim-gitgutter', { 'do': function('NoAutoGutter') }
 "" Use fuzzy search!
 "" https://github.com/junegunn/fzf.vim
 if executable('fzf')
-  Plug '$HOME/.fzf'
+  "" homebrew installation
+  set rtp+=$HOMEBREW_PREFIX/opt/fzf
   Plug 'junegunn/fzf.vim'
+  command! B :Buffers
 endif
 
 if ! has('nvim')
@@ -576,13 +725,21 @@ if executable('cargo') && has('nvim')
   Plug 'euclio/vim-markdown-composer', { 'do': function('BuildComposer') }
 endif
 
-"" NVIM ONLY PLUGINS
+
+"" NVIM PLUGINS
 
 if has("nvim")
+
+  "" A structural code editor for Neovim. View, reorder, rename, duplicate,
+  "" delete, and annotate code declarations from a floating window or split.
+  "" Use <leader>fl
+  Plug 'Sang-it/fluoride'
   Plug 'lukas-reineke/indent-blankline.nvim'
   "" Use :CoAuthor when editing a commit message
   Plug '2kabhishek/co-author.nvim'
-  Plug 'RRethy/nvim-base16'
+  "" A BUNCH of color plugins
+  "" Again - I like gruvbox :)
+  "" Plug 'RRethy/nvim-base16'
   "" Draw pictures!
   "" TODO(Joaquim): Add a little explanation here
   Plug 'jbyuki/venn.nvim'
@@ -613,6 +770,11 @@ if has("nvim")
   Plug 'mfussenegger/nvim-jdtls'
   "" Abuses tree sitter for pretty context colors
   Plug 'lukas-reineke/indent-blankline.nvim' 
+
+  if executable('sqls')
+    Plug 'nanotee/sqls.nvim'
+  endif
+
 endif
 call plug#end()
 
@@ -645,6 +807,31 @@ function! PlugLoaded(name)
   return has_key(g:plugs, a:name)
 endfunction
 
+if PlugLoaded('fluoride')
+  nnoremap <leader>fl :Fluoride vsplit<cr>
+"vim.keymap.set("n", "<leader>cv", "<cmd>Fluoride vsplit<cr>", { desc = "Fluoride (vertical split)" })
+endif
+
+
+if PlugLoaded('rainbow_csv')
+
+  let g:rcsv_colorlinks = [ "csvCol0", "csvCol1", "csvCol2", "csvCol3", "csvCol4", "csvCol5", "csvCol6", "csvCol7", "csvCol8" ]
+  "let g:rcsv_colorlinks = ['String', 'Comment', 'NONE', 'Special', 'Identifier', 'Type', 'Question', 'CursorLineNr', 'ModeMsg', 'Title']
+
+
+  "  ["blue", "blue"],
+  "  ["green", "green"],
+  "  ["magenta", "magenta"],
+  "  ["NONE", "NONE"],
+  "  ["darkred", "darkred"],
+  "  ["darkblue", "darkblue"],
+  "  ["darkgreen", "darkgreen"],
+  "  ["darkmagenta", "darkmagenta"],
+  "  ["darkcyan", "darkcyan"],
+
+
+
+endif
 
 if PlugLoaded('vim-togglelist')
   nmap <script> <silent> <leader>l :call ToggleLocationList()<CR>
@@ -747,40 +934,40 @@ endif
 
 
 if PlugLoaded('gruvbox') && has('nvim')
-  function! FixGruvColors()
-    "" Tweaks to the coloring
-    hi! link @constant GruvBoxPurple
-    hi! link @constant.builtin GruvboxPurple
-    hi! link @constructor GruvboxGreen
-    hi! link @field GruvboxAqua
-    hi! link @function GruvboxYellow
-    hi! link @function.call GruvboxYellow
-    hi! link @function.method.call GruvboxYellow
-    hi! link @identifier GruvboxAqua
-    hi! link @include GruvboxRed
-    hi! link @keyword.return GruvBoxPurple
-    hi! link @method GruvboxYellow
-    hi! link @punctuation.delimiter Noise
-    hi! link @special GruvboxGreen
-    hi! link @string GruvboxOrange
-    hi! link @string.regex GruvBoxRed 
-    hi! link @string.regexp GruvBoxRed
-    hi! link @tag.attribute.javascript GruvboxAqua
-    hi! link @tag.attribute.tsx GruvboxAqua
-    hi! link @type GruvboxGreen
-    hi! link @variable GruvboxBlue
+
+  augroup gruvbox_override
+    autocmd!
+    autocmd ColorScheme gruvbox hi! link @constant GruvBoxPurple
+    autocmd ColorScheme gruvbox hi! link @constant.builtin GruvboxPurple
+    autocmd ColorScheme gruvbox hi! link @constructor GruvboxGreen
+    autocmd ColorScheme gruvbox hi! link @field GruvboxAqua
+    autocmd ColorScheme gruvbox hi! link @function GruvboxYellow
+    autocmd ColorScheme gruvbox hi! link @function.call GruvboxYellow
+    autocmd ColorScheme gruvbox hi! link @function.method.call GruvboxYellow
+    autocmd ColorScheme gruvbox hi! link @identifier GruvboxAqua
+    autocmd ColorScheme gruvbox hi! link @include GruvboxRed
+    autocmd ColorScheme gruvbox hi! link @keyword.return GruvBoxPurple
+    autocmd ColorScheme gruvbox hi! link @method GruvboxYellow
+    autocmd ColorScheme gruvbox hi! link @punctuation.delimiter Noise
+    autocmd ColorScheme gruvbox hi! link @special GruvboxGreen
+    autocmd ColorScheme gruvbox hi! link @string GruvboxOrange
+    autocmd ColorScheme gruvbox hi! link @string.regex GruvBoxRed 
+    autocmd ColorScheme gruvbox hi! link @string.regexp GruvBoxRed
+    autocmd ColorScheme gruvbox hi! link @tag.attribute.javascript GruvboxAqua
+    autocmd ColorScheme gruvbox hi! link @tag.attribute.tsx GruvboxAqua
+    autocmd ColorScheme gruvbox hi! link @type GruvboxGreen
+    autocmd ColorScheme gruvbox hi! link @variable GruvboxBlue
     "" TODO: https://gist.github.com/swarn/fb37d9eefe1bc616c2a7e476c0bc0316
     "" Simply type `:Inspect` and then see what your LSP tells you
-    hi! link @lsp.type.parameter GruvBoxPurple
-    hi! link @lsp.type.function.javascript GruvboxYellow
-    hi! link @lsp.typemod.variable.readonly GruvBoxBlueBold
-    hi! link @lsp.typemod.variable.defaultLibrary GruvBoxAqua
+    autocmd ColorScheme gruvbox hi! link @lsp.type.parameter @constant
+    autocmd ColorScheme gruvbox hi! link @lsp.type.function.javascript @function
+    autocmd ColorScheme gruvbox hi! link @lsp.typemod.variable.readonly @constant
+    autocmd ColorScheme gruvbox hi! link @lsp.typemod.variable.defaultLibrary GruvBoxAqua
     " Importantly this will _not_ match a member of some defaultLibrary
-    hi! link @lsp.typemod.function.defaultLibrary GruvBoxAqua
-  endfunction
+    autocmd ColorScheme gruvbox hi! link @lsp.typemod.function.defaultLibrary GruvBoxAqua
+  augroup END
 
-  colorscheme gruvbox
-  call FixGruvColors()
+  colorscheme personal
 endif
 
 if PlugLoaded('nvcode-color-schemes.vim') && !has("nvim")

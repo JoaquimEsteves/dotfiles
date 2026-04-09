@@ -83,7 +83,7 @@ end
 
 -- https://github.com/lukas-reineke/indent-blankline.nvim
 if ma("indent_blankline") then
-    require("ibl").setup({ scope = { show_end = false } })
+    require("ibl").setup({ scope = { enabled = false } })
 end
 
 if ma("oil") then
@@ -163,9 +163,9 @@ if ma("oil") then
         function! SexyOil(bang, rest)
           if a:bang
             " Foo! behavior
-            topleft split
+            top split
           else
-            botright split
+            bot split
           endif
           execute 'Oil' a:rest
         endfunction
@@ -174,9 +174,10 @@ if ma("oil") then
         function! SexyVertOil(bang, rest)
           if a:bang
             " Foo! behavior
-            vert botright split
+            vert split
+            wincmd l
           else
-            vert topleft split
+            vert split
           endif
           execute 'Oil' a:rest
         endfunction
@@ -187,3 +188,19 @@ if ma("oil") then
         command! -bang -nargs=* -complete=dir Ex :Oil <args>
     ]])
 end
+
+-- from $VIMRUNTIME/example_init.lua
+vim.api.nvim_create_autocmd('TextYankPost', {
+    desc = 'Highlight when yanking (copying) text',
+    callback = function()
+        vim.hl.on_yank()
+    end,
+})
+
+local function reload_colorscheme()
+    local current_color = vim.g.colors_name or 'default'
+    print("Reloading " .. current_color)
+    vim.cmd.colorscheme(current_color)
+end
+
+vim.keymap.set("n", "<F2>", reload_colorscheme, {})

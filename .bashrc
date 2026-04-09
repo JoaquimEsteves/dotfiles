@@ -5,9 +5,19 @@
 
 # If not running interactively, don't do anything
 case $- in
-  *i*) ;;
-  *) return ;;
+*i*) ;;
+*) return ;;
 esac
+
+if [[ "${BASH_VERSINFO[0]}" -lt 5 ]]; then
+  cat <<EOF
+###############################################################################
+#                                  Warning!                                   #
+#                                Fucking MacOS                                #
+###############################################################################
+You're using a nearly twenty year old version of bash.
+EOF
+fi
 
 # don't put duplicate lines or lines starting with space in the history.
 # See bash(1) for more options
@@ -16,9 +26,12 @@ HISTCONTROL=ignoreboth
 # append to the history file, don't overwrite it
 shopt -s histappend
 
+# Ignore these silly commands from history
+HISTIGNORE='ls:ll:ls -alh:pwd:clear:history'
+
 # for setting history length see HISTSIZE and HISTFILESIZE in bash(1)
-HISTSIZE=1000
-HISTFILESIZE=2000
+HISTSIZE=50000
+HISTFILESIZE=100000
 
 # check the window size after each command and, if necessary,
 # update the values of LINES and COLUMNS.
@@ -38,7 +51,7 @@ fi
 
 # set a fancy prompt (non-color, unless we know we "want" color)
 case "$TERM" in
-  xterm-color | *-256color) color_prompt=yes ;;
+xterm-color | *-256color) color_prompt=yes ;;
 esac
 
 # uncomment for a colored prompt, if the terminal has the capability; turned
@@ -111,10 +124,10 @@ unset color_prompt force_color_prompt
 
 # If this is an xterm set the title to user@host:dir
 case "$TERM" in
-  xterm* | rxvt*)
-    PS1="\[\e]0;${debian_chroot:+($debian_chroot)}\u@\h: \w\a\]$PS1"
-    ;;
-  *) ;;
+xterm* | rxvt*)
+  PS1="\[\e]0;${debian_chroot:+($debian_chroot)}\u@\h: \w\a\]$PS1"
+  ;;
+*) ;;
 
 esac
 
@@ -143,17 +156,13 @@ fi
 
 # Add an "alert" alias for long running commands.  Use like so:
 #   sleep 10; alert
+#   (This is linux only)
 alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
 
 # Alias definitions.
 # You may want to put all your additions into a separate file like
 # ~/.bash_aliases, instead of adding them here directly.
 # See /usr/share/doc/bash-doc/examples in the bash-doc package.
-
-if [ -f ~/.bash_aliases ]; then
-  # shellcheck source=/dev/null
-  . ~/.bash_aliases
-fi
 
 # enable programmable completion features (you don't need to enable
 # this, if it's already enabled in /etc/bash.bashrc and /etc/profile
@@ -178,21 +187,72 @@ if [ -f ~/.bash_functions ]; then
   # shellcheck source=/dev/null
   source ~/.bash_functions
 fi
+# HOMEBREW BULLSHIT
 
-export DO_NOT_TRACK=1
-
-# Node Version Manager
-NVM_DIR="$HOME/.nvm"
-if [ -d "$NVM_DIR" ]; then
-  export NVM_DIR
-  # shellcheck source=/dev/null
-  [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh" # This loads nvm
-  # shellcheck source=/dev/null
-  [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion" # This loads nvm bash_completion
+if [ -d ~/.local/bin ]; then
+  PATH="$HOME/.local/bin:$PATH"
 fi
 
+export HOMEBREW_PREFIX="/opt/homebrew"
+export HOMEBREW_CELLAR="/opt/homebrew/Cellar"
+export HOMEBREW_REPOSITORY="/opt/homebrew"
+# PROBLEM LINE IS THIS SHIT
+# _EVERYTIME_ we do an eval, it's dog slow!
+# If spawning a new shell every becomes stupid slow run the command yourself and see what the output is
+# PATH="/opt/homebrew/bin:/opt/homebrew/sbin:/Users/jesteves/.local/share/mise/installs/node/24.14.1/bin:/opt/homebrew/opt/make/libexec/gnubin:/opt/homebrew/opt/coreutils/libexec/gnubin:/Users/jesteves/.local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+# eval "$(/usr/bin/env /usr/libexec/path_helper -s)"
+PATH="/opt/homebrew/bin:/opt/podman/bin:/Users/jesteves/.local/share/mise/installs/node/24.14.1/bin:/opt/homebrew/opt/openjdk/bin:/opt/homebrew/opt/gnu-sed/libexec/gnubin:/opt/homebrew/opt/make/libexec/gnubin:/opt/homebrew/opt/coreutils/libexec/gnubin:/opt/homebrew/sbin:/Users/jesteves/.local/bin:/Users/jesteves/go/bin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/pkg/env/global/bin";
+# NEW_PATH="$PATH"
+[ -z "${MANPATH-}" ] || export MANPATH=":${MANPATH#:}"
+export INFOPATH="/opt/homebrew/share/info:${INFOPATH:-}"
+
+if [ -d "$HOMEBREW_PREFIX/opt/coreutils/libexec/gnubin" ]; then
+  PATH="$HOMEBREW_PREFIX/opt/coreutils/libexec/gnubin:$PATH"
+fi
+
+if [ -d "$HOMEBREW_PREFIX/opt/make/libexec/gnubin" ]; then
+  PATH="$HOMEBREW_PREFIX/opt/make/libexec/gnubin:$PATH"
+fi
+if [ -d "$HOMEBREW_PREFIX/opt/gnu-sed/libexec/gnubin" ]; then
+  PATH="$HOMEBREW_PREFIX/opt/gnu-sed/libexec/gnubin:$PATH"
+fi
+
+# macos only shenanigans
+if [[ -z "$LC_ALL" ]]; then
+  export LC_ALL='en_US.UTF-8'
+fi
+
+if [[ -s $HOMEBREW_PREFIX/etc/profile.d/bash_completion.sh ]]; then
+  # shellcheck source=/dev/null
+  LC_COLLATE=C LANG='' LC_CTYPE=C source "$HOMEBREW_PREFIX/etc/profile.d/bash_completion.sh"
+fi
+
+if [[ -d $HOMEBREW_PREFIX/opt/openjdk/bin ]]; then
+  PATH="$HOMEBREW_PREFIX/opt/openjdk/bin:$PATH"
+  # In case I need to do some fancy compilation
+  # (Highly doubtful!)
+  # export CPPFLAGS="-I/opt/homebrew/opt/openjdk/include"
+fi
+
+for completion in "$HOMEBREW_PREFIX/etc/bash_completion.d/"*; do
+  # shellcheck source=/dev/null
+  source "$completion"
+done
+unset completion
+
+# end-of Homebrew bullshit
+
+# See: https://theleo.zone/posts/pager/
+if command -v lore >/dev/null; then
+  export PAGER=lore
+fi
+
+export DO_NOT_TRACK=1
+# shellcheck source=/dev/null
+[ -f ~/.config/bash_shit/mise.bash ] && source ~/.config/bash_shit/mise.bash
+
 # yarn's global bin folder
-[ -d ~/.yarn/bin ] && export PATH="$PATH:~/.yarn/bin"
+[ -d ~/.yarn/bin ] && export PATH="$PATH:$HOME/yarn/bin"
 # Go's standard bin
 [ -d /usr/local/go/bin ] && export PATH=$PATH:/usr/local/go/bin
 # Locally installed Go bins
@@ -203,60 +263,13 @@ fi
 export HOSTALIASES="$HOME/.hosts"
 # Allow BAT (fancy cat built with RUST) to use 'less' with wheelscrool
 export BAT_PAGER="less --tabs=4 -RF"
-# Allows us to use zoxide, the fancy cd built with rust
-[ -x "$(command -v zoxide)" ] && eval "$(zoxide init bash)"
 
 # FU microsoft telemetry
 export DOTNET_CLI_TELEMETRY_OPTOUT=1
 
 # use vi
-export EDITOR=vim
+export EDITOR=nvim
 
-###### AZERTY KEYBOARD SHENANIGANS ######
-#                                       #
-# Stupid bloody azerty keyboards are    #
-# bloody unusable.                      #
-# So I'm replacing loads of of these    #
-# silly things for reasonable inputs.   #
-# Obviously don't use this if you're    #
-# not on azerty.                        #
-#                                       #
-#########################################
-# Defaults fzf expansion to $$
-# fzf expands with:
-#
-#   Files under the current directory
-#   - You can select multiple items with TAB key
-#    vim **<TAB>
-#
-#    # Files under parent directory
-#    vim ../**<TAB>
-#
-#    # Files under parent directory that match `fzf`
-#    vim ../fzf**<TAB>
-#
-#    # Files under your home directory
-#    vim ~/**<TAB>
-#
-#
-#    # Directories under current directory (single-selection)
-#    cd **<TAB>
-#
-#    # Directories under ~/github that match `fzf`
-#    cd ~/github/fzf**<TAB>
-# export FZF_COMPLETION_TRIGGER='$$'
-
-# Setup Caps locks => escape key
-# No longer works for some reason - use gnome-tweaks?
-# setxkbmap -option caps:escape
-
-# French Keyboard Crap!
-# maps è to /
-# xmodmap -e "keycode 16 = KP_Divide 7"
-# maps § to \
-# xmodmap -e "keycode 15 = backslash 6"
-# Set capslocks to be equal to escape
-# setxkbmap -option caps:escape
 ########################################
 #                                      #
 #           FUZZY SEARCH FUN           #
@@ -264,16 +277,10 @@ export EDITOR=vim
 ########################################
 # Allows shells to remember the history of other shells. (Useful for fzf + tmux)
 # __REMOVED__: It was actually a pain in the ass
-export PROMPT_COMMAND="history -a; history -n"
+# export PROMPT_COMMAND="history -a; history -n"
 
 # shellcheck source=/dev/null
-[ -f ~/.fzf.bash ] && source ~/.fzf.bash
-
-# Allow the use of direnv
-# https://direnv.net/
-[ -x /usr/bin/direnv ] && eval "$(direnv hook bash)"
-# gh completion
-[ -x /usr/bin/gh ] && eval "$(gh completion -s bash)"
+[ -f ~/.config/bash_shit/fzf.bash ] && source ~/.config/bash_shit/fzf.bash
 
 # Perl crap
 if [ -d ~/perl5/bin ]; then
@@ -287,6 +294,7 @@ if [ -d ~/perl5/bin ]; then
 
   # shellcheck disable=SC2089
   PERL_MB_OPT="--install_base \"$HOME/perl5\""
+  # shellcheck disable=SC2090
   export PERL_MB_OPT
 
   PERL_MM_OPT="INSTALL_BASE=$HOME/perl5"
@@ -294,7 +302,7 @@ if [ -d ~/perl5/bin ]; then
 fi
 
 # LUA PATH SHENANIGANS
-if [ -x "$(command -v luarocks)" ]; then
+if command -v luarocks >/dev/null; then
   eval "$(luarocks path)"
 fi
 
@@ -302,8 +310,10 @@ fi
 ## Should be automatic - but isn't lol
 if [ -d "$HOME"/.local/share/bash-completion/completions ]; then
   for f in "$HOME"/.local/share/bash-completion/completions/*; do
+    # shellcheck disable=SC1090
     [ -f "$f" ] && . "$f"
   done
+  unset f
 fi
 
 # UNCOMMENT THIS WHEN YOU WANT TO WORK WITH ANDROID AGAIN
@@ -316,35 +326,46 @@ fi
 # fi
 
 # update-alternatives was not setting the correct JAVA_HOME
-JAVA_HOME=/usr/lib/jvm/temurin-22-jdk-amd64
+JAVA_HOME=/opt/homebrew/opt/openjdk/libexec/openjdk.jdk/Contents/Home/
 if [ -d $JAVA_HOME ]; then
   export JAVA_HOME
 fi
 
-if [ -x "$(command -v ng)" ]; then
+if command -v ng >/dev/null; then
   # Load Angular CLI autocompletion.
+  # shellcheck disable=SC1090
   source <(ng completion script)
 fi
 
-if [ -x "$(command -v eslint_d)" ]; then
+if command -v eslint_d >/dev/null; then
   # Fix broken config shenanigans for eslint_d
   # Basically if you have the new
   # eslint.config.js then eslint_d just craps the bed
   # Annoying...
   export ESLINT_USE_FLAT_CONFIG=true
 fi
-# For some reason this was not changing despite having edited the `etc` files
 export LC_TIME=en_US.utf-8
-# if [ -x "$(command -v clangd)" ]; then
-#   # Tell clangd where to find the includes
-#   # This is a hack to go around me installing clangd incorrectly
-#   if [ -d "/usr/lib/llvm-18/lib/clang/18/include/" ]; then
-#     export CPLUS_INCLUDE_PATH=/usr/lib/llvm-18/lib/clang/18/include/
-#   else
-#     echo "LLVM includes not found! Fix the version"
-#   fi
-# fi
-#
-if [ -x "$(command -v tldr)" ]; then
-  tldr "$(tldr --list | shuf -n1)"
+# Show a little TLDR if we're lucky
+if command -v tldr >/dev/null && [[ $((RANDOM % 10)) -gt 5 ]]; then
+  tldr --offline "$(tldr --offline --list | shuf -n1)"
+fi
+
+# Allows us to use zoxide, the fancy cd built with rust
+# shellcheck disable=SC1090
+[ -f ~/.config/bash_shit/zoxide.bash ] && source ~/.config/bash_shit/zoxide.bash
+# Allow the use of direnv
+# https://direnv.net/
+# direnv hook bash > ~/.config/bash_shit/direnv.bash
+# shellcheck disable=SC1090
+[ -f ~/.config/bash_shit/direnv.bash ] && source ~/.config/bash_shit/direnv.bash
+# shellcheck disable=SC1090
+[ -f ~/.config/bash_shit/podman.bash ] && source ~/.config/bash_shit/podman.bash
+# shellcheck disable=SC1090
+[ -f ~/.config/bash_shit/hf.bash ] && source ~/.config/bash_shit/hf.bash
+
+# Look at alieases only at the end, 'cos we want to do it after PATH
+# editing shenanigans
+if [ -f ~/.bash_aliases ]; then
+  # shellcheck source=/dev/null
+  . ~/.bash_aliases
 fi
