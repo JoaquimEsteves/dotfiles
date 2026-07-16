@@ -75,12 +75,14 @@ end
 vim.keymap.set("n", "<leader>v", toggle_virtual_line(), {})
 vim.keymap.set("n", "<leader>V", toggle_virtual_line(true), {})
 
+local no_format = { ts_ls = true, sqls = true }
 -- The Keybindings themselves are set-up through the init.vim
 -- I did it this way because ALE was a treat and it JUST WORKED
 --
 -- But now I'm training myself to use the default nvim ones
 -- (UNTIL THEY CHANGE AGAIN NO DOUBT!)
 ---@param ev vim.api.keyset.create_autocmd.callback_args
+---@diagnostic disable-next-line: unused-local
 local function setUpLspCommands(ev)
     -- require("lsp_signature").on_attach({
     -- 	bind = false,
@@ -88,14 +90,7 @@ local function setUpLspCommands(ev)
     -- 	floating_window = false,
     -- })
     -- Enable completion triggered by <c-x><c-o>
-    vim.bo[ev.buf].omnifunc = "v:lua.vim.lsp.omnifunc"
-
-    local client = vim.lsp.get_client_by_id(ev.data.client_id)
-    -- use lsp for folding if it's supported by the server
-    if client and client:supports_method("textDocument/foldingRange") then
-        local win = vim.api.nvim_get_current_win()
-        vim.wo[win][0].foldexpr = "v:lua.vim.lsp.foldexpr()"
-    end
+    -- vim.bo[ev.buf].omnifunc = "v:lua.vim.lsp.omnifunc"
 
     local command = function(what, func)
         vim.api.nvim_create_user_command(what, func, { nargs = 0 })
@@ -113,6 +108,11 @@ local function setUpLspCommands(ev)
     command("LspHover", function()
         vim.notify("Bad habit! Use K", 4)
         vim.lsp.buf.hover()
+    end)
+
+    command("LspHighlight", function()
+        vim.lsp.buf.clear_references()
+        vim.lsp.buf.document_highlight()
     end)
 
     command("LspFindReferences", function()
@@ -154,14 +154,19 @@ local function setUpLspCommands(ev)
         -- vim.diagnostic.goto_prev()
     end)
 
+    command('LspFormatting', function()
+        vim.lsp.buf.format({
+            --- Never format nerds that are on that list (namely, typescript and SQLS)
+            filter = function(client) return no_format[client.name] == nil end
+        })
+    end)
+    command('LspDetail', function() vim.diagnostic.open_float({ scope = "line" }) end)
+    command('LspLocList', vim.diagnostic.setloclist)
+
+    --
     -- We define these nerds since if I'm using `ALE` in standard VIM
     -- We still want to have them defined
     vim.cmd([[
-        command! LspFormatting lua vim.lsp.buf.format()
-        "" DIAGNOSTICS
-        command! LspDetail lua vim.diagnostic.open_float({scope="line"})
-        command! LspLocList lua vim.diagnostic.setloclist()
-
         "" TODO(Joaquim): Add this as a function only if pyright is connected
         "" Adds a python comment that shuts pyright up
         function! Stfupyright()
@@ -186,14 +191,15 @@ local function setUpLspCommands(ev)
     ]])
 end
 
+local group_config_id = vim.api.nvim_create_augroup("UserLspConfig", {})
 vim.api.nvim_create_autocmd("LspAttach", {
-    group = vim.api.nvim_create_augroup("UserLspConfig", {}),
+    group = group_config_id,
     callback = setUpLspCommands,
     -- We just need to set up the commands once
     once = true,
 })
 
-local no_format = { tsserver = true, sqls = true }
+
 
 vim.lsp.config("*", {
     on_attach = function(client, bufnr)
@@ -201,6 +207,17 @@ vim.lsp.config("*", {
             -- Without this `CTRL-Y` won't auto import or do other lsp side-effecty
             -- things
             vim.lsp.completion.enable(true, client.id, bufnr)
+        end
+
+        if client:supports_method("textDocument/foldingRange") then
+            local win = vim.api.nvim_get_current_win()
+            --- Equivalent to `like ':setlocal foldexpr=v:lua.vim.lsp.foldexpr()`
+            vim.wo[win][0].foldexpr = "v:lua.vim.lsp.foldexpr()"
+        end
+
+        --- Is this even necessary? It appears lie this is fine
+        if client:supports_method('textDocument/documentColor') then
+            vim.lsp.document_color.enable(true, { client_id = client.id })
         end
 
         if no_format[client.name] then
@@ -352,7 +369,10 @@ end
 
 if which("jdtls") then
     -- https://github.com/eclipse-jdtls/eclipse.jdt.ls#installation
-    local root_dir = vim.fs.dirname(vim.fs.find({ 'gradlew', '.git', 'mvnw', 'pom.xml' }, { upward = true })[1])
+    -- Apparently `vim.fs.find` crashes out if we're in some weird temporary dir
+    local ok, markers = pcall(vim.fs.find, { 'gradlew', '.git', 'mvnw', 'pom.xml' }, { upward = true })
+    local root_dir = ok and vim.fs.dirname(markers[1])
+
     vim.lsp.config('jdtls', {
         cmd = {
             'jdtls',

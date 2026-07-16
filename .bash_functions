@@ -93,7 +93,7 @@ function readable_path() {
 }
 
 function every_binary() {
-  if [[ -x $(which exa) ]]; then
+  if [[ -x "$(command -v exa)" ]]; then
     readable_path | xargs exa -alF --icons --header --extended
   else
     readable_path | xargs ls -la
@@ -172,7 +172,7 @@ fzf_with_controls() {
 _gf() {
   is_in_git_repo || return
   git -c color.status=always status --short |
-    fzf_with_controls 'batdiff --color {-1} | head -500' |
+    fzf_with_controls 'bat --diff --color always {-1} | head -500' |
     cut -c4- | sed 's/.* -> //'
 }
 

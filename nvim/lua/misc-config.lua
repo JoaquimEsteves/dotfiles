@@ -5,7 +5,7 @@ local ma = require("module_available")
 -- https://github.com/kosayoda/nvim-lightbulb
 if ma("nvim-lightbulb") then
     -- Modifies the lightbulb plugin to show up as virtual text _only_
-    function _G.LightBulbFunc()
+    local function LightBulbFunc()
         require("nvim-lightbulb").update_lightbulb({
             sign = {
                 enabled = false,
@@ -29,12 +29,15 @@ if ma("nvim-lightbulb") then
         })
     end
 
-    vim.cmd([[autocmd CursorHold,CursorHoldI * lua LightBulbFunc()]])
+    vim.api.nvim_create_autocmd({'CursorHold','CursorHoldI'}, {
+        desc = 'Prettier Lightbulb',
+        callback = LightBulbFunc
+    })
 end
 
 -- Draw pretty diagrams with arrow keys
 if ma("venn") then
-    function _G.Toggle_venn()
+    local function Toggle_venn()
         local venn_enabled = vim.inspect(vim.b.venn_enabled)
         if venn_enabled == "nil" then
             vim.b.venn_enabled = true
@@ -57,10 +60,11 @@ if ma("venn") then
         end
     end
 
-    function _G.Toggle_venn_double()
+    local function Toggle_venn_double()
         local venn_enabled = vim.inspect(vim.b.venn_enabled)
         if venn_enabled == "nil" then
             vim.b.venn_enabled = true
+            vim.api.nvim_set_option_value('ve', 'all', { scope = 'local' })
             vim.cmd([[setlocal ve=all]])
             -- draw a line on HJKL keystokes
             vim.api.nvim_buf_set_keymap(0, "n", "J", "<C-v>j:VBoxD<CR>", { noremap = true })
@@ -70,7 +74,8 @@ if ma("venn") then
             -- draw a box by pressing "f" with visual selection
             vim.api.nvim_buf_set_keymap(0, "v", "f", ":VBox<CR>", { noremap = true })
         else
-            vim.cmd([[setlocal ve=]])
+            vim.api.nvim_set_option_value('ve', '', { scope = 'local' })
+            -- vim.cmd([[setlocal ve=]])
             vim.api.nvim_buf_del_keymap(0, "n", "J")
             vim.api.nvim_buf_del_keymap(0, "n", "K")
             vim.api.nvim_buf_del_keymap(0, "n", "L")
@@ -79,6 +84,10 @@ if ma("venn") then
             vim.b.venn_enabled = nil
         end
     end
+
+    vim.api.nvim_create_user_command('ToggleVen', Toggle_venn, { desc = "pretty drawing" })
+    vim.api.nvim_create_user_command('ToggleVenDouble', Toggle_venn_double,
+        { desc = "pretty drawing, but with double-lines!" })
 end
 
 -- https://github.com/lukas-reineke/indent-blankline.nvim
@@ -204,3 +213,177 @@ local function reload_colorscheme()
 end
 
 vim.keymap.set("n", "<F2>", reload_colorscheme, {})
+
+
+---@return fun(): integer?
+-- Usage:
+-- ```lua
+-- -- Assume there's 5 tabs and we're at tab 2
+-- for tab in tab_order() do
+--   -- tab = 2, 1, 3, 4, 5 ...
+-- end
+--
+-- ```
+local function tab_order()
+    local n = vim.fn.tabpagenr('$')
+    local current = vim.fn.tabpagenr()
+    return coroutine.wrap(function()
+        coroutine.yield(current)
+        local left = current - 1
+        local right = current + 1
+        while left >= 1 or right <= n do
+            if left >= 1 then
+                coroutine.yield(left)
+                left = left - 1
+            end
+            if right <= n then
+                coroutine.yield(right)
+                right = right + 1
+            end
+        end
+    end)
+end
+
+---@return string
+function _G.CustomTabLine_I_Hate_Lua()
+    ---@type table<integer, string[]>
+    local res = { [9999999] = {} }
+    ---@type table<integer, string>
+    --- Buffers always have the same name
+    local all_buffer_to_name = {}
+
+    local visible_chars = 0
+    local col_size = vim.o.columns
+    local number_of_tabs = vim.fn.tabpagenr('$')
+    local cwd = vim.fn.getcwd()
+
+
+    ---@param s string
+    --- Removes all of the cruft with some JANK regex.
+    local function visible_len(s)
+        return #(s:gsub('%%#[^#]*#', ''):gsub('%%%d*T', ''):gsub('%%=', ''))
+    end
+
+    ---@param items string[]
+    ---@param tab_nr integer
+    ---@param force boolean?
+    local function append(items, tab_nr, force)
+        local tmp_vis = visible_chars
+        for _, item in ipairs(items) do
+            tmp_vis = tmp_vis + visible_len(item)
+        end
+        if force or tmp_vis < col_size then
+            visible_chars = tmp_vis
+            vim.list_extend(res[tab_nr], items)
+        else
+            visible_chars = visible_chars + 3
+            vim.list_extend(res[tab_nr], { "..." })
+        end
+    end
+
+    append({
+        -- Default-highlighting for the tab. highlight-groups are denoted with %#hl-GroupName#%
+        '%#TabLineFill#%T',
+        -- Pushes the CWD to the right
+        -- And then sets the color to `TAG`
+        '%=%#Tag#',
+        vim.fn.fnamemodify(cwd, ':~'),
+    }, 9999999, true)
+
+    local function get_buf_name(buffer_nr)
+        if all_buffer_to_name[buffer_nr] ~= nil then
+            return all_buffer_to_name[buffer_nr]
+        end
+
+        local buff_type = vim.fn.getbufvar(buffer_nr, '&buftype')
+
+        if buff_type == 'quickfix' then
+            return ''
+        end
+
+        if buff_type == 'terminal' then
+            local cmd = vim.fn.matchstr(vim.fn.bufname(buffer_nr), '[^:]*$')
+            return table.concat({ 'term[', buffer_nr, ']<', (cmd ~= '' and cmd or '?'), '>' }, '')
+        end
+
+        if buff_type == 'help' then
+            return table.concat({ 'help<', vim.fn.fnamemodify(vim.fn.bufname(buffer_nr), ':t'), '>' }, '')
+        end
+
+        local buffer_name = vim.fn.fnamemodify(vim.fn.bufname(buffer_nr), ':~:.')
+
+        if buffer_name == '' then
+            return '[No Name]'
+        end
+
+        return buffer_name
+    end
+
+
+    ---@param buffer_nr integer
+    ---@param selected_highlight string
+    ---@param current_tab_buffer_to_name table<integer, string>
+    ---@return string
+    local function get_buf_display(buffer_nr, selected_highlight, current_tab_buffer_to_name)
+        if current_tab_buffer_to_name[buffer_nr] ~= nil then
+            return current_tab_buffer_to_name[buffer_nr]
+        end
+        local buffer_name = get_buf_name(buffer_nr)
+        all_buffer_to_name[buffer_nr] = buffer_name
+
+        if vim.fn.getbufvar(buffer_nr, '&modified') == 1 then
+            return table.concat({ '%#WarningMsg#[', buffer_nr, ']', selected_highlight, buffer_name, ' ' }, '')
+        end
+
+        return table.concat({ '[', buffer_nr, ']', buffer_name, ' ' }, '')
+    end
+
+    ---@param tab_index integer
+    --- It's its own function so we can do early returns
+    local function do_the_thing(tab_index)
+        -- for tab_index = 1, number_of_tabs do
+        ---@type table<integer, string>
+        local current_buffer_to_name = {}
+        res[tab_index] = {}
+
+        append({
+            '%#TabLine#',
+            '%' .. tab_index .. 'T',
+            number_of_tabs ~= 1 and ('%#Directory#' .. tab_index .. ':%#TabLine#') or '',
+        }, tab_index, true)
+
+
+        if visible_chars > col_size then
+            -- Append empty so we get the ellipsis anyway
+            append({}, tab_index)
+            return
+        end
+
+        ---@type string
+        local selected_highlight = tab_index == vim.fn.tabpagenr() and '%#TabLineSel#' or '%#TabLine#'
+
+        for _, b in ipairs(vim.fn.tabpagebuflist(tab_index)) do
+            current_buffer_to_name[b] = get_buf_display(b, selected_highlight, current_buffer_to_name)
+        end
+
+        append({
+            selected_highlight,
+            table.concat(vim.tbl_values(current_buffer_to_name), ' '),
+            '%#TabLine#',
+        }, tab_index)
+    end
+
+    -- vim.iter(tab_order()):each(do_the_thing)
+    for tab_index in tab_order() do
+        do_the_thing(tab_index)
+    end
+
+    local real_res = {}
+    for _, v in vim.spairs(res) do
+        real_res[#real_res + 1] = table.concat(v, '')
+    end
+
+    return table.concat(real_res, '')
+end
+
+vim.go.tabline = '%!v:lua.CustomTabLine_I_Hate_Lua()'

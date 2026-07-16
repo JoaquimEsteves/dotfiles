@@ -125,6 +125,10 @@ hi('@function.builtin', { italic = true })
 hi('@type.builtin', { italic = true })
 hi('@module', {})
 
+-- LANGUAGE SPECIFIC
+hi("@css.units", { link = "Special" })
+hi("@property.css", { fg=normal.fg, bg=normal.bg, italic = true })
+
 local group = vim.api.nvim_create_augroup('personal_colors_group', { clear = true })
 
 vim.api.nvim_create_autocmd('ColorScheme', {

@@ -413,8 +413,14 @@ function! TabCloseLeft(bang)
   endwhile
 endfunction
 
+function! TabCloseOthers(bang)
+  call TabCloseRight(a:bang)
+  call TabCloseLeft(a:bang)
+endfunction
+
 command! -bang TabCloseRight call TabCloseRight('<bang>')
 command! -bang TabCloseLeft call TabCloseLeft('<bang>')
+command! -bang TabCloseOthers call TabCloseOthers('<bang>')
 
 "  ______________________________________________________________________
 " /                                                                      \
@@ -451,26 +457,47 @@ endfunction
 " Use map <buffer> to only map dd in the quickfix window. Requires +localmap
 autocmd FileType qf map <buffer> dd :call RemoveQFItem()<cr>
 
-set tabline=%!MyTabLine()  " custom tab pages line
-                           " Modified from: https://vim.fandom.com/wiki/Show_tab_number_in_your_tab_line
-function MyTabLine()
-  let res = ''
-  " tabpagenr('$') = total number of tab pages ('$' means "last index")
-  for t in range(tabpagenr('$'))
+set showtabline=2 " ie: always
+set tabline=%!CustomTabLine_I_Hate_Vimscript()  " custom tab pages line
+" HEAVILY Modified from: https://vim.fandom.com/wiki/Show_tab_number_in_your_tab_line
+                           
+"" TODO(Joaquim): The problem with this code is that it goes left to right
+"" But actually we want to FOCUS on the current tab, having it be centered.
+function! CustomTabLine_I_Hate_Vimscript()
+  let res = []
+  " '$' means "last index"
+  let number_of_tabs = tabpagenr('$')
+
+  let col_size = &columns
+
+  for t in range(number_of_tabs)
     let tab_index = t + 1
 
-    " %#GroupName# — switches active highlight group mid-string
-    let res .= '%#TabLine#'
-    " %×T — marks start of mouse-clickable region that switches to tab ×
-    let res .= '%' . tab_index . 'T'
-    let res .= '[' . tab_index . ']'
+    " vimlists must all be in one line (???). See :help line-continuation
+    " Comments are supposedly '"\ ' - but my diagnosic is going crazy so I'll
+    " just ignore that
+    "
+    "\ %#GroupName# — switches active highlight group mid-string
+    "\ % N T — marks start of mouse-clickable region that switches to
+    "\ tab. Also works with re-ordering!
+    "\ Displays [tab_number] if there's more than one tab
+    "\ This makes it easy to jump with <number>gt
+    call extend(res, [
+          \'%#TabLine#',
+          \'%' , tab_index , 'T' ,
+          \number_of_tabs != 1 ? join(['%#Directory#' , tab_index , ':%#TabLine#' ], '') : ''
+          \])
 
-    let bufnames = []
-    let modified = 0
+    "" A dictionary, at least dictionaries and lists are KIND OF sane in
+    "" VIMSCRIPT
+    let buffer_to_name = {}
 
-    " tabpagebuflist(n) — buffer numbers of every window open in tab n
+    let selected_highlight = tab_index == tabpagenr() ? '%#TabLineSel#' : '%#TabLine#'
     for b in tabpagebuflist(tab_index)
-      " getbufvar(buf, '&opt') — reads a buffer-local option ('&' prefix = option, not variable)
+      if has_key(buffer_to_name, b)
+        continue
+      endif
+
       let buff_type = getbufvar(b, '&buftype')
       " buftype='quickfix' covers both the quickfix list and location lists
       " We don't care about these
@@ -486,39 +513,47 @@ function MyTabLine()
         " '[^:]*$' matches everything after the last ':', which is the command
         " (A clanker vibed the regex, it appears to work)
         let cmd = matchstr(bufname(b), '[^:]*$')
-        call add(bufnames, ':term<' . (cmd != '' ? cmd : '?') . '>')
+        let buffer_to_name[b] = join(['term[' , b , ']<' , (cmd != '' ? cmd : '?') , '>'], '')
+
         continue
       endif
 
       if buff_type == 'help'
         " fnamemodify(path, ':t') — ':t' modifier returns the tail (basename) of a path
-        call add(bufnames, ':help<' . fnamemodify(bufname(b), ':t') . '>')
+        let buffer_to_name[b] = join(['help<' , fnamemodify(bufname(b), ':t') , '>'], '')
         continue
       endif
 
-      " getbufvar(buf, '&modified') — true if buffer has unsaved changes
-      if getbufvar(b, '&modified')
-        let modified = 1
+
+      let buffer_name = fnamemodify(bufname(b), ':~:.')
+      if buffer_name == ''
+        let buffer_name = '[No Name]'
+      else
+        "let buffer_name = pathshorten(buffer_name)
+        "" Add a space even if we're not adding the little modified character.
+        "" This prevents the whole thing from shifting
+        "let buffer_name = buffer_name . (getbufvar(b, '&modified') ? '+' : ' ')
       endif
 
-      let buffer_name = bufname(b)
-      call add(bufnames, buffer_name != '' ? buffer_name : '[No Name]')
+      if getbufvar(b, '&modified') 
+        "" Change the colour of the buffer to the `WARNING` if 
+        let buffer_to_name[b] = join(['%#WarningMsg#', '[', b, ']', selected_highlight, buffer_name, ' '], '')
+      else
+        let buffer_to_name[b] = join(['[', b, ']', buffer_name, ' '], '')
+      endif
+
     endfor
 
-    if modified
-      let res .= '+'
-    endif
-
-    let res .= tab_index == tabpagenr() ? '%#TabLineSel#' : '%#TabLine#'
-    let res .= join(bufnames, ' ')
-    let res .= '%#TabLine# '
+    call extend(res, [
+          \ selected_highlight,
+          \ join(values(buffer_to_name), ''),
+          \ '%#TabLine#'])
   endfor
 
   " %T here with no number resets the clickable-region state
-  let res .= '%#TabLineFill#%T'
-  " %= — Right align
-  let res .= '%=%#Tag#' . getcwd()
-  return res
+  call extend(res, ['%#TabLineFill#%T', '%=%#Tag#', fnamemodify(getcwd(), ':~')])
+
+  return join(res, '')
 endfunction
 
 "  _____________________________________________________________________
@@ -730,6 +765,10 @@ endif
 
 if has("nvim")
 
+  "" Allows using the LSP on the code-block of some other language.
+  "" So SQL in side `query =` or css inside `style =`
+  "" Call it with `OtterActivate`, note that it's a little fiddly
+  Plug 'jmbuhr/otter.nvim'
   "" A structural code editor for Neovim. View, reorder, rename, duplicate,
   "" delete, and annotate code declarations from a floating window or split.
   "" Use <leader>fl
@@ -756,10 +795,6 @@ if has("nvim")
   Plug 'nvim-treesitter/nvim-treesitter-textobjects'
   "" Fixes treesitters recent bullshit
   Plug 'MeanderingProgrammer/treesitter-modules.nvim'
-  "" Abuses tree sitter for pretty context colors
-  "" There's a weird bug with this one.
-  "" TODO: See if it's fixed in the future
-  "" Plug 'lukas-reineke/indent-blankline.nvim'
   "" auto-complete + snippets
   "" main one
   "" Plug 'ms-jpq/coq_nvim', {'branch': 'coq'}
@@ -884,11 +919,6 @@ endif
 if PlugLoaded('goyo.vim')
   " let g:goyo_linenr = 1
   " let g:goyo_width = '50%'
-endif
-
-if PlugLoaded('mechatroner/rainbow_csv')
-  command! ShrinkCSV :RainbowShrink
-  command! AlignCSV :RainblowAlign
 endif
 
 if PlugLoaded('animate.vim')
@@ -1021,6 +1051,7 @@ if PlugLoaded("nvim-lspconfig")
   nnoremap <Leader>d :LspDetail<CR>
   nnoremap <Leader>dd :LspLocList<CR>
   nnoremap <Leader>h :LspHover<CR>
+  nnoremap <Leader>hh :LspHighlight<CR>
   nnoremap <Leader>H <C-W>}<CR>
   "" Follow  vim convention instead of <leader>gg
   "" Remember - <C-o> to go back! I always forget lol

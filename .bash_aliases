@@ -35,7 +35,7 @@ alias g="git "
 #	  | cut -d \" \" -f 1 \
 #	  | emoji-fzf get"
 # shellcheck disable=SC2154
-alias emoj='emoji-fzf preview  | fzf -m --preview "emoji-fzf get --name {1}" | cut -d " " -f 1 | while read -r line; do echo $(echo $line | emoji-fzf get); done'
+alias emoj='emoji-fzf preview  | fzf -m --preview "emoji-fzf get --name {1}" | cut -d " " -f 1 | while read -r line; do echo $(emoji-fzf get <<< "$line"); done'
 # to copy to xclip system keyboard (on mac use pbcopy) after selecting
 alias emojc="emoj | pbcopy"
 
@@ -140,7 +140,7 @@ if [[ -x $(command -v procs) ]]; then
 fi
 
 # quickly get all dotfiles
-alias dotfiles="fd '^\.' . --maxdepth 1 --hidden --no-ignore "
+alias dotfiles="fd '^\.' . --max-depth 1 --hidden --no-ignore "
 # Quick copy to clipboard
 # Use it with a pipe command for example
 # alias c2b="xclip -sel clip "
