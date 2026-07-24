@@ -1,0 +1,12 @@
+Makefile
+Session.vim
+.*.un~
+.git
+.gitignore
+.gitmodules
+.*.swp
+.*.swo
+.xinitrc
+.xscreensaver
+example.gitconfig
+.viminfo
