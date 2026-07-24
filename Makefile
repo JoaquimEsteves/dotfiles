@@ -18,6 +18,11 @@ define _help
 * submodules-update  Fetches the latest submodules
 endef
 
+# command -v is (apparently) posix or whatever
+define installed
+$(shell command -v $(1) 2>/dev/null)
+endef
+
 help:
 	$(info $(_help))
 	@:
@@ -30,12 +35,16 @@ submodules-update:
 	git submodule update --init --recursive
 .PHONY: submodules
 
-ifdef NO
-CMD := stow --simulate
-else
-CMD := stow
-endif
 
+
+ifneq ($(call installed,stow),)
+CMD := stow
+ifdef NO
+CMD := $(CMD) --simulate
+endif
+ifdef DEL
+CMD := $(CMD) --delete
+endif
 all: normal config bash_shit
 .PHONY: all
 
@@ -47,10 +56,13 @@ config:
 	mkdir -p ~/.config
 	$(CMD) --verbose --dotfiles dot-config --ignore=dot-config --target ~/.config
 .PHONY: config
+else
+normal config:
+	$(warning Son😭😭😭😭😭)
+	$(error Requires GNU stow)
+.PHONY: normal config
+endif
 
-define installed
-$(shell command -v $(1) 2>/dev/null)
-endef
 
 BS := ~/.config/bash_shit
 

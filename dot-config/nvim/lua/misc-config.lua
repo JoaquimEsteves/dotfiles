@@ -29,7 +29,7 @@ if ma("nvim-lightbulb") then
         })
     end
 
-    vim.api.nvim_create_autocmd({'CursorHold','CursorHoldI'}, {
+    vim.api.nvim_create_autocmd({ 'CursorHold', 'CursorHoldI' }, {
         desc = 'Prettier Lightbulb',
         callback = LightBulbFunc
     })
@@ -367,10 +367,14 @@ function _G.CustomTabLine_I_Hate_Lua()
         end
 
         append({
-            selected_highlight,
-            table.concat(vim.tbl_values(current_buffer_to_name), ' '),
-            '%#TabLine#',
-        }, tab_index)
+                selected_highlight,
+                table.concat(vim.tbl_values(current_buffer_to_name), ' '),
+                '%#TabLine#',
+            },
+            tab_index,
+            -- Always force if it's the selected tab
+            tab_index == vim.fn.tabpagenr()
+        )
     end
 
     -- vim.iter(tab_order()):each(do_the_thing)

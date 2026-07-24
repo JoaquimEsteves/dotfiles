@@ -231,8 +231,17 @@ fi
 
 
 if [[ -s $HOMEBREW_PREFIX/etc/profile.d/bash_completion.sh ]]; then
+  old_lc_collate="$LC_COLLATE"
+  export LC_COLLATE=C
+  #
+  # The shitty script below will yell bloody murder if for some reason LC_COLLATE is not C
+  # has to be exported btw, just setting it before doesn't seem to do a damn thing.
+  #
+  # Is it a macos only thing?
   # shellcheck source=/dev/null
-  LC_COLLATE=C LANG='' LC_CTYPE=C source "$HOMEBREW_PREFIX/etc/profile.d/bash_completion.sh"
+  LANG='' LC_CTYPE=C source "$HOMEBREW_PREFIX/etc/profile.d/bash_completion.sh"
+  export LC_COLLATE="$old_lc_collate"
+  unset old_lc_collate
 fi
 
 if [[ -d $HOMEBREW_PREFIX/opt/openjdk/bin ]]; then
@@ -337,6 +346,8 @@ fi
 JAVA_HOME=/opt/homebrew/opt/openjdk/libexec/openjdk.jdk/Contents/Home/
 if [ -d $JAVA_HOME ]; then
   export JAVA_HOME
+else
+  unset JAVA_HOME
 fi
 
 if command -v ng >/dev/null; then
@@ -353,7 +364,8 @@ if command -v eslint_d >/dev/null; then
   export ESLINT_USE_FLAT_CONFIG=true
 fi
 # Force time to be yyyy-mm-ddThh:mm:ss+-timezone
-export LC_TIME=en_DK.UTF-8
+# Apparently not a thing for mac
+# export LC_TIME=en_DK.UTF-8
 # Show a little TLDR if we're lucky
 if command -v tldr >/dev/null && [[ $((RANDOM % 10)) -gt 5 ]]; then
   tldr --offline "$(tldr --offline --list | shuf -n1)"

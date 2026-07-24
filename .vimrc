@@ -339,8 +339,8 @@ command! Rm call Rm()
 command! MakeTags !ctags -R --exclude=node_modules  --exclude=__pycache__ --exclude=.mypy_cache --exclude=*.json .
 command! OpenVimRc :tabnew ~/.vimrc
 if has('nvim')
-  command! OpenLspRc :tabnew ~/Programs/dotfiles/nvim/lua/lsp-config.lua
-  command! OpenTSRc :tabnew ~/Programs/dotfiles/nvim/lua/treesitter-config.lua
+  command! OpenLspRc :tabnew ~/Programs/dotfiles/dot-config/nvim/lua/lsp-config.lua
+  command! OpenTSRc :tabnew ~/Programs/dotfiles/dot-config/nvim/lua/treesitter-config.lua
 endif
 command! ClearColumn :set colorcolumn&
 command! AddColumn :set colorcolumn=80,120
@@ -350,7 +350,7 @@ if executable('shfmt')
 endif
 command! CopyFileName let @+ = expand('%')
 command! CopyFileNameWithLineNumber let @+ = expand('%') . ':' . line('.')
-command! Realpath !realpath % | c2b
+command! Realpath !realpath '%' | c2b
 "" Stands for buffer delete
 "" Deletes all buffers and then re-opens the one you were using before
 "" Use with confirm so you don't lose your work!
@@ -730,7 +730,7 @@ if executable('fzf')
   "" homebrew installation
   set rtp+=$HOMEBREW_PREFIX/opt/fzf
   Plug 'junegunn/fzf.vim'
-  command! B :Buffers
+
 endif
 
 if ! has('nvim')
@@ -1042,6 +1042,8 @@ if PlugLoaded('fzf.vim')
   nnoremap <A-p> :GFiles?<CR>
   "" Search _all_ files with fuzzy search
   nnoremap <C-G> :Files<CR>
+  "" Just the buffers plz
+  nnoremap <M-b> :Buffers<CR>
 endif
 
 " Uses the same controls as ale. But uses neovims built-in lsp

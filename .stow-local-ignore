@@ -1,9 +1,10 @@
 Makefile
 Session.vim
-.*.un~
 .git
 .gitignore
 .gitmodules
+# Vim Crap
+.*.un~
 .*.swp
 .*.swo
 .xinitrc

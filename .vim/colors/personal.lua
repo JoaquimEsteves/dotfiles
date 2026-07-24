@@ -58,12 +58,16 @@ hi('Statement', { fg = pallete.red[5] })
 hi('Identifier', { link = 'Normal' })
 
 hi('Constant', { fg = pallete.indigo[4] })
+-- Alternative. Purple constants
+-- hi('Constant', { fg = pallete.purple[4] })
 hi('Type', { fg = pallete.teal[5], })
 
 hi('Boolean', { fg = pallete.pink[3] })
 
 hi('Comment', { dim = true })
 hi('String', { fg = pallete.emerald[6], })
+-- Alternative. Orange strings
+-- hi('String', { fg = pallete.orange[3], })
 
 
 hi('Number', { link = 'Normal' })

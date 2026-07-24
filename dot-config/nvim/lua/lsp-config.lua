@@ -440,11 +440,13 @@ if which("diagnostic-languageserver") then
         json = "eslint",
         yaml = "eslint",
         typescriptreact = 'eslint',
+        typescript = 'eslint'
     }
 
     local formatFiletypes = {
         yaml = "prettier",
         typescriptreact = 'prettier',
+        typescript = 'prettier',
         json = "prettier",
         sh = "shfmt",
         lua = "stylua",
