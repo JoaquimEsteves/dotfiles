@@ -7,7 +7,7 @@ shopt -s expand_aliases
 alias ..='cd ..'
 
 # Safety...
-alias rm="rm -i "
+alias rm="rm --interactive=once "
 alias rrm="command rm "
 # alias cp='cp --verbose --reflink=auto --archive '
 # alias rm='rm --verbose '

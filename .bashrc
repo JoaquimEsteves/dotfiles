@@ -216,11 +216,19 @@ fi
 if [ -d "$HOMEBREW_PREFIX/opt/gnu-sed/libexec/gnubin" ]; then
   PATH="$HOMEBREW_PREFIX/opt/gnu-sed/libexec/gnubin:$PATH"
 fi
-
-# macos only shenanigans
-if [[ -z "$LC_ALL" ]]; then
-  export LC_ALL='en_US.UTF-8'
+###############################################################################
+#                                  MAC CRAP!                                  #
+###############################################################################
+if [[ "$OSTYPE" == 'darwin*' ]]; then
+  # Bash completion for make
+  # For some reason, on `mac` it wasn't working
+  complete -W "\$(grep -oE '^[a-zA-Z0-9_.-]+:([^=]|$)' ?akefile | sed 's/[^a-zA-Z0-9_.-]*$//')" make
+  # macos only shenanigans
+  if [[ -z "$LC_ALL" ]]; then
+    export LC_ALL='en_US.UTF-8'
+  fi
 fi
+
 
 if [[ -s $HOMEBREW_PREFIX/etc/profile.d/bash_completion.sh ]]; then
   # shellcheck source=/dev/null
@@ -344,7 +352,8 @@ if command -v eslint_d >/dev/null; then
   # Annoying...
   export ESLINT_USE_FLAT_CONFIG=true
 fi
-export LC_TIME=en_US.utf-8
+# Force time to be yyyy-mm-ddThh:mm:ss+-timezone
+export LC_TIME=en_DK.UTF-8
 # Show a little TLDR if we're lucky
 if command -v tldr >/dev/null && [[ $((RANDOM % 10)) -gt 5 ]]; then
   tldr --offline "$(tldr --offline --list | shuf -n1)"
