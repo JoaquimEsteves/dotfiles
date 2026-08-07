@@ -5,13 +5,9 @@ source ~/.vimrc
 "" Let tree-sitter handle it
 "" Note that this goes in the end since
 "" SOME plugin appears to set syntax to `enable`
+"" We enable syntax back on whenever we find a file tree-sitter doesn't know
+"" about
 syntax off
-
-if PlugLoaded('vim-fugitive')
-  "" UNLESS we open fugitive
-  autocmd FileType fugitive syntax enable
-endif
-
 
 "  _____________________________________________________________________
 " /                                                                     \

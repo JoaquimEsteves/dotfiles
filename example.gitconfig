@@ -1,12 +1,37 @@
+# vim: ft=gitconfig
 [user]
 	email = your_email@here.com
 	name = Joaquim Esteves
 	signingkey = /home/<etc>/.ssh/id_rsa.pub
-[fetch]
-	prune = true
 [core]
+	# Use standard vim. Loads faster than nvim
 	editor = vim
+	# Performance shenanigans
+	# Stolen from: https://github.com/joshuarli/usr/blob/main/dotfiles/base/.config/git/config#LL13
+	# commit-graph for fast traversal
+	commitGraph = true
+	
+	# cache untracked dir mtimes to avoid rescanning unchanged dirs
+	untrackedCache = true
+	
+	# use built-in filesystem watcher so git knows what changed without full scan
+	fsmonitor = true
+	
+	# parallel index stat() calls
+	preloadIndex = true
+	
+	# multi-pack-index for faster object lookup across packs
+	multiPackIndex = true
+
+[commitGraph]
+	readChangedPaths = true
+[gc]
+	writeCommitGraph = true
+[fetch]
+	writeCommitGraph = true
+	prune = true
 [alias]
+	amend = commit --amend -v
 	st = status -sb
 	lg = log --date=short --format='%C(green)%C(bold)%cd %C(auto)%h%d %s (%an)' --graph --color=always
 	really-push = push --no-verify --force-with-lease

@@ -8,10 +8,14 @@ local ma = require('module_available')
 
 if not ma('nvim-treesitter') then
     -- just use normal regex
-    vim.cmd [[syntax enable]]
+    vim.cmd('syntax enable')
     return
 end
 
+
+local warned_about = {}
+-- Somehow - treesitter fucking sucks for csv
+local languages_with_no_ts = { fugitive = true, oil = true, csv = true }
 
 -- The nvimtreesitter boys IN THEIR INFINITE WISDOWM
 -- Decided to remove `incremental_selection`
@@ -37,6 +41,14 @@ vim.api.nvim_create_autocmd('FileType', {
         -- checks if a parser exists for the current language
         local language = vim.treesitter.language.get_lang(filetype) or filetype
         if not vim.treesitter.language.add(language) then
+            if (warned_about[language] ~= nil) then
+                return
+            end
+            warned_about[language] = true
+            vim.cmd('syntax enable')
+            if not languages_with_no_ts[language] then
+                vim.notify('No treesitter for `' .. language .. '`')
+            end
             return
         end
 
@@ -45,7 +57,6 @@ vim.api.nvim_create_autocmd('FileType', {
         vim.wo.foldexpr = 'v:lua.vim.treesitter.foldexpr()'
         -- replicate `highlight = { enable = true }`
         vim.treesitter.start(buf, language)
-
     end,
 })
 
@@ -135,3 +146,11 @@ if ma('nvim-treesitter-textobjects') then
         move.goto_previous_start({ "@loop.inner" }, "textobjects")
     end)
 end
+
+
+-- links some lsp only things so that highlighing is cooperating
+vim.cmd[[
+    hi! link @lsp.mod.readonly Constant
+    hi! link @lsp.type.parameter Constant
+    hi! link @lsp.mod.builtin Special
+]]
